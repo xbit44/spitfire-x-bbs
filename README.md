@@ -10,8 +10,15 @@ SFX brings together messages, file areas, DOS and native Doors, FTN networking a
 
 Source code and downloads are not available here yet.
 
+To review Spitfire-X in action feel free to log on to Spitfire-X HQ:
+
+- **Telnet:** `x-bit.org:10023`
+- **SSH:** `x-bit.org:10022`
+
+Visit the [Spitfire-X website](https://x-bit.org/sfx/) for an overview, screenshots and the Sysop Wiki.
+
 ## A look at SFX
 
-![Spitfire-X BBS caller main menu](screenshots/main-menu.png)
+![Spitfire-X BBS Windows Control Panel](screenshots/windows-control-panel.png)
 
 Maintained by [xbit ops](https://github.com/xbit44).
