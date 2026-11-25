@@ -8,6 +8,6 @@ Get the Windows x86 ZIP or Linux x86-64 TAR and its SHA-256 checksum from the [v
 
 Use the matching Full Source archive from the release to build the packages. See the [build guide](distribution/BUILDING.txt), [third-party notices](distribution/ThirdParty/) and [MIT license](LICENSE).
 
-![Spitfire-X BBS caller main menu](screenshots/main-menu.png)
+![Spitfire-X BBS v1.0.0b1 Windows Control Panel](screenshots/windows-control-panel-v1.0.0b1.png)
 
 Maintained by [xbit ops](https://github.com/xbit44).
