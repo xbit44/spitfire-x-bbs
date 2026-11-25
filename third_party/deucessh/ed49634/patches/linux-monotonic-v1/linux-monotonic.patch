@@ -1,0 +1,36 @@
+--- bounded-stream-v3/ssh-conn.c
++++ linux-monotonic-v1/ssh-conn.c
+@@ -1,8 +1,19 @@
+ // RFC 4254: SSH Connection Protocol
+ 
++#ifndef _POSIX_C_SOURCE
++#define _POSIX_C_SOURCE 200809L
++#endif
+ #include <stdlib.h>
+ #include <string.h>
+-#include <windows.h> /* SFX Windows-only monotonic bounded receive profile */
++#include <stdint.h>
++#include <time.h>
++/* SFX Linux host boundary; the reviewed stream bounds below are unchanged. */
++static uint64_t sfx_monotonic_millis(void)
++{
++    struct timespec now;
++    if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) return UINT64_MAX;
++    return (uint64_t)now.tv_sec * 1000U + (uint64_t)now.tv_nsec / 1000000U;
++}
+ 
+ #include "deucessh-conn.h"
+ #include "ssh-internal.h"
+@@ -2821,10 +2832,10 @@
+ 	 * Only buf_mtx is held and timedwait releases it. No additional packet
+ 	 * or plaintext allocation is permitted; TCP supplies backpressure. */
+ 	if (ch->bounded_receive) {
+-		const ULONGLONG until = GetTickCount64() + 5000;
++		const uint64_t until = sfx_monotonic_millis() + 5000;
+ 		while (written < len && !sess->terminate && !atomic_load(&ch->closing)
+ 		    && !atomic_load(&ch->receive_abort)) {
+-			if (GetTickCount64() >= until) break;
++			if (sfx_monotonic_millis() >= until) break;
+ 			if (ch->receive_allowed != NULL) {
+ 				if (dssh_thrd_check_unlock(sess, mtx_unlock(&ch->buf_mtx)) != thrd_success)
+ 					return 0;

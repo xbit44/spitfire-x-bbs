@@ -1,0 +1,164 @@
+{
+  "files": [
+    {
+      "path": "distribution/ThirdParty/SFX-LICENSE.txt",
+      "destination": "Docs/ThirdParty/SFX-LICENSE.txt",
+      "sha256": "D33F9C1E99B0923206B00C9C96126EC645272331DE09AAA14038B428492E53AD"
+    },
+    {
+      "path": "distribution/ThirdParty/licenses/SFXEXEC/COPYING",
+      "destination": "Docs/ThirdParty/licenses/SFXEXEC/COPYING",
+      "sha256": "EDAEF632CBB643E4E7A221717A6C441A4C1A7C918E6E4D56DEBC3D8739B233F6"
+    },
+    {
+      "path": "distribution/ThirdParty/licenses/SFXEXEC/COPYING.LIB",
+      "destination": "Docs/ThirdParty/licenses/SFXEXEC/COPYING.LIB",
+      "sha256": "CC535C21133C895B56B374C8A1DC1EB948D99003ED2B47372069456B62F42B24"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/CLDR-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/CLDR-LICENSE.txt",
+      "sha256": "B4C0AE8EF04F7059F96CE5BBE0467F9FE6F6D81BBE13517701DFEB961FB4D0B6"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/DeuceSSH-LIBCRUX-NOTICE.txt",
+      "destination": "Docs/ThirdParty/notices/DeuceSSH-LIBCRUX-NOTICE.txt",
+      "sha256": "8C906E74E3B3709B9F9BB573177EADADCF17A864B695960912339209ED4F7011"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/DeuceSSH-LICENSE.md",
+      "destination": "Docs/ThirdParty/notices/DeuceSSH-LICENSE.md",
+      "sha256": "4C49C42C4A033D156247F8073AAACF7E76C174EE8D8C24CBB31BC4EF81097411"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/DeuceSSH-PROVENANCE.md",
+      "destination": "Docs/ThirdParty/notices/DeuceSSH-PROVENANCE.md",
+      "sha256": "DA927EB7FFB253C4A8A25D7DCDDE4A0C0812553A23E6D8E7FA8DC179CB0C444E"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/General-File-Helper-NOTICES.md",
+      "destination": "Docs/ThirdParty/notices/General-File-Helper-NOTICES.md",
+      "sha256": "2E4E3617422E91DB3D22C50414DADD4792AE74664BB86A6905E5C7F163579327"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/Mozilla-CA-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/Mozilla-CA-LICENSE.txt",
+      "sha256": "FAB3DD6BDAB226F1C08630B1DD917E11FCB4EC5E1E020E2C16F83A0A13863E85"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/Mozilla-CA-PROVENANCE.md",
+      "destination": "Docs/ThirdParty/notices/Mozilla-CA-PROVENANCE.md",
+      "sha256": "FE58DF74EC77618111B4E42B22EEC6D0B42187DF7F5634AA4D2C6A4FA4B712A4"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/OpenSSL-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/OpenSSL-LICENSE.txt",
+      "sha256": "7D5450CB2D142651B8AFA315B5F238EFC805DAD827D91BA367D8516BC9D49E7A"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/OpenSSL-TLS-PROVENANCE.md",
+      "destination": "Docs/ThirdParty/notices/OpenSSL-TLS-PROVENANCE.md",
+      "sha256": "B29F7672C81D07C7616BC96485C746128A9B975D946F7C4C3E0E507A2BA81A87"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/SFXEXEC-NOTICE.txt",
+      "destination": "Docs/ThirdParty/notices/SFXEXEC-NOTICE.txt",
+      "sha256": "E9968CA3FDD7A8EF42833BB24A3677F6B528C93FA92BBDCB0B3F639671D3FEB8"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/SQLite-LICENSE.md",
+      "destination": "Docs/ThirdParty/notices/SQLite-LICENSE.md",
+      "sha256": "EE6AF51062B30D532991FACE5164136AE6F84E265ECF8ABE89DC69DAC45CA1E7"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/SecLists-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/SecLists-LICENSE.txt",
+      "sha256": "3DBDC93D5F8829DE0941744841730A09C106D0732E5AE0E98CA1D77BE7DED66C"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/SecLists-PROVENANCE.md",
+      "destination": "Docs/ThirdParty/notices/SecLists-PROVENANCE.md",
+      "sha256": "B5CA26C1AA9FBF27A6D779F190F33354B976697B6FE972472B19E126FCA839B1"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/Unicode-CaseFolding-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/Unicode-CaseFolding-LICENSE.txt",
+      "sha256": "9150E7D30217F38C2C3474B05FE21745506C930CBE40C4BA1769CA85B4C6A1B5"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/cpp-httplib-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/cpp-httplib-LICENSE.txt",
+      "sha256": "4B45CBE16D7B71B89AE6127E26E0D90A029198CA5E958AD8E3D0B8BBED364D8B"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/curl-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/curl-LICENSE.txt",
+      "sha256": "82F2F4427D6545EE5AAAC4F0B80428DA6CC8BA41C2CF5DA3A03680EC327B9681"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/curl-PROVENANCE.md",
+      "destination": "Docs/ThirdParty/notices/curl-PROVENANCE.md",
+      "sha256": "78810D9120255A60E84D4FE0D81EED3D4042E8922C51C6C55E37960967AC4F4C"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/date-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/date-LICENSE.txt",
+      "sha256": "C90F6C00FB961170560299CBDA28CA2D45804913AA8B2A9F36DBB8E0028D6930"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/libarchive-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/libarchive-LICENSE.txt",
+      "sha256": "58A10828AEBF0C3571A3975A4ED744AFB810145241732703D348B34B0DEC7A06"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/libarchive-PROVENANCE.md",
+      "destination": "Docs/ThirdParty/notices/libarchive-PROVENANCE.md",
+      "sha256": "4F5128C2F32F6FA758466BACC1A9AD9872804657C713985FC4F8E85B14BFA35D"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/libsodium-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/libsodium-LICENSE.txt",
+      "sha256": "508A76D186356C0DD807A670EF510964F8724557024796A2C426C6C0E19AB683"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/nlohmann-json-LICENSE.MIT",
+      "destination": "Docs/ThirdParty/notices/nlohmann-json-LICENSE.MIT",
+      "sha256": "46A65CFFD1EA955132D95A8DD921640714A8D6B537D2E4E482D31145AE95B603"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/tzdata-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/tzdata-LICENSE.txt",
+      "sha256": "0613408568889F5739E5AE252B722A2659C02002839AD970A63DC5E9174B27CF"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/zlib-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/zlib-LICENSE.txt",
+      "sha256": "E32FF4E00D9D94930537635291DA39E7E612703334BF6FDE8C7F1686FE8A45A2"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/zlib-PROVENANCE.md",
+      "destination": "Docs/ThirdParty/notices/zlib-PROVENANCE.md",
+      "sha256": "0D75127AD1F8BF5258F5BE330F88D1FBF9FD3C6300E3F0F73B4340F3DADDE38A"
+    },
+    {
+      "path": "distribution/windows/THIRD_PARTY.txt",
+      "destination": "Docs/ThirdParty/THIRD_PARTY.txt",
+      "sha256": "9C0F597F681A1410A7146538FD13F5B20A9B828E5AC2955B60C354BB9745C751"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/Moebius-CP437-NOTICE.txt",
+      "destination": "Docs/ThirdParty/notices/Moebius-CP437-NOTICE.txt",
+      "sha256": "C5D9196BC3B1FC504EDCB095FA71E4A5316E28EB7AF9D4DCDF525A1F16DEEB25"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/Moebius-LICENSE.txt",
+      "destination": "Docs/ThirdParty/notices/Moebius-LICENSE.txt",
+      "sha256": "CFC7749B96F63BD31C3C42B5C471BF756814053E847C10F3EB003417BC523D30"
+    },
+    {
+      "path": "distribution/ThirdParty/notices/Moebius-UPSTREAM-README.md",
+      "destination": "Docs/ThirdParty/notices/Moebius-UPSTREAM-README.md",
+      "sha256": "2B06E38A289A59BABA0B5F6E60700440672BBD59D80D1E919C7846099B9F6D7A"
+    }
+  ]
+}

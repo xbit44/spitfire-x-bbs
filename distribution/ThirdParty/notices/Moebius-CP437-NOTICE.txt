@@ -1,0 +1,19 @@
+Moebius IBM CP437 bitmap font
+
+SFX includes the unmodified 4096-byte app/fonts/ibm/CP437.F16 from Moebius
+1.0.29, commit 5df8344ecfad24863386d86fd5a5f494616036f8, as
+moebius-cp437.f16 in the Windows Control Panel.
+SHA256: ff3640ffffdd774ec56ee7ecacf7bce8324a67071155ade07f4c6380fa879025
+
+Upstream project: https://github.com/blocktronics/moebius
+Exact upstream font:
+https://raw.githubusercontent.com/blocktronics/moebius/5df8344ecfad24863386d86fd5a5f494616036f8/app/fonts/ibm/CP437.F16
+
+The upstream release identifies Copyright 2020 Andy Herbert and publishes
+the project under the Apache License, Version 2.0. SFX preserves that
+published licensing basis and the upstream font bytes. No font modification
+or new authorship is claimed.
+
+See Moebius-LICENSE.txt for the complete original license and
+Moebius-UPSTREAM-README.md for the original copyright and credits.
+Source provenance: src/apps/control_panel/assets/owner/MOEBIUS_FONT_PROVENANCE.md

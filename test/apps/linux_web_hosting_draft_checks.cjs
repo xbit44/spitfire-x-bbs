@@ -1,0 +1,21 @@
+module.exports=async function({assert,sandbox,evaluate,elements,drafts,response}){
+  const page=(revision='1',enabled=false)=>{const fields=[{key:'start_bbs_at_boot',label:'Start BBS when Linux starts',type:'checkbox',value:enabled,help:'Opening the launcher does not start the BBS.'}];return {route:'system.runtime_behavior',title:'Runtime Behavior',category:'System',revision,can_save:true,activation:'Boot preference.',fields,active_fields:fields};};
+  sandbox.hostingFixture=page();evaluate("authenticated=false;page='config';route='system.runtime_behavior';busy=false;saving=false;offline=null;offlineUnknown=null;offlineBusy=false;maintenanceActive=false;mainPending=null;draftKey='hosting-draft-check';board=hostingFixture;renderForm(board);setDirty(false);$('field-start_bbs_at_boot').checked=true;formChanged()");
+  assert.equal(JSON.parse(drafts.get('hosting-draft-check')).main.values.start_bbs_at_boot,true,'unsent boot choice retained');
+  sandbox.unsentHosting=JSON.parse(drafts.get('hosting-draft-check'));evaluate('board=structuredClone(hostingFixture);renderForm(board);setDirty(false);restoreDraft(unsentHosting)');
+  assert.equal(evaluate('dirty'),true);assert.equal(elements.get('field-start_bbs_at_boot').checked,true);
+  let posts=0,reads=0,reject;const pending=new Promise((_resolve,fail)=>reject=fail);
+  sandbox.fetch=async(path,options)=>{assert.equal(path,'/api/config/page/system.runtime_behavior');if(options.method==='POST'){++posts;return pending;}++reads;return response(page('2',true));};
+  const saving=evaluate('saveBoard()');assert.equal(posts,1);assert.equal(JSON.parse(drafts.get('hosting-draft-check')).main.hosting.unconfirmed,true,'intent saved before HTTP completion');
+  reject(new Error('reply lost'));assert.equal(await saving,false);assert.equal(evaluate('board.can_save'),false);assert.equal(await evaluate('saveBoard()'),false);assert.equal(posts,1,'no automatic retry after unknown save');
+  sandbox.unknownHosting=JSON.parse(drafts.get('hosting-draft-check'));evaluate('board=structuredClone(hostingFixture);renderForm(board);setDirty(false);restoreDraft(unknownHosting)');
+  assert.equal(elements.get('save-board').disabled,true,'reload retains unknown-save lock');assert.equal(elements.get('discard-board').disabled,false);
+  evaluate('setDirty(false)');await evaluate('loadBoard()');assert.equal(reads,1);assert.equal(evaluate('board.revision'),'2');assert.equal(evaluate('board.can_save'),true);assert.equal(posts,1);
+  evaluate("$('field-start_bbs_at_boot').checked=false;formChanged()");
+  sandbox.fetch=async(path,options)=>{assert.equal(path,'/api/config/page/system.runtime_behavior');if(options.method==='POST'){++posts;return response({detail:'Saved without changing callers.'});}++reads;throw new Error('readback lost');};
+  assert.equal(await evaluate('saveBoard()'),false);assert.equal(evaluate('board.can_save'),false,'acknowledged save with missing readback also locks');assert.equal(JSON.parse(drafts.get('hosting-draft-check')).main.hosting.unconfirmed,true);
+  sandbox.fetch=async()=>response(page('3',false));evaluate('setDirty(false)');await evaluate('loadBoard()');
+  evaluate("$('field-start_bbs_at_boot').checked=true;formChanged()");
+  sandbox.fetch=async(path,options)=>{assert.equal(path,'/api/config/page/system.runtime_behavior');if(options.method==='POST'){++posts;return response({detail:'Saved without changing callers.'});}return response(page('4',true));};
+  assert.equal(await evaluate('saveBoard()'),true);assert.equal(evaluate('dirty'),false);assert.equal(evaluate('board.revision'),'4');assert.equal(elements.get('field-start_bbs_at_boot').checked,true);assert.equal(drafts.has('hosting-draft-check'),false,'confirmed readback clears draft');
+};

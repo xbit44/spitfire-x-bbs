@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>External BinkD setup and daily use (v1.0.0b1 test build) | Spitfire-X Sysop Wiki</title>
+ <link rel="stylesheet" href="assets/sysop.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to article</a>
+<aside class="sidebar" aria-label="Wiki navigation">
+ <img class="sidebar-logo" src="images/sfx-about-approved.png" width="1254" height="1254" alt="Spitfire-X BBS bison logo">
+ <a class="brand" href="wiki.html">SPITFIRE-X<span>BBS / SYSOP WIKI</span></a>
+ <form action="search.html" method="get" role="search">
+  <label for="wiki-query">Search this wiki</label>
+  <div class="search-field"><input id="wiki-query" name="q" type="search" maxlength="160" placeholder="Search articles" autocomplete="off"><button type="submit" aria-label="Search">Go</button></div>
+ </form>
+ <nav aria-label="Topics"><p class="nav-heading">CONTENTS</p><a href="wiki.html">Wiki home</a><a href="get-ready.html">Get ready</a>
+<a href="linux-controls.html">Linux browser controls</a>
+<a href="daily-operation.html">Daily operation</a>
+<a href="callers-chat.html">Callers &amp; chat</a>
+<a href="messages-mail.html">Messages &amp; mail</a>
+<a href="files-transfers.html">Files &amp; transfers</a>
+<a href="doors.html">Doors</a>
+<a href="ftn-networks.html">FTN networks</a>
+<a href="external-binkd.html" aria-current="page">External BinkD</a>
+<a href="external-binkd-profile.html">BinkD profile reference</a>
+<a href="maintenance-recovery.html">Maintenance &amp; recovery</a>
+<a href="updates-help.html">Updates &amp; troubleshooting</a>
+<a href="customization-reference.html">Customization &amp; Displays</a>
+<a href="thanks-to.html">Thanks to</a>
+</nav>
+ <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
+</aside>
+<main id="main" tabindex="-1">
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">v1.0.0b1 test build</span></div>
+ <article data-search="article">
+<h1>External BinkD setup and daily use (v1.0.0b1 test build)</h1>
+<div class="notice">External BinkD support is included in the 1.0.0b1 test packages. Stock BinkD is installed separately.</div>
+<h2>In this guide</h2><ul class="article-links"><li><a href="#what-binkd-and-sfx-do">What BinkD and SFX do</a></li><li><a href="#choose-the-mailer">Choose the mailer</a></li><li><a href="#place-or-update-the-optional-helper">Place or update the optional helper</a></li><li><a href="#prepare-your-profile">Prepare your profile</a></li><li><a href="#start-from-the-sfx-folder">Start from the SFX folder</a></li><li><a href="#daily-use-and-profile-changes">Daily use and profile changes</a></li><li><a href="#private-binkd-log">Private BinkD log</a></li><li><a href="#areafix-attachments-and-retained-mail">AreaFix, attachments and retained mail</a></li><li><a href="#backup-restore-and-moving-the-board">Backup, restore and moving the board</a></li></ul>
+<h2 id="what-binkd-and-sfx-do">What BinkD and SFX do</h2>
+<p>The setup uses ONE stock BinkD instance and ONE configuration profile for all your FTN networks. Each network has its own domain, addresses and outbound folder.</p>
+<p>BinkD connects to other mailers, receives files, sends queued files and retries remote delivery. SFX processes the mail while the BBS is running. If BinkD remains running when you stop the BBS, it can still receive complete files. Its recorder saves the information SFX needs to check those files later. The recorder does not toss or scan mail, open the BBS database, or start the BBS.</p>
+<p>Stopping SFX does not stop an independently running BinkD.</p>
+<h2 id="choose-the-mailer">Choose the mailer</h2>
+<p>Stop SFX and the independent BinkD before changing mailers.</p>
+<p>Windows SFXConfig: open FTN Networks. Under Mailer choose External binkd, set External binkd program to your stock BinkD executable (Browse... can select it), then choose Save Changes. Built-in SFX selects the Native mailer; Disabled stops SFX mail processing while keeping settings and mail.</p>
+<p>Linux web Config: open FTN Networks, then Mailer Settings. Choose External BinkD under Mailer and enter External BinkD program. Choose Apply to Draft, then Save FTN Settings... and review the save. The other choices are Native SFX and Disabled - retain mail. Apply to Draft alone does not save settings.</p>
+<p>The program field names stock BinkD, not SFXBinkD. Saving it does not start a program, generate a profile or install a BinkD service. External mode uses SFX for mail processing without a simultaneous Native listener or dialer.</p>
+<p>Native listener endpoints and the setup wizard&#x27;s hub host, port, session password, queued-mail contact and timer values do not control External mode. Their saved Native values remain for later use. BinkD uses the host, port, session password and calling rules in its own profile. SFX still uses separate packet, AreaFix and TIC passwords; do not clear them just because you changed mailers. Routes and Hold mail keep their rules.</p>
+<p>Set Up a Network... opens the network setup steps. Supply the network and hub FTN identities, choose echoes and their permissions, then review before saving. In External mode the wizard does not supply BinkD&#x27;s connection settings. Keep the manual shared profile consistent with the saved networks.</p>
+<h2 id="place-or-update-the-optional-helper">Place or update the optional helper</h2>
+<p>Use the helper supplied with the matching v1.0.0b1 test package; adding it alone does not update the Runtime or configuration programs. Install stock BinkD separately.</p>
+<p>The Windows v1.0.0b1 test ZIP includes Optional/SFXBinkD/SFXBinkD.exe as an optional companion, with PLACEMENT-AND-BUILD.txt beside it. Place it manually at &lt;SFX folder&gt;\Bin\SFXBinkD.exe; Setup does not install this helper automatically. Stop independent BinkD before replacing it. If the file already exists, compare its checksum with the documented old/current helper. Do not overwrite an unknown file. Keep a recognized old copy separately until the update is checked. Preserve all FTN and Config data.</p>
+<p>The fresh Linux v1.0.0b1 test package installs bin/sfxbinkd through its normal install/update path, with executable permission for the normal SFX owner. Keep access private to that owner, stop BinkD before updating it, and preserve <code>ftn</code> and <code>config</code>.</p>
+<h2 id="prepare-your-profile">Prepare your profile</h2>
+<p>Create the source profile manually under <code>FTN/External</code> on Windows or <code>ftn/external</code> on fresh Linux. The helper does not create its password-bearing contents.</p>
+<p>Use your normal Sysop account. On Windows, keep the FTN folder private with its existing SFX access permissions; do not prepare the profile as LocalSystem. On Linux, your account must own FTN with mode 0700 and the source profile with mode 0600. Use ordinary files and folders, not links.</p>
+<p>The source profile and the generated run profile contain session passwords. Keep both private, including in backups. Do not paste them into chat or a support log, or put passwords on a command line. There is no second SFX session-password list to maintain.</p>
+<p>Use <a href="external-binkd-profile.html">supported profile reference</a> to write the profile. Only its listed options are accepted. A general stock binkd.cfg may contain unsupported options. Do not add includes, receive commands, password files, or mail folders outside the board.</p>
+<p>For each network, use its SFX network code in lowercase in the outbound path. Declare its domain and use domain-qualified local and remote FTN addresses. The companion reference lists the required fields.</p>
+<h2 id="start-from-the-sfx-folder">Start from the SFX folder</h2>
+<p>Run the helper from the actual SFX board root. Relative paths start there, not in the profile&#x27;s folder. Keep the helper under <code>Bin</code> on Windows or <code>bin</code> on Linux, and its profile/mail handoff folders under <code>FTN/External</code> or <code>ftn/external</code>, respectively. The board-root folder may contain spaces; the supported relative profile and spool paths cannot.</p>
+<p>These are command forms, not commands to paste unchanged. Replace NETWORK, PROFILE and STOCK_BINKD_PATH with your values. Windows uses <code>Bin\SFXBinkD.exe</code>; fresh Linux uses <code>./bin/sfxbinkd</code>. Never add a password argument.</p>
+<p>Windows:</p><pre><code>Bin/SFXBinkD --prepare NETWORK</code></pre>
+<p>Fresh Linux:</p><pre><code>./bin/sfxbinkd --prepare NETWORK</code></pre>
+<p>Creates a network&#x27;s handoff folders and marker. It does not write the source profile or supply passwords.</p>
+<p>Windows:</p><pre><code>Bin/SFXBinkD --prepare-run PROFILE</code></pre>
+<p>Fresh Linux:</p><pre><code>./bin/sfxbinkd --prepare-run PROFILE</code></pre>
+<p>Checks an existing private source profile and creates a fixed copy for a new run, including its receive recorder command. It prints the run ID and generated configuration path. It does not start BinkD.</p>
+<p>Windows:</p><pre><code>Bin/SFXBinkD --launch PROFILE STOCK_BINKD_PATH [--server]</code></pre>
+<p>Fresh Linux:</p><pre><code>./bin/sfxbinkd --launch PROFILE STOCK_BINKD_PATH [--server]</code></pre>
+<p>Checks the profile, creates a fixed run copy, then starts stock BinkD with that copy. Supply the BinkD executable path, not a shell command or extra arguments. Quote an executable path containing spaces.</p>
+<p>Omit --server for normal combined operation: BinkD accepts incoming sessions and automatically calls out for queued mail. Add --server only when you want to accept incoming sessions without starting outgoing calls. The launcher does not install a service. Keep the launch session open; do not assume closing it leaves BinkD running.</p>
+<h2 id="daily-use-and-profile-changes">Daily use and profile changes</h2>
+<p>Start the BBS when you want SFX to process waiting mail. BinkD can receive while SFX is stopped, but receiving a file does not mean SFX has imported it. In External mode, Scan requests SFX&#x27;s outbound mail scan; it does not place a call. Poll is unavailable because BinkD handles outgoing connections. These actions require the BBS and mail processing to be ready. Disabled mode does not allow Scan.</p>
+<p>A password-protected connection does not prove every address advertised by the other mailer. SFX still checks the file&#x27;s network and link, separately from any configured packet or TIC checks. A known link without a BinkD session password can still need its configured packet or TIC password. A wrong or missing packet password leaves the packet held. A wrong or missing TIC password rejects the TIC; receiving the file successfully does not mean it was accepted into the file catalog.</p>
+<p>BinkD uses the fixed profile created for its run. Editing your source profile does not change that running copy. Stop the old BinkD instance and launch a new run to apply a profile change.</p>
+<p>Keep <code>FTN/External/Runs</code> on Windows or <code>ftn/external/runs</code> on Linux with pending mail. Its profiles and record files are needed to check which run received each file. Do not edit generated files, remove old runs just because a new one exists, or run the receive recorder by hand.</p>
+<p>Handed to BinkD means SFX has saved the outgoing handoff. It does not mean Delivered. BinkD handles later retries and delivery. An empty queue or a missing spool file alone is not a delivery receipt. Recreating a handed-off job could send the same mail again.</p>
+<p>One BinkD session can carry separate files for different networks. SFX checks each file against its network and link. A TIC may arrive before or after its payload; SFX needs both before adding the file to its catalog. LOCAL hatch uses an outgoing copy and preserves the source file.</p>
+<p>Separate networks must use separate files, even when sent during the same session. A single bundle needing different network/link routes is unsupported: SFX keeps it intact and imports none of it. Keep the original and the reported reason for review. Do not rename or move it to force acceptance.</p>
+<h2 id="private-binkd-log">Private BinkD log</h2>
+<p>Each run writes its own diagnostic log:</p>
+<pre><code>Windows: FTN/External/Runs/&lt;run&gt;/binkd.log
+Linux:   ftn/external/runs/&lt;run&gt;/binkd.log</code></pre>
+<p>The launcher prints the actual path. Use it privately when checking failed connections or retries. Stock BinkD may write a password sent during a failed login into this log. Keep its private file access unchanged: on Windows it is limited to the Sysop, SYSTEM and Administrators; on Linux the log is mode 0600. Keep backups of it private too.</p>
+<p>Do not copy this raw log into the SFX log viewer, support reports or chat. It is separate from the SFX activity log. The helper sets loglevel 4 and conlog 0, so stock diagnostics go to this private file, not the console.</p>
+<h2 id="areafix-attachments-and-retained-mail">AreaFix, attachments and retained mail</h2>
+<p>AreaFix keeps its separate password check as well as any configured packet password check. Wrong or missing credentials do not gain access by arriving through BinkD. Generated replies are handed to BinkD; that status does not confirm their remote delivery.</p>
+<p>The network&#x27;s .MSG scanning option uses that network&#x27;s selected directory. The existing scanner publishes attachment requests with Normal, Hold or Crash handling. This is not a new feature for turning every .MSG into a NetMail packet. Source .MSG and kill-sent attachment files remain without remote acknowledgement; restarting does not create duplicate jobs.</p>
+<p>Existing processed-original retention now covers eligible completed External mail. SFX expires only the managed original after its normal identity, protection, completion and dependency checks pass. Held, partial, uncertain or still-needed originals remain. A Handed to BinkD label alone is insufficient; any required outgoing handoff must be durably committed.</p>
+<p>Raw BinkD receive copies, run folders, indexes, consumed markers and handoff history are preserved separately. There is no new automatic cleanup for these files, even when SFX expires an eligible managed original. Allow for their disk use and check free space. Do not delete them to imitate retention settings; pending mail and recovery can depend on them.</p>
+<p>If SFX reports a completed inbox file without usable receive-hook records, keep the file and its metadata for review. SFX does not invent a trusted receive record, import an incomplete download or remove that original.</p>
+<h2 id="backup-restore-and-moving-the-board">Backup, restore and moving the board</h2>
+<p>Stop independently launched BinkD before restoring the board or doing FTN history recovery. If SFX reports that message ID history needs recovery, use <a href="maintenance-recovery.html#ftn-history">Recover FTN History</a> after the normal restore/preparation. Healthy complete-folder copies do not need that action merely because the computer changed; separate held items still need their own review.</p>
+<p>Stop BOTH SFX and the independent BinkD instance before a full-folder backup, restore or transport-mode change. SFX Stop alone is not enough. Keep the whole board together, including the Windows <code>FTN/External</code> or Linux <code>ftn/external</code> source profiles, generated runs, receive records and outbound work.</p>
+<p>After moving a board, use its normal platform preparation and update external launcher paths and any separately configured BinkD service working directory. Start from the new board root. Do not start two BinkD instances against the same handoff folders.</p>
+<p>To stop using the optional helper, stop independent BinkD, settle or review pending mail, and select the desired mailer mode. Only then remove the recognized optional helper executable if desired. Keep the external FTN tree, board settings, spool and history. Windows uses <code>FTN/External</code>/<code>Config</code>; Linux uses <code>ftn/external</code>/<code>config</code>. This does not uninstall or manage stock BinkD.</p>
+<p><a href="ftn-networks.html#mailer">Back to FTN mailer settings</a> · <a href="external-binkd-profile.html">Supported profile reference</a></p>
+</article>
+ <footer>Spitfire-X BBS <span aria-hidden="true">/</span> Sysop documentation <a href="#main">Back to top</a></footer>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,13 @@
+app::FtnHeldReview held_ui_model;
+unsigned held_ui_resolves{},held_ui_retries{};
+bool held_ui_lost_reply{};
+app::Identifier128 held_ui_id(unsigned value){app::Identifier128 id;id.bytes[0]=static_cast<std::uint8_t>(value);return id;}
+std::optional<app::FtnHeldControlResponse> held_ui_exchange(const app::FtnHeldControlRequest& request){
+    app::FtnHeldControlResponse out;out.code=app::FtnConfigurationCode::ok;
+    if(const auto* review_query=std::get_if<app::FtnHeldReviewQuery>(&request)){auto result=held_ui_model;if(!review_query->ingress.valid()){result.messages.clear();result.retry.reset();result.tic.reset();}out.value=result;}
+    else if(std::holds_alternative<app::FtnHeldRecipientQuery>(request))out.value=app::FtnHeldRecipients{{{3,1,"Bob"}},false};
+    else if(const auto* resolution_query=std::get_if<app::FtnRecipientResolutionRequest>(&request)){check(resolution_query->held_message.bytes==held_ui_model.messages.front().operation.bytes&&resolution_query->recipient==3&&resolution_query->recipient_revision==1,"native review sends exact selected private message/account revision");auto& choice=held_ui_model.messages.front().resolution;if(!choice){++held_ui_resolves;choice=app::FtnRecipientResolution{*resolution_query,1700000100};}else check(choice->request.operation.bytes==resolution_query->operation.bytes,"native lost reply repeats exact operation only");out.value=*choice;if(held_ui_lost_reply){held_ui_lost_reply=false;return {};}}
+    else if(const auto* retry_query=std::get_if<app::FtnReprocessRequest>(&request)){check(retry_query->ingress.bytes==held_ui_model.rows.front().ingress.bytes&&retry_query->configuration_revision==held_ui_model.configuration_revision,"native retry targets same original/current review");if(!held_ui_model.retry){++held_ui_retries;held_ui_model.retry=app::FtnReprocessRecord{*retry_query,1700000200,false,false,{}};held_ui_model.rows.front().retry_pending=true;}out.value=*held_ui_model.retry;}
+    else if(const auto* tic_query=std::get_if<app::FtnTicRetryRequest>(&request)){auto& tic=*held_ui_model.tic;check(tic_query->ingress==held_ui_model.rows.front().ingress&&tic_query->configuration_revision==held_ui_model.configuration_revision&&tic_query->review==tic.review,"native TIC retry sends exact original opaque review and current revision");if(!tic.retry){++held_ui_retries;tic.retry=app::FtnTicRetryRecord{*tic_query,1700000200,false,false,{}};held_ui_model.rows.front().retry_pending=true;}else check(tic.retry->request.operation==tic_query->operation,"TIC lost reply retains exact action identity");out.value=*tic.retry;if(held_ui_lost_reply){held_ui_lost_reply=false;return {};}}
+    return out;
+}

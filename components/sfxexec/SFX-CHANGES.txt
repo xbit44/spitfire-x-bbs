@@ -1,0 +1,44 @@
+SFX external DOS components - 2026-10-24 candidate 01
+
+Original source: SynchronetBBS/sbbs, official commit
+97fab8d84a68882d1ceff0bed7cc05497f4d5973.
+Original notices are retained in every source file. UPSTREAM.json identifies
+39 reviewed C/header inputs; UPSTREAM-EXTRA.json identifies the five additional
+original build files. Upstream recipes are reference only: do not run their
+SBBS copy/install steps. The SFX scripts never install to SBBS or System32.
+
+Changes in the derived external driver/launcher:
+- SFXEXEC.DLL and SFXDOOR.EXE, strict single full-path DLL load beside launcher;
+  no SBBSEXEC load/fallback. Pair word0x6424 plus host-pinned full image hashes.
+- Preserve original operations0..19; add20 session bind and21 pair query.
+  Validate visible node1..128 before byte conversion; no offset or wrapping.
+- 128-bit fresh session nonce in every SFX mailslot/event/semaphore name.
+  Driver verifies bound node; first output reports actual loaded DLL path.
+- Explicit owner/SYSTEM ACL for named channels; host refuses existing events
+  and semaphores. Two private64-message credit queues bound memory and waits.
+- Input messages<=256 bytes; preserve complete messages at ring pressure.
+  Output messages<=4000 bytes with truthful partial FOSSIL write counts.
+- Join input/IRQ threads before closing handles/ring/IO hook; bounded close.
+  Per-session UART/options reset, mapped-buffer and explicit-string checks.
+- Exact private INI only, no working-directory configuration fallback.
+- Fix legacy FOSSIL far pointer and MSVC8 packing; ABI assertions require
+  int16/DWORD32/status20/FOSSIL19. Reject unsupported launcher mode/arguments.
+- Generated SFX git identity headers; source8.3 include aliases only in the
+  private compiler staging tree. Source filenames remain unchanged.
+
+The external driver and launcher retain GPL-2.0-or-later terms. XPDEV portions
+retain LGPL-2.0-or-later terms/notices; the combined derived GPL component is
+conveyed with complete corresponding source. COPYING and COPYING.LIB are the
+GNU GPLv2 and Library GPLv2 texts. No additional restriction is placed on those
+components. Microsoft system/tool headers and compiler media are not included.
+
+SFX-owned host/bridge_model.hpp and host/bridge.cpp are independent source;
+they do not copy/link the GPL implementation into SFX. They communicate with
+the external VDD using the documented private protocol and link Windows system
+libraries only. Their complete source and build recipe accompany the candidate;
+existing SFX source rights remain unchanged. The accepted SFX Runtime is not
+rebuilt or supplied. The bridge pins that accepted Runtime's hash/owner/path,
+uses its existing loopback gateway and typed log, and never opens SQLite.
+
+This is a private engineering candidate, not local-Door acceptance or full Setup.
+Native DOS loading, interrupt behavior and SFX+Sync coexistence are PENDING.

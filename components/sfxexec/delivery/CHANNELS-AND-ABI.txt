@@ -1,0 +1,55 @@
+SFXEXEC-20261024-01 PAIR / ENGINEERING CANDIDATE
+
+BIN-IDENTITY.txt pins all three actual images. Host contains expected DLL and
+launcher SHA256 values; mismatch fails. Launcher requests full SFXEXEC.DLL path
+beside itself and checks pair word0x6424. Driver bind20 accepts exactly32 lower
+hex characters once. Query21 returns the pair word. Original op numbers0..19,
+VDDDispatch/VDDInitialize cdecl exports and original packed structures retained.
+Legacy ABI compile checks:16-bit int, DWORD32, status20bytes, FOSSIL info19bytes.
+Visible supported node range1..128 checked before BH conversion; no node offset.
+
+128-bit BCryptGenRandom session identifier, real visible node N:
+  \\.\mailslot\sfxexec\v1\<session>\nN\to_dos
+  \\.\mailslot\sfxexec\v1\<session>\nN\from_dos
+  Local\SFXEXEC.v1.<session>.nN.hungup  (host carrier loss)
+  Local\SFXEXEC.v1.<session>.nN.hangup  (driver DTR request)
+  Local\SFXEXEC.v1.<session>.nN.carrier (change notification)
+  Local\SFXEXEC.v1.<session>.nN.to_credit
+  Local\SFXEXEC.v1.<session>.nN.from_credit
+Events/semaphores are new, owner/SYSTEM ACL, not inherited. Driver input mailslot
+has the same explicit ACL. Host refuses pre-existing objects. Windows logon
+session and nonce separate instances; node identity stays the caller's actual N.
+Both boards may use visible Node1 with entirely different communication names.
+No Sync name/config/log/System32 discovery or mutation is performed.
+
+Each direction has64 message credits. Input max256bytes/message plus10000byte
+ring; output max4000bytes/message plus32768byte host relay buffer. Credit returns
+follow actual consumption. Output exhaustion returns a partial/zero write after
+a finite2second wait; input messages wait intact for ring space. Host batches
+at most64 output messages per pass; private loopback TCP_NODELAY only. Existing
+SFX caller transport/Section10 settings remain unchanged. EOF is checked even
+when input credits are exhausted. Nonces, node checks, owned jobs and joined
+driver threads prevent late data/reuse. Native NTVDM behavior remains PENDING.
+
+Driver's first private output:
+ SFXPAIR1|SFXEXEC-20261024-01|<session>|<node>|<GetModuleFileName actual path>
+Host verifies exact private DLL file ID/hash before sending RLogin ACK/output.
+Actual path/hash is printed in the host log. Only the explicit per-session
+SFXRUN.INI is read; no working-directory/default INI fallback. Debug prefix
+SFXEXEC, not a shared log file. No installed SFX/Sync settings are overwritten.
+
+Host binds loopback only; pins accepted Runtime path/SHA/user via TCP owner PID,
+then a new, unique typed Door-entered event (actual node/generation/account/
+durable session). Completed/stale/duplicate/claimed records are refused. Runtime
+continues time/authority, escape and separate operator controls. Host refuses
+x64 before owner-path/listener access. New private VDM must have creation time
+after launch and accept its private kill-on-close job; existing/shared process
+is refused without termination. Cancellation signals only its nonce's carrier,
+waits2seconds then ends only its proven-owned job; waits at most3more seconds.
+
+THIS BRIDGE LIMITATION IS EXPLICIT:
+The existing external gateway has no game-requested whole-caller disconnect
+command. CanDisconnect=false disables game DTR requests in these profiles.
+The actual VDD DTR event is tested separately in engineering fixtures; full
+local engine/DTR integration is not claimed. Native job/loader/time/operator
+behavior and SFX+Sync coexistence remain for owner observation/review.

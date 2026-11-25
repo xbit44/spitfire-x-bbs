@@ -1,0 +1,55 @@
+REBUILD THE COMPONENTS PRIVATELY
+2026-10-24 - no install, no system/global PATH change
+
+Use the included derived src tree directly, or reproduce it from upstream:
+  python components/sfxexec/scripts/derive.py
+  python components/sfxexec/scripts/refine.py
+  python components/sfxexec/scripts/credits.py
+  python components/sfxexec/scripts/harden.py
+Keep earlier outputs/source snapshots. These operate only on this new component
+tree, not accepted SFX product sources. Do not run upstream make/copy batches.
+
+DLL FIRST:
+  python components/sfxexec/scripts/build.py <fresh-label> --dll-only
+Requires Visual Studio2022 BuildTools MSVC14.44.35207, Windows SDK10.0.26100.0
+and x86 ntvdm.lib/VDDSVC.H. Script records actual commands, all source hashes and
+showIncludes closure. Process-local vcvars32 environment; /MT /Gz /arch:IA32,
+Win7 baseline6.01, exact natural cdecl VDDDispatch/VDDInitialize exports.
+No complete BBS rebuild or .def export aliases are used.
+
+MATCHING DOS LAUNCHER SECOND:
+Provide independently licensed MSVC1.52c tools, DOS CRT/legacy Windows headers
+in build/sfxexec-tools-20261024/MSVC15/{BIN,INCLUDE,LIB}; SLIBCE.LIB is required.
+Provide original Microsoft DDK isvbop.h privately at
+build/sfxexec-tools-20261024/DDK/isvbop.h. These system/tool files are excluded
+from this distribution. Exact media/file hashes are in engineering evidence.
+Native execution of the preserved compiler on this x64 host failed (C1001/
+out-of-memory); failures are retained. No compiler/security-policy patch used.
+An independently verified portable DOSBox-X is a PRIVATE COMPILER HOST ONLY.
+  python components/sfxexec/scripts/compiler_dos_host.py
+  python components/sfxexec/scripts/compile_dos.py <fresh-label>
+Compiler-host script fetches the fixed official portable archive and checks
+its recorded SHA256. No installer or game runtime is installed/bundled. This
+does not qualify native NTVDM/VDD. CL8.00c /AS /Gs /Fc /Fm and Link5.60.339
+produce a real DOS MZ image.8.3 header alias mapping and .COD/.MAP are retained.
+Only the private staged DOS drive is mounted in the compiler host.
+
+MINIMUM HOST THIRD (after DLL/launcher hashes are fixed):
+  python components/sfxexec/scripts/build_host.py <fresh-label> <DLL> <SFXDOOR.EXE>
+Generates pair_hashes.hpp, compiles source-only SFXDOSHost.exe /MT /arch:IA32
+with Win7 subsystem6.01, runs model tests and x64 early refusal. It pins accepted
+Runtime SHA256 90E2F01DE0BBD018830E30EC58CD3703710A769A286DB1FB39C06A5780AE0C8F.
+No product library, schema or R246 starter-category source is linked into it.
+
+Available engineering qualification:
+  python components/sfxexec/scripts/qualify_vdd.py <fresh-label> <DLL>
+The private import shim is compiled ONLY into the engineering scratch fixture.
+It executes real DLL/Win32 IPC in two processes, with fake CPU/interrupt services.
+Never copy its ntvdm.exe/VDDHarness.exe into an owner runtime package/System32.
+Local fixture IPC may require normal unsandboxed local access; it does not need
+or justify weakening host security policy. Actual DOS/coexistence remains pending.
+
+Final package recipe is scripts/package_candidate.py; its fixed source-build
+labels identify this delivered candidate. Change labels explicitly for a new
+candidate. Source/ZIP hashes will change; do not claim byte-identical binaries
+across compiler time/path changes (legacy __DATE__/__TIME__ are retained).

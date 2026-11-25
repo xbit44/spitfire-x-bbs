@@ -1,0 +1,374 @@
+/* Network related wrapper functions */
+
+/****************************************************************************
+ * @format.tab-size 4		(Plain Text/Source Code File Header)			*
+ * @format.use-tabs true	(see http://www.synchro.net/ptsc_hdr.html)		*
+ *																			*
+ * Copyright Rob Swindell - http://www.synchro.net/copyright.html			*
+ *																			*
+ * This library is free software; you can redistribute it and/or			*
+ * modify it under the terms of the GNU Lesser General Public License		*
+ * as published by the Free Software Foundation; either version 2			*
+ * of the License, or (at your option) any later version.					*
+ * See the GNU Lesser General Public License for more details: lgpl.txt or	*
+ * http://www.fsf.org/copyleft/lesser.html									*
+ *																			*
+ * For Synchronet coding style and modification guidelines, see				*
+ * http://www.synchro.net/source.html										*
+ *																			*
+ * Note: If this box doesn't appear square, then you need to fix your tabs.	*
+ ****************************************************************************/
+
+#include "sockwrap.h"
+#include "genwrap.h"    /* truncsp */
+#include "netwrap.h"    /* verify prototypes */
+
+#include <stdlib.h>     /* malloc() */
+
+#if defined(_WIN32)
+	#include <iphlpapi.h>   /* GetAdaptersAddresses */
+	#ifndef GAA_FLAG_SKIP_FRIENDLY_NAME /* absent from the Borland C++ Builder SDK */
+		#define GAA_FLAG_SKIP_FRIENDLY_NAME 0x0020
+	#endif
+#endif
+
+str_list_t getNameServerList(void)
+{
+#ifdef __unix__ /* Look up DNS server address */
+	FILE*      fp;
+	char*      p;
+	char       str[128];
+	str_list_t list;
+
+	if ((list = strListInit()) == NULL)
+		return NULL;
+	if ((fp = fopen("/etc/resolv.conf", "r")) != NULL) {
+		while (!feof(fp)) {
+			if (fgets(str, sizeof(str), fp) == NULL)
+				break;
+			truncsp(str);
+			p = str;
+			SKIP_WHITESPACE(p);
+			if (strnicmp(p, "nameserver", 10) != 0) /* no match */
+				continue;
+			FIND_WHITESPACE(p); /* skip "nameserver" */
+			SKIP_WHITESPACE(p); /* skip more white-space */
+			strListPush(&list, p);
+		}
+		fclose(fp);
+	}
+	return list;
+
+#elif defined(_WIN32)
+	/* Windows assigns these well-known site-local addresses to any interface
+	 * that has no IPv6 name server of its own; they never answer queries. */
+	static const char* const unconfigured[] = {
+		"fec0:0:0:ffff::1",
+		"fec0:0:0:ffff::2",
+		"fec0:0:0:ffff::3",
+		NULL
+	};
+	const ULONG           flags = GAA_FLAG_SKIP_UNICAST | GAA_FLAG_SKIP_ANYCAST
+	                            | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_FRIENDLY_NAME;
+	IP_ADAPTER_ADDRESSES* adapters = NULL;
+	IP_ADAPTER_ADDRESSES* adapter;
+	ULONG                 result = ERROR_BUFFER_OVERFLOW;
+	ULONG                 len = 15 * 1024;  /* size recommended by Microsoft */
+	int                   attempt;
+	str_list_t            list;
+	WSADATA               wsaData;
+
+	if ((list = strListInit()) == NULL)
+		return NULL;
+	WSAStartup(MAKEWORD(2, 2), &wsaData);   /* req'd for getnameinfo() */
+	/* the adapter set can grow between the sizing call and the real one */
+	for (attempt = 0; attempt < 3 && result == ERROR_BUFFER_OVERFLOW; attempt++) {
+		if ((adapters = (IP_ADAPTER_ADDRESSES*)malloc(len)) == NULL)
+			break;
+		if ((result = GetAdaptersAddresses(AF_UNSPEC, flags, NULL, adapters, &len)) != ERROR_SUCCESS) {
+			free(adapters);
+			adapters = NULL;
+		}
+	}
+	for (adapter = adapters; adapter != NULL; adapter = adapter->Next) {
+		IP_ADAPTER_DNS_SERVER_ADDRESS* dns;
+
+		if (adapter->OperStatus != IfOperStatusUp)
+			continue;
+		if (adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK)
+			continue;
+		for (dns = adapter->FirstDnsServerAddress; dns != NULL; dns = dns->Next) {
+			char   str[128];
+			int    i;
+			size_t addrlen;
+
+			if (getnameinfo(dns->Address.lpSockaddr, dns->Address.iSockaddrLength
+			                , str, sizeof str, NULL, 0, NI_NUMERICHOST) != 0)
+				continue;
+			for (i = 0; unconfigured[i] != NULL; i++) {
+				addrlen = strlen(unconfigured[i]);
+				/* the address may carry a "%<scope-id>" suffix */
+				if (strnicmp(str, unconfigured[i], addrlen) == 0
+				    && (str[addrlen] == '\0' || str[addrlen] == '%'))
+					break;
+			}
+			if (unconfigured[i] != NULL)
+				continue;
+			if (strListFind(list, str, /* case_sensitive: */ false) < 0)
+				strListPush(&list, str);
+		}
+	}
+	free(adapters);
+	WSACleanup();
+	return list;
+#else
+	#error "Need a get_nameserver() implementation for this platform"
+#endif
+}
+
+const char* getHostNameByAddr(const char* addr, char* buf, size_t size)
+{
+	const char* result = NULL;
+	struct sockaddr_in  in = { AF_INET };
+	struct sockaddr_in6 in6 = { AF_INET6 };
+
+#ifdef _WIN32
+	WSADATA  wsaData;
+	WSAStartup(MAKEWORD(2, 2), &wsaData);
+#endif
+	if (addr != NULL) {
+		if (xp_inet_pton(AF_INET, addr, &in.sin_addr) == 1) {
+			if (getnameinfo((SOCKADDR*)&in, sizeof in, buf, size, NULL, 0, NI_NAMEREQD) == 0)
+				result = buf;
+		}
+		else if (xp_inet_pton(AF_INET6, addr, &in6.sin6_addr) == 1) {
+			if (getnameinfo((SOCKADDR*)&in6, sizeof in6, buf, size, NULL, 0, NI_NAMEREQD) == 0)
+				result = buf;
+		}
+	}
+#ifdef _WIN32
+	WSACleanup();
+#endif
+	return result;
+}
+
+/* In case we want to DLL-export getNameServerList in the future */
+void freeNameServerList(str_list_t list)
+{
+	strListFree(&list);
+}
+
+// If the input is invalid, INADDR_NONE (usually -1) is returned
+// The return value is in *network* (not host) byte order
+uint32_t parseIPv4Address(const char* value)
+{
+	uint32_t result = 0;
+
+	if (strchr(value, '.') == NULL)
+		return strtol(value, NULL, 10);
+
+#if defined(__BORLANDC__) || defined(__MINGW32__)
+	result = inet_addr(value); // deprecated function call
+#else
+	if (inet_pton(AF_INET, value, &result) != 1)
+		result = INADDR_NONE;
+#endif
+	return result;
+}
+
+struct in6_addr parseIPv6Address(const char* value)
+{
+	struct addrinfo  hints = {0};
+	struct addrinfo *res, *cur;
+	struct in6_addr  ret = {{{0}}};
+
+	hints.ai_flags = AI_NUMERICHOST | AI_PASSIVE;
+	if (getaddrinfo(value, NULL, &hints, &res))
+		return ret;
+
+	for (cur = res; cur; cur = cur->ai_next) {
+		if (cur->ai_addr->sa_family == AF_INET6)
+			break;
+	}
+	if (!cur) {
+		freeaddrinfo(res);
+		return ret;
+	}
+	memcpy(&ret, &((struct sockaddr_in6 *)(cur->ai_addr))->sin6_addr, sizeof(ret));
+	freeaddrinfo(res);
+	return ret;
+}
+
+// 'addr' must be in network byte order
+const char* IPv4AddressToStr(uint32_t addr, char* dest, size_t size)
+{
+#if defined _WIN32
+	int         result;
+	WSADATA     wsaData;
+	SOCKADDR_IN sockaddr = {0};
+	sockaddr.sin_family = AF_INET;
+	sockaddr.sin_addr.s_addr = addr;
+
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+		return NULL;
+	result = getnameinfo((SOCKADDR*)&sockaddr, sizeof(sockaddr), dest, size, NULL, 0, NI_NUMERICHOST);
+	WSACleanup();
+	if (result != 0)
+		return NULL;
+	return dest;
+#else
+	struct in_addr in_addr;
+	in_addr.s_addr = addr;
+	return inet_ntop(AF_INET, &in_addr, dest, size);
+#endif
+}
+
+/*
+ * While RFC-952 limits a name to 24 characters, this is never enforced.
+ * RFC-952 also doesn't allow beginning or ending with a hyphen.
+ * RFC-952 also bans starting with a digit.
+ * RFC-1123 explicitly overrode the restriction against starting with a digit.
+ * RFC-1123 implicitly overrode the length restriction.
+ *
+ * The limit of 63 characters for a name comes from DNS, as does the 253
+ * (254 with trailing dot) overall limit.  If DNS isn't used, it's chaos.
+ */
+static bool
+isValidHostnameString(const char *str)
+{
+	size_t seglen = 0;
+	size_t totallen = 0;
+	bool   last_was_hyphen = false;
+
+	if (!*str)
+		return false;
+	while (*str) {
+		if ((*str >= 'a' && *str <= 'z')
+		    || (*str >= 'A' && *str <= 'Z')
+		    || (*str >= '0' && *str <= '9')
+		    || (*str == '-')
+		    || (*str == '.')) {
+			if (*str == '.') {
+				if (last_was_hyphen) {
+					return false;
+				}
+				if (seglen == 0) {
+					return false;
+				}
+				seglen = 0;
+			}
+			else {
+				if (seglen == 0) {
+					if (*str == '-') {
+						return false;
+					}
+				}
+				seglen++;
+				if (seglen > 63) {
+					return false;
+				}
+			}
+			totallen++;
+			if (totallen > 253) {
+				// Allow a trailing dot
+				if (totallen != 254 || *str != '.') {
+					return false;
+				}
+			}
+			last_was_hyphen = (*str == '-');
+		}
+		else {
+			return false;
+		}
+		str++;
+	}
+
+	return true;
+}
+
+bool
+isValidAddressString(const char *str)
+{
+	bool result = false;
+	char   addr[32];
+#ifdef _WIN32
+	WSADATA  wsaData;
+	WSAStartup(MAKEWORD(2, 2), &wsaData);
+#endif
+
+	/*
+	 * Per RFC-1123, we need to check for valid IP address first
+	 */
+	if (xp_inet_pton(AF_INET, str, addr) == 1)
+		result = true;
+	else if (xp_inet_pton(AF_INET6, str, addr) == 1)
+		result = true;
+
+#ifdef _WIN32
+	WSACleanup();
+#endif
+	return result;
+}
+
+bool
+isValidHostname(const char *str)
+{
+	/*
+	 * Per RFC-1123, we need to check for valid IP address first
+	 */
+	if (isValidAddressString(str))
+		return true;
+
+	return isValidHostnameString(str);
+}
+
+bool
+isResolvableHostname(const char *str)
+{
+	struct addrinfo  hints = {0};
+	struct addrinfo *res = NULL;
+	const char       portnum[2] = "1";
+
+	if (!isValidHostname(str)) {
+		return false;
+	}
+
+	hints.ai_flags = PF_UNSPEC;
+	hints.ai_family = PF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_flags = AI_NUMERICSERV;
+#ifdef AI_ADDRCONFIG
+	hints.ai_flags |= AI_ADDRCONFIG;
+#endif
+	if (getaddrinfo(str, portnum, &hints, &res) != 0) {
+		return false;
+	}
+	freeaddrinfo(res);
+	return true;
+}
+
+#if NETWRAP_TEST
+int main(int argc, char** argv)
+{
+	size_t     i;
+	str_list_t list;
+	char buf[128];
+
+	if ((list = getNameServerList()) != NULL) {
+		for (i = 0; list[i] != NULL; i++)
+			printf("%s\n", list[i]);
+		freeNameServerList(list);
+	}
+
+	if (argc > 1) {
+		printf("isValidAddressString(%s) = %d\n", argv[1], isValidAddressString(argv[1]));
+		printf("isValidHostname(%s) = %d\n", argv[1], isValidHostname(argv[1]));
+		const char* p = getHostNameByAddr(argv[1], buf, sizeof buf);
+		printf("%s\n", p == NULL ? "(null)" : p);
+	}
+
+	return 0;
+}
+#endif
+

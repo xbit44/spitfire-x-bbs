@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>Files and transfers | Spitfire-X Sysop Wiki</title>
+ <link rel="stylesheet" href="assets/sysop.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to article</a>
+<aside class="sidebar" aria-label="Wiki navigation">
+ <img class="sidebar-logo" src="images/sfx-about-approved.png" width="1254" height="1254" alt="Spitfire-X BBS bison logo">
+ <a class="brand" href="wiki.html">SPITFIRE-X<span>BBS / SYSOP WIKI</span></a>
+ <form action="search.html" method="get" role="search">
+  <label for="wiki-query">Search this wiki</label>
+  <div class="search-field"><input id="wiki-query" name="q" type="search" maxlength="160" placeholder="Search articles" autocomplete="off"><button type="submit" aria-label="Search">Go</button></div>
+ </form>
+ <nav aria-label="Topics"><p class="nav-heading">CONTENTS</p><a href="wiki.html">Wiki home</a><a href="get-ready.html">Get ready</a>
+<a href="linux-controls.html">Linux browser controls</a>
+<a href="daily-operation.html">Daily operation</a>
+<a href="callers-chat.html">Callers &amp; chat</a>
+<a href="messages-mail.html">Messages &amp; mail</a>
+<a href="files-transfers.html" aria-current="page">Files &amp; transfers</a>
+<a href="doors.html">Doors</a>
+<a href="ftn-networks.html">FTN networks</a>
+<a href="maintenance-recovery.html">Maintenance &amp; recovery</a>
+<a href="updates-help.html">Updates &amp; troubleshooting</a>
+<a href="customization-reference.html">Customization &amp; Displays</a>
+<a href="thanks-to.html">Thanks to</a>
+</nav>
+ <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
+</aside>
+<main id="main" tabindex="-1">
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">Sysop wiki</span></div>
+ <article data-search="article"><h1>Files and transfers</h1><p class="lead">File areas, File Manager and upload scanning.</p><h2>In this guide</h2>
+<ul class="article-links"><li><a href="#groups-areas">Files &gt; Groups &amp; Areas</a></li><li><a href="#caller-file-list">Caller file list markers</a></li><li><a href="#scan-preferences">Caller scan preferences</a></li><li><a href="#transfer-policy">Files &gt; Transfer Policy</a></li><li><a href="#after-transfer">Log off after transfer</a></li><li><a href="#count-rules">Files &gt; Security-level Count Rules</a></li><li><a href="#caller-exemptions">Files &gt; Caller Exemptions</a></li><li><a href="#clamav">Security &gt; ClamAV</a></li></ul>
+<section id="groups-areas"><h2>Files &gt; Groups &amp; Areas</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Choose the named group or area and use its actions below the list. Check the Editing name before Save Changes; browsing another row does not by itself replace an open editor. Storage paths are on the Linux BBS computer, and saving a folder choice does not move files. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>Groups organize the area list; an area owns its file listings and points to an existing storage folder. The caller must meet both the group's access minimum and the area's applicable access/download rules. Disabling a group or area keeps its settings and files while removing caller access.</p>
+<h3>Fresh board layout</h3>
+<p>A fresh board has an enabled <strong>Main</strong> group with access minimum 1 and these three areas. Updates keep your saved groups, areas and paths.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Area</th><th>Folder relative to SFX</th><th>Starting behavior</th></tr></thead><tbody>
+<tr><td>General Files</td><td>Windows: <code>Files/General</code>; Linux: <code>files/general</code></td><td>Ordinary area. Caller uploads off; downloads not restricted to Sysops.</td></tr>
+<tr><td>Uploads</td><td>Windows: <code>Files/Uploads</code>; Linux: <code>files/uploads</code></td><td>Review area. Caller uploads on; downloads restricted to Sysops.</td></tr>
+<tr><td>Upload to Sysop</td><td>Windows: <code>Files/UploadToSysop</code>; Linux: <code>files/uploadtosysop</code></td><td>Private submissions. Caller uploads on; browsing/downloads restricted to Sysops. Uploads and downloads do not participate in ratios.</td></tr>
+</tbody></table></div>
+<p>All three start enabled, with access/upload/download minimum 1, inherited upload size, own-description editing off and content backup off. General Files and Uploads initially participate in ratios. The special review/private roles and permanent area numbers are not ordinary editable labels.</p>
+<h3>Group fields</h3>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Field</th><th>Rules</th></tr></thead><tbody>
+<tr><td>Name</td><td>1-64 bytes of valid text, without leading/trailing spaces or control characters. Plain ASCII allows 64 characters.</td></tr>
+<tr><td>Display order</td><td>Nonnegative whole number through 9,223,372,036,854,775,806. Lower numbers come first; this does not change the permanent group ID.</td></tr>
+<tr><td>Access minimum</td><td>Whole security level 1-999; starts at 1 for a new group.</td></tr>
+<tr><td>Enabled</td><td>On/off; starts on.</td></tr>
+</tbody></table></div>
+<p>New Group starts with an empty name. Windows suggests an order based on the current group count; Linux starts at 0. For example, name a group <code>Utilities</code> and give it order <code>10</code>. Review its order relative to existing groups before saving.</p>
+<h3>Area fields</h3>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Field</th><th>Rules and new ordinary-area defaults</th></tr></thead><tbody>
+<tr><td>Name</td><td>The same text rules as a group name; starts empty.</td></tr>
+<tr><td>Description</td><td>Optional text, up to 256 bytes; starts empty. No control characters or line breaks.</td></tr>
+<tr><td>Display order</td><td>The same numeric range as group order. Windows suggests a position after existing areas; Linux starts at 0. Insert Before/After chooses the position for you.</td></tr>
+<tr><td>Parent group</td><td>Select an existing group. Windows has a Parent group selector. On Linux, browse Groups and choose Move Here; the displayed group ID is read-only.</td></tr>
+<tr><td>Enabled</td><td>Starts on. Off keeps listings and files.</td></tr>
+<tr><td>Access minimum</td><td>1-999; starts at 1. Controls normal access to this area, together with group access.</td></tr>
+<tr><td>Upload minimum</td><td>1-999; starts at 1. Required level for uploads, together with the relevant area/group and upload-enable checks.</td></tr>
+<tr><td>Download minimum</td><td>1-999; starts at 1. Applies in addition to access and any Sysop-only download choice.</td></tr>
+<tr><td>Existing storage folder</td><td>Required, up to 2048 bytes; starts empty. Relative to this SFX folder or an absolute path on the BBS host.</td></tr>
+<tr><td>Allow caller uploads</td><td>Starts off for a new ordinary area. On permits callers who meet its upload rules.</td></tr>
+<tr><td>Sysop-only downloads</td><td>Starts off for an ordinary area. Required on for the special Uploads and Upload to Sysop areas.</td></tr>
+<tr><td>Caller may edit own descriptions</td><td>Starts off. On permits an uploader's own-description editing subject to current file access.</td></tr>
+<tr><td>Back up contents</td><td>Starts off. On includes this area's payloads in content backup; it does not run a backup when saved.</td></tr>
+<tr><td>Uploads participate in ratio</td><td>Starts on. Controls whether eligible uploads in this area contribute to ratio accounting.</td></tr>
+<tr><td>Downloads participate in ratio</td><td>Starts on. Controls ratio participation for downloads; the separate daily file count still applies unless exempt.</td></tr>
+<tr><td>Route accepted caller uploads to Uploads for Sysop review</td><td>Starts off for an ordinary area. On sends accepted uploads to the review area instead of directly publishing them in the requested ordinary area. Not selectable for the special areas.</td></tr>
+<tr><td>Caller upload maximum bytes</td><td>Blank inherits Transfer Policy. Otherwise use 1-1,073,741,824 whole bytes. This area's explicit cap replaces the global cap.</td></tr>
+</tbody></table></div>
+<h3>Folders, order and saving</h3>
+<p>Create the intended storage folder before selecting it. For example, <code>Files/Utilities</code> on Windows or <code>files/utilities</code> on fresh Linux refers to a folder inside that installation. Match the real spelling of an existing path you select; SFX does not rename arbitrary folders. Linux absolute paths start with <code>/</code>; Windows absolute paths use a drive and full path. Do not use a network-share path, <code>.</code>/<code>..</code> components or a trailing separator. Save validates the folder and ownership/safety rules; it does not create the folder, move files into it or automatically adopt unknown files.</p>
+<p>Changing an area's folder is refused while it has registered file records or pending intake/import/file/FTN work bound to the old path. Two areas cannot be configured to use the same folder. Use the file-management workflows for payload work instead of expecting a path edit to relocate content.</p>
+<p>Use New Area inside the wanted group, or select an area and choose Insert Before/After. Move Up/Down changes caller display order. Area numbers are permanent and assigned when a new area is saved; reordering does not renumber them. At most 999 permanent area numbers can be allocated. The Linux catalog browser lists by permanent ID and shows display order separately, so its editing list is not a preview of caller menu order.</p>
+<p>Save Changes writes the reviewed settings without a BBS restart. Read the result before another edit. Reload fetches current saved values; Reconcile checks an unresolved operation. A refused save keeps the previous configuration authoritative. Check the text/level ranges, existing folder, duplicate path, permanent identity and whether another session changed the catalog.</p>
+<h3>Delete a group</h3>
+<p>Stop the BBS and close File Manager/file work before Delete Group. Review its areas, file listings and inspected disk contents. Choose explicitly between <strong>Remove from SFX only - keep files on disk</strong> and <strong>Delete from SFX and delete files on disk</strong>. The latter permanently deletes the reviewed files. Empty folders, internal history and permanent numbers remain.</p>
+<p>Confirm only after checking the exact group and choice. Cancel before starting keeps the group, areas and files. If deletion was interrupted, use the saved Continue Deletion or review/reconcile flow; completed disk deletions cannot be undone. An unresolved result is not proof that nothing happened. Follow the specific refusal if pending work or a protected area prevents the operation.</p></section>
+<section id="scan-preferences"><h2>Caller scan preferences</h2>
+<p>From <strong>Your Settings &gt; Scan Preferences</strong>, choose <strong>D, New File Scan Date</strong> to change the saved scan date. The date prompt starts on a new line. Enter a real date in <code>YYYY-MM-DD</code> form, no later than the saved scan date. An empty <strong>Enter</strong> keeps the date unchanged and returns to the preferences. An invalid date is refused.</p>
+<p><strong>N</strong> toggles New File Scan at Logon. <strong>L</strong> toggles File Light Bars when the Sysop allows them. These remain separate choices; changing the scan-date label does not reset either preference.</p></section>
+<section id="caller-file-list"><h2>Caller file list markers</h2>
+<p>A <code>*</code> in the column immediately before a filename means the file is queued. A blank in that column means it is not queued. Read the marker alongside the filename when reviewing the list.</p></section>
+<section id="transfer-policy"><h2>Files &gt; Transfer Policy</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Save Changes keeps this editor’s board-wide limits. The upload-scan choice is saved separately under ClamAV; a transfer-policy save does not start a transfer or update definitions. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>These are the board-wide caller file-transfer defaults. Updates preserve saved values. An area's upload cap, an explicit security-level count rule, and caller exemptions can change which limits apply to a particular transfer.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Setting</th><th>Fresh value</th><th>Rules</th></tr></thead><tbody>
+<tr><td>Maximum caller upload bytes</td><td>104,857,600 bytes (100 MiB)</td><td>Whole bytes from 1 to 1,073,741,824 (1 GiB). Applies to caller uploads; an area may override it. It is not a Sysop-import size setting.</td></tr>
+<tr><td>Light-bar selection default for new callers</td><td>On</td><td>On/off. Seeds a caller's file-list choice when no saved choice exists; existing saved caller preferences are kept.</td></tr>
+<tr><td>Limit successful downloads per BBS-local day</td><td>Off</td><td>On enables the Daily files value below.</td></tr>
+<tr><td>Daily files</td><td>No enabled limit</td><td>1-1,000,000 whole files when enabled. The day follows the BBS time zone.</td></tr>
+<tr><td>Enable file-count ratio</td><td>Off</td><td>On requires explicit Downloads and Per uploads values.</td></tr>
+<tr><td>Downloads</td><td>No prefilled ratio</td><td>1-1,000,000 whole files when the ratio is enabled.</td></tr>
+<tr><td>Per uploads</td><td>No prefilled ratio</td><td>1-1,000,000 whole files when the ratio is enabled.</td></tr>
+</tbody></table></div>
+<p>For example, set Daily files to <code>20</code> and turn its limit on to allow twenty successful downloads per BBS-local day. Counts are files, not bytes. A transfer in progress reserves allowance so simultaneous transfers cannot each spend the same remaining slot. Failed transfers do not become successful-download counts.</p>
+<p>A ratio of <strong>3 downloads per 1 upload</strong> gives three initial participating downloads, then three more for each eligible upload. More generally, total entitlement is the Downloads value plus the whole-number part of <code>eligible uploads × Downloads / Per uploads</code>. Already used participating downloads count against that entitlement. Area participation flags and level/caller exemptions affect eligibility; turning a ratio on does not grant access to a hidden or private file.</p>
+<p>Choose <strong>Save Changes</strong> and read the result. These settings save without a BBS restart and are checked for later transfer admission; saving does not start a transfer. If a save result is uncertain, use the offered <strong>Reconcile</strong> action or reload the saved settings before another change. For an invalid value, check bytes versus files, the numeric ranges, and that each enabled count has an explicit value. Use the enable checkbox to turn a count off; zero is not a valid enabled count.</p></section>
+<section id="after-transfer"><h2>Log off after transfer</h2>
+<p>Before a File-menu upload or download, the caller sees <strong>Log off after transfer? [Y/n]</strong>. Enter keeps the starting <strong>Y</strong> choice. Choose <strong>N</strong> to stay online and use the ordinary transfer report and return.</p>
+<p>With <strong>Y</strong>, SFX shows the transfer report and starts a visible <strong>10-second</strong> logoff countdown automatically. There is no final Enter prompt before the countdown. Press <strong>A</strong> to abort logoff and return to the File menu, or <strong>D</strong> to disconnect now. If the caller does nothing, SFX logs off when the countdown expires.</p>
+<p>Read the transfer report for completed, failed or held files. The logoff choice does not turn an unsuccessful transfer into a successful one. This choice belongs to File-menu transfers; the QWK menu has no added logoff choice.</p></section>
+<section id="count-rules"><h2>Files &gt; Security-level Count Rules</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Select the intended security level from the named list, review its inheritance and count fields, then Save Changes. This edits the level’s file-count rule, not one caller’s account or area permissions. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>Select an existing active security level. This page changes file-count rules for that level; the level's name, calling-time allowances and Sysop threshold remain under Users &amp; Access &gt; Security Levels. A level starts by inheriting the global file-count policy, and updates preserve its saved choice.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Setting</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Inherit global file-count policy</td><td>On uses Files &gt; Transfer Policy. This is the starting choice. Off enables the level's explicit choices below.</td></tr>
+<tr><td>Limit successful daily downloads</td><td>On applies this level's Daily files value. Explicit Off removes the daily limit for this level instead of falling back to the global limit.</td></tr>
+<tr><td>Daily files</td><td>1-1,000,000 whole files when enabled.</td></tr>
+<tr><td>Enable file-count ratio</td><td>On applies this level's explicit ratio; Off removes that ratio requirement for this level.</td></tr>
+<tr><td>Downloads</td><td>1-1,000,000 whole files when ratio is on.</td></tr>
+<tr><td>Per uploads</td><td>1-1,000,000 whole files when ratio is on.</td></tr>
+<tr><td>Exempt this level from daily download counts</td><td>Waives the daily-count restriction. Starts off.</td></tr>
+<tr><td>Exempt this level from file-count ratios</td><td>Waives the ratio restriction. Starts off.</td></tr>
+</tbody></table></div>
+<p>For example, to give level 20 a daily allowance of 50 files, turn inheritance off, enable its daily limit and enter <code>50</code>. Choose the ratio policy you want for that level too: an explicit level record replaces the global count rule rather than overriding just one number. Enabling inheritance again uses the global rule and clears the level's separate count/exemption choices.</p>
+<p>Save Changes applies the rule to later download checks without restarting the BBS. Area access, download permissions and private-file protection still apply. If the selected level was removed elsewhere, discard the stale draft and select an active level. Reload or reconcile an uncertain result before resubmitting.</p></section>
+<section id="caller-exemptions"><h2>Files &gt; Caller Exemptions</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Find and explicitly select the caller before editing the exemption fields. Save Changes affects that caller’s file-count exemptions; check the name and result before choosing another caller. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>Find and select the caller before changing either checkbox. <strong>Exempt caller from daily download file counts</strong> and <strong>Exempt caller from file-count ratios</strong> both start off when no exemption has been saved. They are independent on/off choices, and updates keep existing choices.</p>
+<p>For example, turn on only the daily exemption to waive that caller's daily file count while retaining any applicable ratio. An enabled caller exemption adds to any level exemption. Turning a caller checkbox off does not cancel an exemption granted by the caller's security level.</p>
+<p>Choose Save Changes and read the result. It applies to later admission checks without a BBS restart. These checkboxes do not grant access to private areas, change an area's upload cap or waive file permissions. If the caller is missing or the result is uncertain, reload the exact caller and review before retrying.</p></section>
+<section id="clamav"><h2>Security &gt; ClamAV</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Save Changes keeps only the caller-upload scan choice. Status refresh, definition updates, log viewing and cancellation remain separate actions. Check engine and definition readiness as well as the saved checkbox. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>On supported Windows 10/11 hosts, Setup's <strong>Install Portable ClamAV now?</strong> choice is optional. Yes downloads/verifies the engine and attempts the initial definitions; No skips for now, and Cancel returns to Setup. Later, use <strong>SFXConfig &gt; Security &gt; ClamAV</strong>. Read the engine and definition result rather than treating an accepted install request as ready scanning.</p>
+<p>Installing or skipping the component is separate from reviewing <strong>Scan Uploads</strong>. Explicitly saved choices remain saved; the untouched starting-policy cases below still apply. When a required scan cannot complete, the new upload is held privately for review rather than reported clean. Completing the BBS first-run wizard does not establish AV readiness.</p>
+<p><strong>Scan caller uploads</strong> is a saved board choice. On supported scanning hosts, saving it on enables scanning of new caller uploads; saving it off disables that scan requirement. This choice saves separately from Transfer Policy. Sysop imports are not automatically scanned by this setting.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Installation or saved state</th><th>Starting scan choice</th></tr></thead><tbody>
+<tr><td>Linux, or supported Windows 10/11, with the ClamAV component present and the initial scan policy still untouched</td><td>On when SFX initializes that component. This does not mean the engine or definitions are ready.</td></tr>
+<tr><td>Fresh policy without the optional component</td><td>Off. Adding the component later can enable an untouched initial policy; it does not replace an explicitly saved choice.</td></tr>
+<tr><td>An explicitly saved On or Off choice on a supported scanning host</td><td>Kept on normal updates and later initialization. Check the saved checkbox rather than assuming every installation starts alike.</td></tr>
+<tr><td>Windows 7 SP1</td><td>Off. SFX does not support ClamAV scanning on this platform.</td></tr>
+</tbody></table></div>
+<p>When scanning is on, an unavailable or incomplete scan holds a new caller upload privately rather than releasing it as clean. Check the installed engine, definition readiness and the scan result before deciding what to do with a held upload. Having definition files present is not the same as a verified ready scanner.</p>
+<p><strong>Windows 7 SP1 has no ClamAV scanning support in SFX.</strong> Its upload-scanning choice is kept off. On Windows 10 and 11, the Portable ClamAV page can install the optional component later. Stop the BBS and Control Panel before <strong>Install Portable ClamAV...</strong>; SFXConfig may stay open. The Linux page reports its installed engine and definition status and provides definition-update controls.</p>
+<p>Optional ClamAV work can continue after the Windows Control Panel opens. This does not make an unverified engine or incomplete definitions ready to scan. SFX still verifies the engine before scan or definition-update use and holds uploads whose required scan cannot complete.</p>
+<h3 id="clamav-prepare-repair">Verify ClamAV after Prepare SFX on Windows</h3>
+<p>On Windows 10 and 11, <strong>Prepare SFX</strong> gives a prepared copy its own installation identity and reports if Portable ClamAV needs attention. If an earlier Prepare left the ClamAV receipt tied to the previous identity, stop the BBS and close its controls. Run matching Setup, select that exact existing folder and follow the normal <a href="updates-help.html#windows-update">update or repair review and backup steps</a>.</p>
+<p>Setup can issue a receipt for the current board when it verifies the installed engine and matches the previous identity to that board's protected Prepare history. It reuses the verified engine and can update an untouched, generated FreshClam configuration to use the selected board's folder.</p>
+<ul><li><strong>Repaired for this installation</strong> means Setup corrected the receipt or generated FreshClam configuration for the selected board.</li><li><strong>Existing Portable ClamAV verified</strong> means the installed engine and its receipt passed verification.</li><li>If Setup <strong>preserved the existing FreshClam configuration</strong>, the engine passed verification and the configuration needs attention. Keep the existing file and review the ClamAV diagnostic.</li><li>If Setup <strong>could not verify the existing Portable ClamAV receipt or engine</strong>, it preserved the component files. Keep the reported diagnostic and follow the guidance for that installation.</li></ul>
+<p>Open <strong>SFXConfig &gt; Security &gt; ClamAV</strong> and check engine and definition status separately. Review your saved upload-scan choice there as well. An upload stays held privately when its required scan cannot finish.</p>
+<h3>Definitions and update controls</h3>
+<p>Turning upload scanning off does not turn definition updates off. Runtime owns the automatic daily UTC update attempt. <strong>Update Definitions Now</strong> requests a manual update; it does not turn scanning on or override a vendor cooldown. Check the last attempt, last successful check, last definition change and reported result separately. An unchanged successful definition check is different from a failed check.</p>
+<p>Use <strong>Refresh Status</strong> to read current state and <strong>View Update Log</strong> for the latest update output. On Linux, that view contains at most 64 KiB of the latest output, not a permanent history of every update. Cancel requests cancellation of the active operation; wait for the reported result and cleanup before starting another. Save Changes writes the scan choice without a BBS restart, and does not itself install the engine, update definitions or rescan existing files.</p>
+<p>If scanning is unavailable, check engine verification, definition readiness and the diagnostic. Use matching Setup repair when the Windows page reports an unverified installation. If a settings save is uncertain, reconcile or reload it before retrying; do not infer a successful save from a checked box alone.</p></section>
+<div class="related"><h2>Related topics</h2><a href="messages-mail.html">Messages and offline mail</a><a href="doors.html">Add and maintain Doors</a></div></article>
+ <footer>Spitfire-X BBS <span aria-hidden="true">/</span> Sysop documentation <a href="#main">Back to top</a></footer>
+</main>
+
+</body>
+</html>

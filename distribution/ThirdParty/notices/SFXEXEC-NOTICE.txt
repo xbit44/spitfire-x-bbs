@@ -1,0 +1,10 @@
+SFXEXEC.DLL and SFXDOOR.EXE derive from official SynchronetBBS/sbbs commit
+97fab8d84a68882d1ceff0bed7cc05497f4d5973. Original copyright notices remain.
+External driver/launcher: GPL-2.0-or-later; XPDEV portions retain LGPL
+terms/notices. Complete corresponding source and recipes accompany the
+matched Engineering-Companion; no additional license restriction applies.
+This product includes software developed by HD Associates, Inc. (retained
+Unix-only xpsem.h source, not linked into this Windows candidate).
+The independent SFX host links no GPL driver implementation. Microsoft
+compiler/SDK/DDK and compiler-host emulator media are not distributed.
+Normal integration supersedes historical standalone component instructions.

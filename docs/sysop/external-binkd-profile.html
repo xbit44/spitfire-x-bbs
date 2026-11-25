@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>External BinkD supported profile (v1.0.0b1 test build) | Spitfire-X Sysop Wiki</title>
+ <link rel="stylesheet" href="assets/sysop.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to article</a>
+<aside class="sidebar" aria-label="Wiki navigation">
+ <img class="sidebar-logo" src="images/sfx-about-approved.png" width="1254" height="1254" alt="Spitfire-X BBS bison logo">
+ <a class="brand" href="wiki.html">SPITFIRE-X<span>BBS / SYSOP WIKI</span></a>
+ <form action="search.html" method="get" role="search">
+  <label for="wiki-query">Search this wiki</label>
+  <div class="search-field"><input id="wiki-query" name="q" type="search" maxlength="160" placeholder="Search articles" autocomplete="off"><button type="submit" aria-label="Search">Go</button></div>
+ </form>
+ <nav aria-label="Topics"><p class="nav-heading">CONTENTS</p><a href="wiki.html">Wiki home</a><a href="get-ready.html">Get ready</a>
+<a href="linux-controls.html">Linux browser controls</a>
+<a href="daily-operation.html">Daily operation</a>
+<a href="callers-chat.html">Callers &amp; chat</a>
+<a href="messages-mail.html">Messages &amp; mail</a>
+<a href="files-transfers.html">Files &amp; transfers</a>
+<a href="doors.html">Doors</a>
+<a href="ftn-networks.html">FTN networks</a>
+<a href="external-binkd.html">External BinkD</a>
+<a href="external-binkd-profile.html" aria-current="page">BinkD profile reference</a>
+<a href="maintenance-recovery.html">Maintenance &amp; recovery</a>
+<a href="updates-help.html">Updates &amp; troubleshooting</a>
+<a href="customization-reference.html">Customization &amp; Displays</a>
+<a href="thanks-to.html">Thanks to</a>
+</nav>
+ <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
+</aside>
+<main id="main" tabindex="-1">
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">v1.0.0b1 test build</span></div>
+ <article data-search="article">
+<h1>External BinkD supported profile (v1.0.0b1 test build)</h1>
+<div class="notice">This is the supported profile grammar for the helper included in the 1.0.0b1 test packages, not a complete stock BinkD manual or a runnable configuration. Read <a href="external-binkd.html">External BinkD setup guide</a> for setup limits.</div>
+<h2>In this guide</h2><ul class="article-links"><li><a href="#text-format">Text format</a></li><li><a href="#required-network-declarations">Required network declarations</a></li><li><a href="#remote-links">Remote links</a></li><li><a href="#required-shared-receive-folders">Required shared receive folders</a></li><li><a href="#required-listener">Required listener</a></li><li><a href="#optional-single-value-lines">Optional single-value lines</a></li><li><a href="#paths-and-generated-files">Paths and generated files</a></li><li><a href="#review-before-use">Review before use</a></li></ul>
+<h2 id="text-format">Text format</h2>
+<p>Use lowercase directive names exactly as shown. Put one directive on each line. Separate words with spaces or tabs; double quotes can surround a value containing spaces. There are no backslash escapes or multiline values. A # starts a comment only at a word boundary; it cannot occur inside a value. Backslashes, embedded double quotes and control characters are not accepted inside values. Empty values are not accepted.</p>
+<p>The profile is limited to 49,152 bytes. Each word is limited to 512 bytes; there may be at most 12 words on a line. Additional limits below also apply.</p>
+<p>All UPPERCASE names and &lt;angle-bracket&gt; values below are placeholders. Do not save these examples as a deployment profile. Supply real configuration privately, with credentials agreed with your link&#x27;s Sysop.</p>
+<h2 id="required-network-declarations">Required network declarations</h2>
+<p>Windows:</p><pre><code>domain DOMAIN FTN/External/code/Outbound DEFAULT_ZONE</code></pre>
+<p>Fresh Linux:</p><pre><code>domain DOMAIN ftn/external/code/outbound DEFAULT_ZONE</code></pre>
+<p>DOMAIN is the FTN domain name used by addresses below. &quot;code&quot; is the lowercase SFX network code, not a second spelling of the domain. DEFAULT_ZONE is an integer from 1 to 65535. Windows paths use the exact <code>FTN/External/</code> prefix and <code>/Outbound</code> suffix; fresh Linux uses <code>ftn/external/</code> and <code>/outbound</code>. Preserve address/domain/password values and the real spelling of the stock BinkD executable; this layout rule is for SFX-owned paths. Declare at least one domain; up to 64 are accepted. Domain names and network codes must each be unique without regard to case and must pass SFX&#x27;s FTN-code validation.</p>
+<pre><code>address ZONE:NET/NODE.POINT@DOMAIN</code></pre>
+<p>Declare at least one local FTN address for every domain. Use a valid FTN address with an explicit declared domain; the point portion can be omitted for a node address. Up to 64 local address declarations are accepted.</p>
+<p>The one shared profile can contain multiple domain and address lines. Each network still needs its matching SFX configuration. A profile declaration alone does not create that network or prove delivery.</p>
+<h2 id="remote-links">Remote links</h2>
+<pre><code>node ZONE:NET/NODE.POINT@DOMAIN HOST PASSWORD FLAVOUR - -</code></pre>
+<p>The address must be valid and use a declared domain. Up to 512 unique remote node declarations are accepted. The final two literal hyphens are required; they leave stock per-node outbound/inbound box overrides unset. The normal form above needs no -nr flag.</p>
+<p>HOST is a single explicit host value accepted by stock BinkD, optionally with its port. HOST cannot start with a hyphen. This helper does not accept host lists, wildcards or shell expressions. Spaces, tabs, #, semicolon, *, ?, comma, dollar sign and backtick are refused, in addition to the general text restrictions above.</p>
+<p>PASSWORD is one session password, at most 128 bytes. Spaces, tabs, !, comma, #, semicolon, *, dollar sign, backtick and ? are refused, along with the general text restrictions. Password lists and separate incoming/outgoing password forms are not supported. A literal - means an unprotected node; that node is not recorded as a password-protected remote address.</p>
+<p>FLAVOUR must be one of i, c, h or -. These are the accepted stock flavour tokens. The restricted profile does not expose an outbound box, and this guide does not claim the complete SFX outbound flavour matrix is tested.</p>
+<p>The optional form is:</p>
+<pre><code>node ZONE:NET/NODE.POINT@DOMAIN -nr HOST PASSWORD FLAVOUR - -</code></pre>
+<p>Stock BinkD calls -nr &quot;Not Reliable Link&quot;. It is a specific outbound protocol workaround, not a default or recommended setting. Ordinary explicit node lines work without it. Use it only for the particular stock BinkD connection problem it addresses; it does not replace authenticated routing.</p>
+<h2 id="required-shared-receive-folders">Required shared receive folders</h2>
+<p>Include each of these lines exactly once:</p>
+<p>Windows:</p><pre><code>inbound FTN/External/Inbound/Secure
+inbound-nonsecure FTN/External/Inbound/Nonsecure
+temp-inbound FTN/External/Temp</code></pre>
+<p>Fresh Linux:</p><pre><code>inbound ftn/external/inbound/secure
+inbound-nonsecure ftn/external/inbound/nonsecure
+temp-inbound ftn/external/temp</code></pre>
+<p>These are relative to the board root. Do not replace them with absolute paths, outside-board folders, backslashes or per-network inbound folders. The launcher prepares the shared directories and the generated receive hook.</p>
+<h2 id="required-listener">Required listener</h2>
+<pre><code>listen LISTEN_VALUE</code></pre>
+<p>Exactly one listen line is required. Supply a listener value accepted by your stock BinkD build for the intended address and port. The profile parser checks the directive and text shape, not full stock listener syntax or whether that address/port can be used. Choose the listener for your installation; this guide does not change firewall rules.</p>
+<h2 id="optional-single-value-lines">Optional single-value lines</h2>
+<p>Each may appear at most once:</p>
+<pre><code>sysname &quot;YOUR BBS NAME&quot;
+location &quot;YOUR LOCATION&quot;
+sysop &quot;YOUR SYSOP NAME&quot;
+nodeinfo &quot;YOUR NODE INFORMATION&quot;
+timeout SECONDS
+connect-timeout SECONDS
+maxservers COUNT
+maxclients COUNT</code></pre>
+<p>Timeouts must be integers from 1 to 3600; a trailing s is accepted. Server and client counts must be integers from 1 to 64. Text values remain subject to the 512-byte word limit and the general quoting rules. Stock BinkD&#x27;s own interpretation still applies. Omit optional lines unless you need them.</p>
+<h2 id="paths-and-generated-files">Paths and generated files</h2>
+<p>The manually supplied source profile must be under <code>FTN/External</code> on Windows or <code>ftn/external</code> on fresh Linux. Supported relative path segments use only ASCII letters, digits, dot, underscore and hyphen, separated by forward slashes. They cannot be empty, . or .., or end in a dot. Absolute paths, drive prefixes, spaces and backslashes are refused. The relative path is limited to 512 bytes. These restrictions do not require renaming a physical board-root folder merely because it contains spaces.</p>
+<p>The helper creates a private frozen binkd.cfg under <code>FTN/External/Runs</code> on Windows or <code>ftn/external/runs</code> on Linux for each run. It adds loglevel 4, conlog 0, a private per-run binkd.log and the completed-file recorder hook. The log can contain a password sent during a failed login. Keep it private and out of the SFX log viewer, support reports and chat. Windows access is limited to the Sysop, SYSTEM and Administrators; Linux uses mode 0600. Do not add or replace log, loglevel, conlog or exec directives yourself. The source input is validated before these generated lines are added.</p>
+<p>Every directive not listed as accepted above is refused. This includes include, defnode, separate password-file directives, arbitrary receive commands and additional stock options. Do not broaden the profile by editing the generated copy; its contents are bound to that run&#x27;s records.</p>
+<h2 id="review-before-use">Review before use</h2>
+<p>Check network codes, domains, addresses and private link credentials against the intended SFX configuration. Prepare under the normal Sysop account with the private file permissions described in the setup guide. Preserve earlier run files while mail still refers to them. A successfully parsed profile is not proof of successful connections, correct routes or delivery.</p>
+<p>SFXConfig saves the mailer choice and stock program path; it does not write this private source profile or manage a BinkD service. The setup guide gives the Windows and Linux navigation and matching helper placement.</p>
+<p>Eligible SFX-managed processed originals can expire under existing safety checks. Raw receive copies, runs, indexes and handoff history are preserved separately without a new automatic cleanup process; allow for their disk use. Keep the source profile and pending run metadata with the whole board.</p>
+<p>Use this reference with the matching 1.0.0b1 helper and programs.</p>
+<p><a href="ftn-networks.html#mailer">Back to FTN mailer settings</a> · <a href="external-binkd.html">Setup and daily use</a></p>
+</article>
+ <footer>Spitfire-X BBS <span aria-hidden="true">/</span> Sysop documentation <a href="#main">Back to top</a></footer>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+--- a/ssh-conn.c
++++ b/ssh-conn.c
+@@ -1199,8 +1199,11 @@
+ 			if (err_free < buf_free)
+ 				buf_free = err_free;
+ 			uint32_t buf_cap = buf_free > UINT32_MAX ? UINT32_MAX : (uint32_t)buf_free;
+-			if (add > buf_cap)
+-				add = buf_cap;
++			/* Free space also backs credit already advertised, queued or
++			 * in flight. Grant only the still-uncommitted part of it. */
++			uint32_t available = buf_cap > outstanding ? buf_cap - outstanding : 0;
++			if (add > available)
++				add = available;
+ 		}
+ 		add = queue_window_adjust_locked(ch, add);
+ 	}

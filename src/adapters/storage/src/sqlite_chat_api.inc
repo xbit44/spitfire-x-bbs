@@ -1,0 +1,8 @@
+SFX_CHAT_API(application::StorageResult<application::ChatConfiguration>,chat_configuration,(const application::MessageConfigurationActor& a),(a))
+SFX_CHAT_API(application::StorageResult<application::ChatConfiguration>,change_chat_configuration,(const application::MessageConfigurationActor& a,const application::ChatConfiguration& c),(a,c))
+SFX_CHAT_API(application::StorageResult<application::ChatPreferences>,chat_preferences,(const application::MessageActor& a),(a))
+SFX_CHAT_API(application::StorageResult<application::ChatPreferences>,save_chat_preferences,(const application::MessageActor& a,const application::ChatPreferences& p),(a,p))
+SFX_CHAT_API(application::StorageResult<application::PrivateChatAllowance>,private_chat_allowance,(const application::MessageActor& a,std::string_view date),(a,date))
+SFX_CHAT_API(application::StorageStatus,persist_private_chat_usage,(application::Identifier128 id,std::int64_t seconds,const std::vector<std::pair<std::string,std::int64_t>>& days),(id,seconds,days))
+SFX_CHAT_API(application::StorageResult<application::MenuDoorCommands>,menu_door_commands,(const application::MessageActor& a,application::MenuId m),(a,m))
+SFX_CHAT_API(application::StorageResult<application::DoorLaunch>,menu_door_launch,(const application::MessageActor& a,const application::MenuDoorSelection& s),(a,s))

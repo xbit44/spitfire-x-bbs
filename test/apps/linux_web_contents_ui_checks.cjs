@@ -1,0 +1,21 @@
+'use strict';
+module.exports=async({assert,sandbox,evaluate,elements,response})=>{
+ const value={operation:'21',kind:'file_contents',active:true,completed:false,awaiting_confirmation:false,confirmation:'a'.repeat(96),findings:[],archive:'/board/Backup/Scheduled/point.zip',archive_files:'61',stage:'Choose file areas',detail:'Choose areas',contents:{awaiting_selection:true,areas:[{id:'4',name:'General <text>'},{id:'5',name:'Second'}],destinations:[],restored:'0',identical:'0',conflicts:'0'}};
+ sandbox.contentsFixture=value;
+ evaluate("authenticated=true;offlineBusy=false;busy=false;saving=false;dirty=false;offlineUnknown=null;offlineReadOk=true;offline=contentsFixture;renderContentsRestore(offline)");
+ assert.equal(elements.get('contents-selection').hidden,false);assert.equal(elements.get('contents-select').disabled,true,'no area is selected implicitly');
+ const first=elements.get('contents-area-list').children[0];assert.equal(first.children[1].textContent,'General <text> (#4)');first.children[0].checked=true;first.children[0].onchange();assert.equal(elements.get('contents-select').disabled,false);
+ evaluate('renderContentsRestore(offline)');assert.equal(elements.get('contents-area-list').children[0],first,'status refresh keeps in-progress checkbox selection');
+ let posts=0,selected;
+ const review=structuredClone(value);review.contents.awaiting_selection=false;review.awaiting_confirmation=true;review.confirmation='b'.repeat(96);review.contents.destinations=[{area:'4',path:'/board/Files/General',missing:'1',identical:'1',conflicts:'1'}];
+ sandbox.fetch=async(path,options)=>{if(options.method==='POST'){++posts;assert.equal(path,'/api/maintenance/contents-select');selected=JSON.parse(options.body);return response({accepted:true,detail:'Previewing'});}assert.equal(path,'/api/maintenance');return response(review);};
+ await evaluate('selectContentsRestore()');assert.deepEqual(selected,{operation:'21',confirmation:'a'.repeat(96),areas:['4']});assert.equal(posts,1);assert.equal(elements.get('contents-selection').hidden,true);assert.equal(elements.get('contents-destinations').children[0].children[1].textContent,'Current destination: /board/Files/General');
+ let pending=evaluate('confirmOfflineRestore()');assert.match(elements.get('offline-dialog-title').textContent,/missing file contents/);assert.match(elements.get('offline-dialog-detail').textContent,/missing 1, identical 1, conflicts 1/);assert.match(elements.get('offline-dialog-warning').textContent,/Existing files stay untouched/);elements.get('offline-decline').onclick();await pending;assert.equal(posts,1,'cancel final review sends no restore request');
+ const final=structuredClone(review);final.awaiting_confirmation=false;final.active=false;final.completed=true;final.ready=true;final.management_reopened=true;final.success=true;final.confirmation='';final.contents.restored='1';final.contents.identical='1';final.contents.conflicts='1';
+ sandbox.fetch=async(path,options)=>{if(options.method==='POST'){++posts;assert.equal(path,'/api/maintenance/confirm');assert.deepEqual(JSON.parse(options.body),{operation:'21',confirmation:'b'.repeat(96)});return response({accepted:true,detail:'Confirmed'});}return response(final);};
+ pending=evaluate('confirmOfflineRestore()');elements.get('offline-accept').onclick();await pending;assert.equal(posts,2);assert.match(elements.get('contents-destinations').children[1].textContent,/1 restored; 1 identical; 1 conflicts skipped/);
+ sandbox.contentsFixture=structuredClone(value);sandbox.contentsFixture.operation='22';sandbox.contentsFixture.confirmation='c'.repeat(96);evaluate('offline=contentsFixture;offlineReadOk=true;renderContentsRestore(offline)');const input=elements.get('contents-area-list').children[1].children[0];input.checked=true;input.onchange();
+ sandbox.fetch=async(path,options)=>{if(options.method==='POST'){++posts;throw new Error('lost response');}return response(sandbox.contentsFixture);};
+ await evaluate('selectContentsRestore()');assert.equal(evaluate('offlineUnknown.phase'),'contents_select');assert.equal(elements.get('contents-select').disabled,true);await evaluate('selectContentsRestore()');assert.equal(posts,3,'unknown selection does not automatically repeat');
+ evaluate('retainOffline(null);offline=null;contentsSelected.clear();contentsSelectionKey="";offlineReadOk=false');
+};

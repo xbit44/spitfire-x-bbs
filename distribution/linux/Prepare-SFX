@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+"""Prepare the chosen copied outer folder or write a scoped service plan."""
+import fcntl
+import json
+import os
+from pathlib import Path
+import shlex
+import stat
+import subprocess
+import sys
+import uuid
+
+root = Path(os.path.abspath(__file__)).parent
+
+
+def require_lowercase_layout():
+    # Refuse an old/mixed tree before creating a lock or preparing permissions.
+    # Native controls independently verify the full receipt/role boundaries.
+    owned = {'bin', 'web', 'docs', 'display', 'doors', 'botgate', 'config', 'data',
+             'files', 'ftn', 'logs', 'backup', 'work', 'node', 'management', 'games', 'service'}
+    for entry in root.iterdir():
+        if entry.name.lower() in owned and entry.name != entry.name.lower():
+            raise RuntimeError('This build needs a fresh lowercase Linux installation; the existing folder was left unchanged.')
+    directory = root / 'config'
+    info = directory.lstat()
+    if directory.is_symlink() or not stat.S_ISDIR(info.st_mode) or info.st_uid != os.geteuid() or info.st_mode & 0o077:
+        raise RuntimeError('The lowercase config folder must be private and owned by you.')
+    marker = directory / 'linux-layout.v1'
+    info = marker.lstat()
+    if not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid() or info.st_nlink != 1 or info.st_mode & 0o077:
+        raise RuntimeError('A verified lowercase Linux layout marker is required.')
+    fd = os.open(str(marker), os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    with os.fdopen(fd, 'rb') as stream:
+        opened = os.fstat(stream.fileno())
+        if (info.st_dev, info.st_ino) != (opened.st_dev, opened.st_ino) or stream.read(129) != b'SFX-LINUX-LAYOUT-1\nlinux-lowercase-v1\n':
+            raise RuntimeError('This build needs a fresh lowercase Linux installation; the existing folder was left unchanged.')
+
+
+try:
+    if os.getuid() != os.geteuid() or os.geteuid() == 0 or root.resolve() != root:
+        raise RuntimeError('Use your normal Linux account and a copied SFX folder without links.')
+    info = root.lstat()
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.geteuid() or info.st_mode & 0o022:
+        raise RuntimeError('The SFX folder must belong to you and not allow other accounts to write it.')
+    if sys.argv[1:] not in ([], ['--service-plan'], ['--service-plan', '--low-ports']):
+        raise RuntimeError('Usage: prepare-sfx [--service-plan [--low-ports]]')
+    require_lowercase_layout()
+    fd = os.open(str(root / '.sfx-runtime.lock'), os.O_RDWR | os.O_CREAT | os.O_NOFOLLOW, 0o600)
+    try:
+        lock = os.fstat(fd)
+        if not stat.S_ISREG(lock.st_mode) or lock.st_uid != os.geteuid() or lock.st_nlink != 1 or lock.st_mode & 0o077:
+            raise RuntimeError('The installation lock needs attention.')
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise RuntimeError('Close SFX management before preparing this folder. Running work was left unchanged.')
+        require_lowercase_layout()
+        os.chmod(str(root), 0o700)
+    finally:
+        os.close(fd)
+    if sys.argv[1:]:
+        args = [str(root / 'bin/sfxweb'), '--service-plan', '--root', str(root), '--tzdata', str(root / 'bin/tzdata')]
+        if '--low-ports' in sys.argv:
+            args.append('--low-ports')
+        plan = json.loads(subprocess.check_output(args, text=True))
+        if Path(plan['unit_name']).name != plan['unit_name'] or plan['unit_name'] != plan['unit_name'].lower():
+            raise RuntimeError('The generated service unit filename must be lowercase and belong to this plan folder.')
+        folder = root / 'service'
+        folder.mkdir(mode=0o700, exist_ok=True)
+        info = folder.lstat()
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.geteuid() or info.st_mode & 0o077 or folder.is_symlink():
+            raise RuntimeError('The service folder must be private and owned by you.')
+        unit = folder / plan['unit_name']
+        expected = plan['unit'].encode('utf-8')
+        reuse = False
+        if unit.exists() or unit.is_symlink():
+            prior = unit.lstat()
+            if stat.S_ISREG(prior.st_mode) and prior.st_uid == os.geteuid() and prior.st_nlink == 1 and not prior.st_mode & 0o077:
+                reuse = unit.read_bytes() == expected
+            if not reuse:
+                # Preserve edited/different earlier plans. Keep the exact unit
+                # basename so the administrator's install command stays usable.
+                revision = folder / ('plan-' + uuid.uuid4().hex)
+                revision.mkdir(mode=0o700)
+                unit = revision / plan['unit_name']
+        if not reuse:
+            fd = os.open(str(unit), os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+            with os.fdopen(fd, 'wb') as stream:
+                stream.write(expected); stream.flush(); os.fsync(stream.fileno())
+        print('Service plan prepared, not installed: ' + str(unit))
+        print('An administrator can review it, then run:')
+        print('sudo install -m 0644 -- ' + shlex.quote(str(unit)) + ' ' + shlex.quote('/etc/systemd/system/' + unit.name))
+        print('sudo systemctl daemon-reload')
+        print('sudo systemctl enable --now ' + shlex.quote(unit.name))
+        print('SFX runs as your normal account. Start BBS when Linux starts is a separate choice in SFXConfig.')
+        print('After moving the folder or changing accounts, retire the old service and prepare a new plan.')
+    else:
+        print('Outer folder prepared. In SFXConfig, open BBS Health Check or Backup & Restore and choose Prepare for This Computer.', flush=True)
+        os.execv(str(root / 'spitfire-x'), [str(root / 'spitfire-x')])
+except (OSError, ValueError, KeyError, RuntimeError, subprocess.CalledProcessError) as error:
+    print('Prepare stopped: ' + str(error), file=sys.stderr)
+    sys.exit(1)

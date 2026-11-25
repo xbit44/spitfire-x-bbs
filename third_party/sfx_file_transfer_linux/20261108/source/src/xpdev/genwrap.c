@@ -1,0 +1,1605 @@
+/* General cross-platform development wrappers */
+
+/****************************************************************************
+ * @format.tab-size 4		(Plain Text/Source Code File Header)			*
+ * @format.use-tabs true	(see http://www.synchro.net/ptsc_hdr.html)		*
+ *																			*
+ * Copyright Rob Swindell - http://www.synchro.net/copyright.html			*
+ *																			*
+ * This library is free software; you can redistribute it and/or			*
+ * modify it under the terms of the GNU Lesser General Public License		*
+ * as published by the Free Software Foundation; either version 2			*
+ * of the License, or (at your option) any later version.					*
+ * See the GNU Lesser General Public License for more details: lgpl.txt or	*
+ * http://www.fsf.org/copyleft/lesser.html									*
+ *																			*
+ * For Synchronet coding style and modification guidelines, see				*
+ * http://www.synchro.net/source.html										*
+ *																			*
+ * Note: If this box doesn't appear square, then you need to fix your tabs.	*
+ ****************************************************************************/
+
+#include <string.h>     /* strlen() */
+#include <stdarg.h>     /* vsnprintf() */
+#include <stdlib.h>     /* RAND_MAX */
+#include <fcntl.h>      /* O_NOCTTY */
+#include <time.h>       /* clock() */
+#include <errno.h>      /* errno */
+#include <ctype.h>      /* toupper/tolower */
+#include <limits.h>     /* CHAR_BIT */
+#include <math.h>       /* fmod */
+
+#include "strwrap.h"        /* strdup */
+#include "str_list.h"       /* strListPush() */
+#include "ini_file.h"
+
+#if defined(__unix__)
+	#include <sys/ioctl.h>      /* ioctl() */
+	#include <sys/socket.h>     /* socketpair() */
+	#include <sys/wait.h>       /* waitpid() */
+	#include <signal.h>
+#elif defined(_WIN32)
+	#include <io.h>     /* _open_osfhandle() */
+	#include <windows.h>
+	#include <lm.h>     /* NetWkstaGetInfo() */
+	#if WINVER >= 0x0600 // _WIN32_WINNT_VISTA
+		#define GetTickCount() GetTickCount64()
+	#endif
+#else
+
+#endif
+
+#include "genwrap.h"    /* Verify prototypes */
+#include "xpendian.h"   /* BYTE_SWAP */
+
+/****************************************************************************/
+/* Used to replace snprintf()  guarantees to terminate.			  			*/
+/****************************************************************************/
+int safe_snprintf(char *dst, size_t size, const char *fmt, ...)
+{
+	va_list argptr;
+	int     numchars;
+
+	va_start(argptr, fmt);
+	numchars = vsnprintf(dst, size, fmt, argptr);
+	va_end(argptr);
+	if (size > 0)
+		dst[size - 1] = 0;
+#ifdef _MSC_VER
+	if (numchars == -1)
+		numchars = strlen(dst);
+#endif
+	if ((size_t)numchars >= size && numchars > 0) {
+		if (size == 0)
+			numchars = 0;
+		else
+			numchars = size - 1;
+	}
+	return numchars;
+}
+
+#ifdef NEEDS_STRLCPY
+size_t strlcpy(char *dst, const char *src, size_t dsize)
+{
+	const char *osrc = src;
+	size_t      nleft = dsize;
+
+	/* Copy as many bytes as will fit. */
+	if (nleft != 0) {
+		while (--nleft != 0) {
+			if ((*dst++ = *src++) == '\0')
+				break;
+		}
+	}
+
+	/* Not enough room in dst, add NUL and traverse rest of src. */
+	if (nleft == 0) {
+		if (dsize != 0)
+			*dst = '\0'; /* NUL-terminate dst */
+		while (*src++)
+			;
+	}
+
+	return src - osrc - 1; /* count does not include NUL */
+}
+
+size_t
+strlcat(char *dst, const char *src, size_t dsize)
+{
+	const char *odst = dst;
+	const char *osrc = src;
+	size_t      n = dsize;
+	size_t      dlen;
+
+	/* Find the end of dst and adjust bytes left but don't go past end. */
+	while (n-- != 0 && *dst != '\0')
+		dst++;
+	dlen = dst - odst;
+	n = dsize - dlen;
+
+	if (n-- == 0)
+		return dlen + strlen(src);
+	while (*src != '\0') {
+		if (n != 0) {
+			*dst++ = *src;
+			n--;
+		}
+		src++;
+	}
+	*dst = '\0';
+
+	return dlen + (src - osrc);    /* count does not include NUL */
+}
+#endif
+
+#if defined(NEEDS_STRCASESTR)
+/****************************************************************************/
+/* Case insensitive version of strstr()	- currently heavy-handed			*/
+/****************************************************************************/
+char* strcasestr(const char* haystack, const char* needle)
+{
+	const char* p;
+	size_t      len = strlen(needle);
+
+	for (p = haystack; *p != '\0'; p++) {
+		if (strnicmp(p, needle, len) == 0)
+			return (char*)p;
+	}
+	return NULL;
+}
+#endif
+
+/****************************************************************************/
+/* Return last character of string											*/
+/****************************************************************************/
+char* lastchar(const char* str)
+{
+	size_t len;
+
+	len = strlen(str);
+
+	if (len)
+		return (char*)&str[len - 1];
+
+	return (char*)str;
+}
+
+/****************************************************************************/
+/* Return character value of C-escaped (\) character						*/
+/****************************************************************************/
+char c_unescape_char(char ch)
+{
+	switch (ch) {
+		case 'e':   return ESC;    /* non-standard */
+		case 'a':   return '\a';
+		case 'b':   return '\b';
+		case 'f':   return '\f';
+		case 'n':   return '\n';
+		case 'r':   return '\r';
+		case 't':   return '\t';
+		case 'v':   return '\v';
+	}
+	return ch;
+}
+
+/****************************************************************************/
+/* Return character value of C-escaped (\) character literal sequence		*/
+/* supports \x## (hex) and \### sequences (for octal or decimal)			*/
+/****************************************************************************/
+char c_unescape_char_ptr(const char* str, char** endptr)
+{
+	char ch;
+
+	if (*str == 'x') {
+		int digits = 0;     // \x## for hexadecimal character literals (only 2 digits supported)
+		++str;
+		ch = 0;
+		while (digits < 2 && IS_HEXDIGIT(*str)) {
+			ch *= 0x10;
+			ch += HEX_CHAR_TO_INT(*str);
+			str++;
+			digits++;
+		}
+#ifdef C_UNESCAPE_OCTAL_SUPPORT
+	} else if (IS_OCTDIGIT(*str)) {
+		int digits = 0;     // \### for octal character literals (only 3 digits supported)
+		ch = 0;
+		while (digits < 3 && IS_OCTDIGIT(*str)) {
+			ch *= 8;
+			ch += OCT_CHAR_TO_INT(*str);
+			str++;
+			digits++;
+		}
+#else
+	} else if (IS_DIGIT(*str)) {
+		int digits = 0;     // \### for decimal character literals (only 3 digits supported)
+		ch = 0;
+		while (digits < 3 && IS_DIGIT(*str)) {
+			ch *= 10;
+			ch += DEC_CHAR_TO_INT(*str);
+			str++;
+			digits++;
+		}
+#endif
+	} else
+		ch = c_unescape_char(*(str++));
+
+	if (endptr != NULL)
+		*endptr = (char*)str;
+
+	return ch;
+}
+
+/****************************************************************************/
+/* Un-escape a C string, in place											*/
+/****************************************************************************/
+char* c_unescape_str(char* str)
+{
+	char  ch;
+	char* src = str;
+	char* dst = str;
+
+	if (str == NULL)
+		return NULL;
+
+	while ((ch = *(src++)) != '\0') {
+		if (ch == '\\')    /* escape */
+			ch = c_unescape_char_ptr(src, &src);
+		*(dst++) = ch;
+	}
+	*dst = '\0';
+	return str;
+}
+
+/****************************************************************************/
+/* Un-escape printable characters in a C string, in place					*/
+/****************************************************************************/
+char* c_unescape_printable(char* str)
+{
+	char  ch;
+	char* buf;
+	char* src;
+	char* dst;
+
+	if (str == NULL || (buf = strdup(str)) == NULL)
+		return NULL;
+
+	src = buf;
+	dst = str;
+	while ((ch = *(src++)) != 0) {
+		if (ch == '\\') {   /* escape */
+			ch = c_unescape_char_ptr(src, &src);
+			if (!IS_PRINTABLE(ch))
+				continue;
+		}
+		*(dst++) = ch;
+	}
+	*dst = 0;
+	free(buf);
+	return str;
+}
+
+char* c_escape_char(char ch)
+{
+	switch (ch) {
+		case 0:     return "\\x00";
+		case 1:     return "\\x01";
+		case ESC:   return "\\e";      /* non-standard */
+		case '\a':  return "\\a";
+		case '\b':  return "\\b";
+		case '\f':  return "\\f";
+		case '\n':  return "\\n";
+		case '\r':  return "\\r";
+		case '\t':  return "\\t";
+		case '\v':  return "\\v";
+		case '\\':  return "\\\\";
+		case '\"':  return "\\\"";
+		case '\'':  return "\\'";
+	}
+	return NULL;
+}
+
+char* c_escape_str(const char* src, char* dst, size_t maxlen, bool ctrl_only)
+{
+	const char* s;
+	char*       d;
+	const char* e;
+
+	for (s = src, d = dst; *s && (size_t)(d - dst) < maxlen; s++) {
+		if ((!ctrl_only || (uchar) * s < ' ') && (e = c_escape_char(*s)) != NULL) {
+			strlcpy(d, e, maxlen - (d - dst));
+			d += strlen(d);
+		} else if ((uchar) * s < ' ' || (uchar) * s >= '\x7f') {
+			d += safe_snprintf(d, maxlen - (d - dst), "\\x%02X", (uchar) * s);
+		} else
+			*d++ = *s;
+	}
+	*d = 0;
+
+	return dst;
+}
+
+/* Returns a byte count parsed from the 'str' argument, supporting power-of-2
+ * short-hands (e.g. 'K' for kibibytes).
+ * If 'unit' is specified (greater than 1), result is divided by this amount.
+ *
+ * Moved from ini_file.c/parseBytes()
+ */
+int64_t parse_byte_count(const char* str, uint64_t unit)
+{
+	char*  p = NULL;
+	double bytes;
+
+	bytes = strtod(str, &p);
+	if (p != NULL) {
+		SKIP_WHITESPACE(p);
+		switch (toupper(*p)) {
+			case 'E':
+				bytes *= 1024;
+			/* fall-through */
+			case 'P':
+				bytes *= 1024;
+			/* fall-through */
+			case 'T':
+				bytes *= 1024;
+			/* fall-through */
+			case 'G':
+				bytes *= 1024;
+			/* fall-through */
+			case 'M':
+				bytes *= 1024;
+			/* fall-through */
+			case 'K':
+				bytes *= 1024;
+				break;
+		}
+	}
+	if (unit > 1)
+		bytes /= unit;
+	if (bytes < 0 || bytes > (double)INT64_MAX)
+		return INT64_MAX;
+	return (int64_t)bytes;
+}
+
+static const double one_pebibyte = 1024.0 * 1024.0 * 1024.0 * 1024.0 * 1024.0;
+static const double one_tebibyte = 1024.0 * 1024.0 * 1024.0 * 1024.0;
+static const double one_gibibyte = 1024.0 * 1024.0 * 1024.0;
+static const double one_mebibyte = 1024.0 * 1024.0;
+static const double one_kibibyte = 1024.0;
+
+/* Convert an exact byte count to a string with a floating point value
+   and a single letter multiplier/suffix.
+   For values evenly divisible by 1024, no suffix otherwise.
+*/
+char* byte_count_to_str(uint64_t bytes, char* str, size_t size)
+{
+	if (bytes && fmod((double)bytes, one_pebibyte) == 0)
+		safe_snprintf(str, size, "%gP", bytes / one_pebibyte);
+	else if (bytes && fmod((double)bytes, one_tebibyte) == 0)
+		safe_snprintf(str, size, "%gT", bytes / one_tebibyte);
+	else if (bytes && fmod((double)bytes, one_gibibyte) == 0)
+		safe_snprintf(str, size, "%gG", bytes / one_gibibyte);
+	else if (bytes && fmod((double)bytes, one_mebibyte) == 0)
+		safe_snprintf(str, size, "%gM", bytes / one_mebibyte);
+	else if (bytes && fmod((double)bytes, one_kibibyte) == 0)
+		safe_snprintf(str, size, "%gK", bytes / one_kibibyte);
+	else
+		safe_snprintf(str, size, "%" PRIi64, bytes);
+
+	return str;
+}
+
+/* Convert a rounded byte count to a string with a floating point value
+   with a single decimal place and a single letter multiplier/suffix.
+   'unit' is the smallest divisor used.
+*/
+char* byte_estimate_to_str(uint64_t bytes, char* str, size_t size, uint64_t unit, int precision)
+{
+	if (bytes >= one_pebibyte)
+		safe_snprintf(str, size, "%1.*fP", precision, bytes / one_pebibyte);
+	else if (bytes >= one_tebibyte || unit == one_tebibyte)
+		safe_snprintf(str, size, "%1.*fT", precision, bytes / one_tebibyte);
+	else if (bytes >= one_gibibyte || unit == one_gibibyte)
+		safe_snprintf(str, size, "%1.*fG", precision, bytes / one_gibibyte);
+	else if (bytes >= one_mebibyte || unit == one_mebibyte)
+		safe_snprintf(str, size, "%1.*fM", precision, bytes / one_mebibyte);
+	else if (bytes >= one_kibibyte || unit == one_kibibyte)
+		safe_snprintf(str, size, "%1.*fK", precision, bytes / one_kibibyte);
+	else
+		safe_snprintf(str, size, "%" PRIi64, bytes);
+
+	return str;
+}
+
+static const double one_year   = 365.0 * 24.0 * 60.0 * 60.0; // Actually, 365.2425
+static const double one_week   =   7.0 * 24.0 * 60.0 * 60.0;
+static const double one_day    =       24.0 * 60.0 * 60.0;
+static const double one_hour   =            60.0 * 60.0;
+static const double one_minute =                 60.0;
+
+/* Parse a duration string, default unit is in seconds */
+/* (Y)ears, (W)eeks, (D)ays, (H)ours, and (M)inutes */
+/* suffixes/multipliers are supported. */
+/* Return value is in seconds */
+double parse_duration(const char* str)
+{
+	char*  p = NULL;
+	double t;
+
+	t = strtod(str, &p);
+	if (p != NULL) {
+		SKIP_WHITESPACE(p);
+		switch (toupper(*p)) {
+			case 'Y':   t *= one_year; break;
+			case 'W':   t *= one_week; break;
+			case 'D':   t *= one_day; break;
+			case 'H':   t *= one_hour; break;
+			case 'M':   t *= one_minute; break;
+		}
+	}
+	return t;
+}
+
+/* Convert a duration (in seconds) to a string
+ * with a single letter multiplier/suffix:
+ * (y)ears, (w)eeks, (d)ays, (h)ours, (m)inutes, or (s)econds
+ */
+char* duration_to_str(double value, char* str, size_t size)
+{
+	if (value && fmod(value, one_year) == 0)
+		safe_snprintf(str, size, "%gy", value / one_year);
+	else if (value && fmod(value, one_week) == 0)
+		safe_snprintf(str, size, "%gw", value / one_week);
+	else if (value && fmod(value, one_day) == 0)
+		safe_snprintf(str, size, "%gd", value / one_day);
+	else if (value && fmod(value, one_hour) == 0)
+		safe_snprintf(str, size, "%gh", value / one_hour);
+	else if (value && fmod(value, one_minute) == 0)
+		safe_snprintf(str, size, "%gm", value / one_minute);
+	else
+		safe_snprintf(str, size, "%gs", value);
+
+	return str;
+}
+
+/* Convert a duration (in seconds) to a verbose string
+ * with a word clarifier / modifier:
+ * year[s], week[s], day[s], hour[s], minute[s] or second[s]
+ */
+char* duration_to_vstr(double value, char* str, size_t size)
+{
+	if (value && fmod(value, one_year) == 0) {
+		value /= one_year;
+		safe_snprintf(str, size, "%g year%s", value, value == 1 ? "":"s");
+	}
+	else if (value && fmod(value, one_week) == 0) {
+		value /= one_week;
+		safe_snprintf(str, size, "%g week%s", value, value == 1 ? "":"s");
+	}
+	else if (value && fmod(value, one_day) == 0) {
+		value /= one_day;
+		safe_snprintf(str, size, "%g day%s", value, value == 1 ? "":"s");
+	}
+	else if (value && fmod(value, one_hour) == 0) {
+		value /= one_hour;
+		safe_snprintf(str, size, "%g hour%s", value, value == 1 ? "":"s");
+	}
+	else if (value && fmod(value, one_minute) == 0) {
+		value /= one_minute;
+		safe_snprintf(str, size, "%g minute%s", value, value == 1 ? "":"s");
+	}
+	else
+		safe_snprintf(str, size, "%g second%s", value, value == 1 ? "":"s");
+
+	return str;
+}
+
+static void add_suffix(char* str, size_t size, const char* suffix)
+{
+	bool is_word = *(suffix + 1) != '\0';
+	char* plural = is_word ? "s" : "";
+	char* p = strstr(str, ".0");
+	if (p != NULL && *(p + 2) == '\0') // remove trailing ".0"
+		*p = '\0';
+	if (strcmp(str, "1") == 0)
+		plural = "";
+	if (is_word) {
+		(void)strlcat(str, " ", size);
+		(void)strlcat(str, suffix, size);
+		(void)strlcat(str, plural, size);
+	} else
+		(void)strlcat(str, suffix, size);
+}
+
+/* Convert a duration estimate (in seconds) to a string
+ * with a single letter multiplier/suffix:
+ * (y)ears, (w)eeks, (d)ays, (h)ours, (m)inutes, or (s)econds
+ */
+char* duration_estimate_to_str(double value, char* str, size_t size, double unit, int precision)
+{
+	if (value >= one_year || unit == one_year) {
+		safe_snprintf(str, size, "%1.*f", precision, value / one_year);
+		add_suffix(str, size, "y");
+	}
+	else if (unit == one_week) { // prefer "90 days" over "12.9 weeks"
+		safe_snprintf(str, size, "%1.*f", precision, value / one_week);
+		add_suffix(str, size, "w");
+	}
+	else if (value >= one_day || unit == one_day) {
+		safe_snprintf(str, size, "%1.*f", precision, value / one_day);
+		add_suffix(str, size, "d");
+	}
+	else if (value >= one_hour || unit == one_hour) {
+		safe_snprintf(str, size, "%1.*f", precision, value / one_hour);
+		add_suffix(str, size, "h");
+	}
+	else if (value >= one_minute || unit == one_minute) {
+		safe_snprintf(str, size, "%1.*f", precision, value / one_minute);
+		add_suffix(str, size, "m");
+	}
+	else
+		safe_snprintf(str, size, "%gs", value);
+
+	return str;
+}
+
+/* Convert a duration estimate (in seconds) to a verbose string
+ * with a word clarifier / modifier:
+ * year[s], week[s], day[s], hour[s], minute[s] or second[s]
+ */
+char* duration_estimate_to_vstr(double value, char* str, size_t size, double unit, int precision)
+{
+	if (value >= one_year || unit == one_year) {
+		value /= one_year;
+		snprintf(str, size, "%1.*f", precision, value);
+		add_suffix(str, size, "year");
+	}
+	else if (unit == one_week) { // prefer "90 days" over "12.9 weeks"
+		value /= one_week;
+		snprintf(str, size, "%1.*f", precision, value);
+		add_suffix(str, size, "week");
+	}
+	else if (value >= one_day || unit == one_day) {
+		value /= one_day;
+		snprintf(str, size, "%1.*f", precision, value);
+		add_suffix(str, size, "day");
+	}
+	else if (value >= one_hour || unit == one_hour) {
+		value /= one_hour;
+		snprintf(str, size, "%1.*f", precision, value);
+		add_suffix(str, size, "hour");
+	}
+	else if (value >= one_minute || unit == one_minute) {
+		value /= one_minute;
+		snprintf(str, size, "%1.*f", precision, value);
+		add_suffix(str, size, "minute");
+	}
+	else
+		snprintf(str, size, "%g second%s", value, value == 1 ? "":"s");
+
+	return str;
+}
+
+/****************************************************************************/
+/* Convert ASCIIZ string to upper case										*/
+/****************************************************************************/
+#if defined(__unix__)
+char* strupr(char* str)
+{
+	char* p = str;
+
+	while (*p) {
+		*p = toupper(*p);
+		p++;
+	}
+	return str;
+}
+/****************************************************************************/
+/* Convert ASCIIZ string to lower case										*/
+/****************************************************************************/
+char* strlwr(char* str)
+{
+	char* p = str;
+
+	while (*p) {
+		*p = tolower(*p);
+		p++;
+	}
+	return str;
+}
+/****************************************************************************/
+/* Reverse characters of a string (provided by amcleod)						*/
+/****************************************************************************/
+char* strrev(char* str)
+{
+	char t, *i = str, *j = str + strlen(str);
+
+	while (i < j) {
+		t = *i; *(i++) = *(--j); *j = t;
+	}
+	return str;
+}
+#endif
+
+#if defined(NEEDS_STRTOK_R)
+
+/****************************************************************************/
+/* Implementations of the recursive (thread-safe) version of strtok			*/
+/* Thanks to Apache Portable Runtime (APR)									*/
+/****************************************************************************/
+char* strtok_r(char *str, const char *delim, char **last)
+{
+	char* token;
+
+	if (str == NULL)      /* subsequent call */
+		str = *last;    /* start where we left off */
+
+	/* skip characters in delimiter (will terminate at '\0') */
+	while (*str && strchr(delim, *str))
+		++str;
+
+	if (!*str) {         /* no more tokens */
+		*last = str;
+		return NULL;
+	}
+
+	token = str;
+
+	/* skip valid token characters to terminate token and
+	 * prepare for the next call (will terminate at '\0)
+	 */
+	*last = token + 1;
+	while (**last && !strchr(delim, **last))
+		++*last;
+
+	if (**last) {
+		**last = '\0';
+		++*last;
+	}
+
+	return token;
+}
+
+#endif
+
+/****************************************************************************/
+/* Initialize (seed) the random number generator							*/
+/****************************************************************************/
+void xp_randomize(void)
+{
+#if !(defined(HAS_SRANDOMDEV_FUNC) && defined(HAS_RANDOM_FUNC))
+	unsigned seed = ~0;
+#if defined(HAS_DEV_URANDOM) && defined(URANDOM_DEV)
+	int      rf;
+#endif
+#endif
+
+#if defined(HAS_SRANDOMDEV_FUNC) && defined(HAS_RANDOM_FUNC)
+	srandomdev();
+	return;
+#else
+
+#if defined(HAS_DEV_URANDOM) && defined(URANDOM_DEV)
+	if ((rf = open(URANDOM_DEV, O_RDONLY)) != -1) {
+		if (read(rf, &seed, sizeof(seed)) != sizeof seed)
+			seed = UINT_MAX;
+		close(rf);
+	}
+	else {
+#endif
+	unsigned curtime    = (unsigned)time(NULL);
+	unsigned process_id = (unsigned)GetCurrentProcessId();
+
+	seed = curtime ^ BYTE_SWAP_INT(process_id);
+
+		#if defined(_WIN32) || defined(GetCurrentThreadId)
+	seed ^= (unsigned)(uintptr_t)GetCurrentThreadId();
+		#endif
+
+#if defined(HAS_DEV_URANDOM) && defined(URANDOM_DEV)
+}
+#endif
+
+#ifdef HAS_RANDOM_FUNC
+	srandom(seed);
+#else
+	srand(seed);
+#endif
+#endif
+}
+
+/****************************************************************************/
+/* Return random number between 0 and n-1									*/
+/****************************************************************************/
+long xp_random(int n)
+{
+#ifdef HAS_RANDOM_FUNC
+	long          curr;
+	unsigned long limit;
+
+	if (n < 2)
+		return 0;
+
+	limit = ((1UL << ((sizeof(long) * CHAR_BIT) - 1)) / n) * n - 1;
+
+	while (1) {
+		/* coverity[dont_call] */
+		curr = random();
+		if (curr <= limit)
+			return curr % n;
+	}
+#else
+	double f = 0;
+	int    ret;
+
+	if (n < 2)
+		return 0;
+	do {
+		f = (double)rand() / ((double)RAND_MAX + 1.0);
+		ret = (int)(n * f);
+	} while (ret == n);
+
+	return ret;
+#endif
+}
+
+/****************************************************************************/
+/* Return ASCII string representation of ulong								*/
+/* There may be a native GNU C Library function to this...					*/
+/****************************************************************************/
+#if !defined(_MSC_VER) && !defined(__BORLANDC__) && !defined(__WATCOMC__)
+char* ultoa(ulong val, char* str, int radix)
+{
+	switch (radix) {
+		case 8:
+			sprintf(str, "%lo", val);
+			break;
+		case 10:
+			sprintf(str, "%lu", val);
+			break;
+		case 16:
+			sprintf(str, "%lx", val);
+			break;
+		default:
+			sprintf(str, "bad radix: %d", radix);
+			break;
+	}
+	return str;
+}
+
+#if (defined(__GNUC__) && (__GNUC__ < 5)) || !defined(__MINGW32__)
+char* _i64toa(int64_t val, char* str, int radix)
+{
+	switch (radix) {
+		case 8:
+			sprintf(str, "%" PRIo64, val);
+			break;
+		case 10:
+			sprintf(str, "%" PRId64, val);
+			break;
+		case 16:
+			sprintf(str, "%" PRIx64, val);
+			break;
+		default:
+			sprintf(str, "bad radix: %d", radix);
+			break;
+	}
+	return str;
+}
+
+char* _ui64toa(uint64_t val, char* str, int radix)
+{
+	switch (radix) {
+		case 8:
+			sprintf(str, "%" PRIo64, val);
+			break;
+		case 10:
+			sprintf(str, "%" PRIu64, val);
+			break;
+		case 16:
+			sprintf(str, "%" PRIx64, val);
+			break;
+		default:
+			sprintf(str, "bad radix: %d", radix);
+			break;
+	}
+	return str;
+}
+#endif
+#endif
+
+/* Stupid real-time system clock implementation.	*/
+/********************************************************/
+clock_t xp_msclock(void)
+{
+	uint64_t t = (uint64_t)(xp_timer() * 1000);
+
+	return (clock_t)(t & 0xffffffff);
+}
+
+/****************************************************************************/
+/* Skips all white-space chars at beginning of 'str'						*/
+/****************************************************************************/
+char* skipsp(char* str)
+{
+	SKIP_WHITESPACE(str);
+	return str;
+}
+
+/****************************************************************************/
+/* Truncates all white-space chars off end of 'str'	(needed by STRERRROR)	*/
+/****************************************************************************/
+char* truncsp(char* str)
+{
+	size_t i, len;
+
+	if (str != NULL) {
+		i = len = strlen(str);
+		while (i && IS_WHITESPACE(str[i - 1]))
+			i--;
+		if (i != len)
+			str[i] = 0; /* truncate */
+	}
+	return str;
+}
+
+/****************************************************************************/
+/* Truncates common white-space chars off end of \n-terminated lines in		*/
+/* 'dst' and retains original line break format	(e.g. \r\n or \n)			*/
+/****************************************************************************/
+char* truncsp_lines(char* dst)
+{
+	char* sp;
+	char* dp;
+	char* src;
+
+	if ((src = strdup(dst)) == NULL)
+		return dst;
+
+	for (sp = src, dp = dst; *sp != 0; sp++) {
+		if (*sp == '\n') {
+			while (dp != dst
+			       && (*(dp - 1) == ' ' || *(dp - 1) == '\t' || *(dp - 1) == '\r'))
+				dp--;
+			if (sp != src && *(sp - 1) == '\r')
+				*(dp++) = '\r';
+		}
+		*(dp++) = *sp;
+	}
+	*dp = 0;
+
+	free(src);
+	return dst;
+}
+
+/****************************************************************************/
+/* Truncates carriage-return and line-feed chars off end of 'str'			*/
+/****************************************************************************/
+char* truncnl(char* str)
+{
+	size_t i, len;
+
+	if (str != NULL) {
+		i = len = strlen(str);
+		while (i && (str[i - 1] == '\r' || str[i - 1] == '\n'))
+			i--;
+		if (i != len)
+			str[i] = 0; /* truncate */
+	}
+	return str;
+}
+
+/****************************************************************************/
+/* Return errno from the proper C Library implementation					*/
+/* (single/multi-threaded)													*/
+/****************************************************************************/
+int get_errno(void)
+{
+	return errno;
+}
+
+/****************************************************************************/
+/* Returns the current value of the system's best timer (in SECONDS)		*/
+/* Any value < 0 indicates an error											*/
+/****************************************************************************/
+long double xp_timer(void)
+{
+	long double     ret;
+#if defined(__unix__)
+	struct timespec ts;
+
+	if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+		ret = ts.tv_sec;
+		ret += ((long double)ts.tv_nsec) / 1000000000;
+	}
+	else
+		ret = -1;
+#elif defined(_WIN32)
+	LARGE_INTEGER freq;
+	LARGE_INTEGER tick;
+	if (QueryPerformanceFrequency(&freq) && QueryPerformanceCounter(&tick)) {
+#if 0
+		ret = ((long double)tick.HighPart * 4294967296) + ((long double)tick.LowPart);
+		ret /= ((long double)freq.HighPart * 4294967296) + ((long double)freq.LowPart);
+#else
+		/* In MSVC, a long double does NOT have 19 decimals of precision */
+		ret = (((long double)(tick.QuadPart % freq.QuadPart)) / freq.QuadPart);
+		ret += tick.QuadPart / freq.QuadPart;
+#endif
+	}
+	else {
+		ret = (long double)GetTickCount();
+		ret /= 1000;
+	}
+#else
+#error no high-resolution time for this platform
+#endif
+	return ret;
+}
+
+/****************************************************************************/
+/* Returns the current value of the system's best timer (in MILLISECONDS)	*/
+/* Any value < 0 indicates an error											*/
+/****************************************************************************/
+uint64_t xp_timer64(void)
+{
+	uint64_t        ret;
+#if defined(__unix__)
+	struct timespec ts;
+
+	if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+		ret = ts.tv_sec * 1000;
+		ret += ts.tv_nsec / 1000000;
+	}
+	else
+		ret = -1;
+#elif defined(_WIN32)
+	static bool     can_use_QPF = true;
+	static bool     intable = false;
+	static bool     initialized = false;
+	static uint32_t msfreq;
+	static double   msdfreq;
+	LARGE_INTEGER   tick;
+
+	if (!initialized) {
+		LARGE_INTEGER freq;
+		if (!QueryPerformanceFrequency(&freq))
+			can_use_QPF = false;
+		else
+			intable = (freq.QuadPart % 1000) == 0;
+
+		if (intable)
+			msfreq = (uint32_t)(freq.QuadPart / 1000);
+		else
+			msdfreq = ((double)freq.QuadPart) / 1000;
+
+		initialized = true;
+	}
+	if (can_use_QPF) {
+		if (!QueryPerformanceCounter(&tick)) {
+			can_use_QPF = false;
+			return GetTickCount();
+		}
+		if (intable)
+			ret = tick.QuadPart / msfreq;
+		else
+			ret = (uint32_t)(((double)tick.QuadPart) / msdfreq);
+	}
+	else {
+		ret = GetTickCount();
+	}
+#else
+#error no high-resolution time for this platform
+#endif
+	return ret;
+}
+
+/****************************************************************************/
+/* Returns the current value of the system's worst timer (in SECONDS)		*/
+/* A value of -1 may indicate an error										*/
+/****************************************************************************/
+int64_t xp_fast_timer64(void)
+{
+	int64_t          ret;
+#if defined(__unix__)
+	struct timespec  ts;
+	static clockid_t cid = CLOCK_REALTIME;
+
+#ifdef CLOCK_MONOTONIC_COARSE
+	if (cid == CLOCK_REALTIME) {
+		if (clock_getres(CLOCK_MONOTONIC_COARSE, &ts) == 0)
+			cid = CLOCK_MONOTONIC_COARSE;
+	}
+#endif
+#ifdef CLOCK_MONOTONIC_FAST
+	if (cid == CLOCK_REALTIME) {
+		if (clock_getres(CLOCK_MONOTONIC_FAST, &ts) == 0)
+			cid = CLOCK_MONOTONIC_FAST;
+	}
+#endif
+#ifdef CLOCK_MONOTONIC_RAW
+	if (cid == CLOCK_REALTIME) {
+		if (clock_getres(CLOCK_MONOTONIC_RAW, &ts) == 0)
+			cid = CLOCK_MONOTONIC_RAW;
+	}
+#endif
+#ifdef CLOCK_MONOTONIC
+	if (cid == CLOCK_REALTIME) {
+		cid = CLOCK_MONOTONIC;
+		if (clock_getres(CLOCK_MONOTONIC, &ts) == 0)
+			cid = CLOCK_MONOTONIC;
+	}
+#endif
+
+	if (clock_gettime(cid, &ts) == 0)
+		ret = ts.tv_sec;
+	else
+		ret = -1;
+#elif defined(_WIN32)
+	ret = GetTickCount() / 1000;
+#else
+#error no high-resolution time for this platform
+#endif
+	return ret;
+}
+
+/****************************************************************************/
+/* Returns the current value of the system's worst timer (in MILLISECONDS)	*/
+/* A value of -1 may indicate an error										*/
+/****************************************************************************/
+int64_t xp_fast_timer64_ms(void)
+{
+	int64_t          ret;
+#if defined(__unix__)
+	struct timespec  ts;
+	static clockid_t cid = CLOCK_REALTIME;
+
+#ifdef CLOCK_MONOTONIC_COARSE
+	if (cid == CLOCK_REALTIME) {
+		if (clock_getres(CLOCK_MONOTONIC_COARSE, &ts) == 0)
+			cid = CLOCK_MONOTONIC_COARSE;
+	}
+#endif
+#ifdef CLOCK_MONOTONIC_FAST
+	if (cid == CLOCK_REALTIME) {
+		if (clock_getres(CLOCK_MONOTONIC_FAST, &ts) == 0)
+			cid = CLOCK_MONOTONIC_FAST;
+	}
+#endif
+#ifdef CLOCK_MONOTONIC_RAW
+	if (cid == CLOCK_REALTIME) {
+		if (clock_getres(CLOCK_MONOTONIC_RAW, &ts) == 0)
+			cid = CLOCK_MONOTONIC_RAW;
+	}
+#endif
+#ifdef CLOCK_MONOTONIC
+	if (cid == CLOCK_REALTIME) {
+		cid = CLOCK_MONOTONIC;
+		if (clock_getres(CLOCK_MONOTONIC, &ts) == 0)
+			cid = CLOCK_MONOTONIC;
+	}
+#endif
+
+	if (clock_gettime(cid, &ts) == 0) {
+		ret = ts.tv_sec * 1000;
+		ret += ts.tv_nsec / 1000000;
+	}
+	else
+		ret = -1;
+#elif defined(_WIN32)
+	ret = GetTickCount();
+#else
+#error no high-resolution time for this platform
+#endif
+	return ret;
+}
+
+/* Returns true if specified process is running */
+bool check_pid(pid_t pid)
+{
+#ifdef __EMSCRIPTEN__
+	fprintf(stderr, "%s not implemented", __func__);
+	return false;
+#else
+#if defined(__unix__)
+	return kill(pid, 0) == 0;
+#elif defined(_WIN32)
+	HANDLE h;
+	bool   result = false;
+
+	if ((h = OpenProcess(PROCESS_QUERY_INFORMATION, /* inheritable: */ false, pid)) != NULL) {
+		DWORD code;
+		if (GetExitCodeProcess(h, (PDWORD)&code) == true && code == STILL_ACTIVE)
+			result = true;
+		CloseHandle(h);
+	}
+	return result;
+#else
+	return false;   /* Need check_pid() definition! */
+#endif
+#endif
+}
+
+/* Terminate (unconditionally) the specified process */
+bool terminate_pid(pid_t pid)
+{
+#ifdef __EMSCRIPTEN__
+	fprintf(stderr, "%s not implemented", __func__);
+	return false;
+#else
+#if defined(__unix__)
+	return kill(pid, SIGKILL) == 0;
+#elif defined(_WIN32)
+	HANDLE h;
+	bool   result = false;
+
+	if ((h = OpenProcess(PROCESS_TERMINATE, /* inheritable: */ false, pid)) != NULL) {
+		if (TerminateProcess(h, 255))
+			result = true;
+		CloseHandle(h);
+	}
+	return result;
+#else
+	return false;   /* Need check_pid() definition! */
+#endif
+#endif
+}
+
+/****************************************************************************/
+/* Re-entrant (thread-safe) version of strerror()							*/
+/* GNU (not POSIX) inspired API												*/
+/****************************************************************************/
+char* safe_strerror(int errnum, char *buf, size_t buflen)
+{
+	snprintf(buf, buflen, "Unknown error: %d", errnum);
+
+#if defined(_MSC_VER)
+	strerror_s(buf, buflen, errnum);
+#elif defined(_WIN32) || defined(__EMSCRIPTEN__)
+	strlcpy(buf, strerror(errnum), buflen);
+#elif defined(_GNU_SOURCE) && defined(__USE_GNU)
+	char* ret = strerror_r(errnum, buf, buflen);
+	if (ret != buf)
+		strlcpy(buf, ret, buflen);
+#else
+	strerror_r(errnum, buf, buflen);
+#endif
+	return buf;
+}
+
+#ifdef _WIN32
+/* GetStdHandle(), normalized: NULL when the process has no such handle */
+static HANDLE std_handle(DWORD id)
+{
+	HANDLE h = GetStdHandle(id);
+
+	return h == INVALID_HANDLE_VALUE ? NULL : h;
+}
+#endif
+
+/****************************************************************************/
+/* Like system(), but without the console window that Windows creates for	*/
+/* a command-line run by a process with no console of its own (a service,	*/
+/* or a GUI app like sbbsctrl): the shell allocates one, so every command	*/
+/* flashes a window onto the sysop's desktop.								*/
+/* A caller that does have a console keeps using system(), whose child		*/
+/* inherits that console (and thus still writes its output there).			*/
+/****************************************************************************/
+int xp_system(const char* cmdline)
+{
+#ifdef _WIN32
+	if (GetConsoleWindow() == NULL) {
+		/* Declare before the first statement: Borland C++ (sbbsctrl/useredit) is C89. */
+		const char*         comspec;
+		char*               cmd;
+		size_t              len;
+		STARTUPINFOA        si;
+		PROCESS_INFORMATION pi;
+		BOOL                success;
+		DWORD               exit_code = 0;
+
+		comspec = getenv("COMSPEC");
+		if (comspec == NULL)
+			comspec = "cmd.exe";
+		len = strlen(comspec) + strlen(cmdline) + 16;
+		cmd = malloc(len);
+		if (cmd == NULL)
+			return -1;
+		/* /S: cmd.exe strips the outermost quote-pair and runs the rest
+		   verbatim, so any quoting or redirection within survives. */
+		snprintf(cmd, len, "\"%s\" /S /C \"%s\"", comspec, cmdline);
+		memset(&si, 0, sizeof si);
+		si.cb = sizeof si;
+		si.hStdInput = std_handle(STD_INPUT_HANDLE);
+		si.hStdOutput = std_handle(STD_OUTPUT_HANDLE);
+		si.hStdError = std_handle(STD_ERROR_HANDLE);
+		/* Redirected (rather than absent) standard handles have to be passed
+		   along, or the new console would swallow output that system() would
+		   have written to the caller's file or pipe. */
+		if (si.hStdInput != NULL || si.hStdOutput != NULL || si.hStdError != NULL)
+			si.dwFlags = STARTF_USESTDHANDLES;
+		memset(&pi, 0, sizeof pi);
+		/* Inherit handles, as system() does: a command-line can name a handle
+		   for the child to pick up (services.cpp hands a native service its
+		   socket that way). */
+		success = CreateProcessA(comspec, cmd, NULL, NULL, /* inherit: */ TRUE
+		                         , CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+		free(cmd);
+		if (!success)
+			return -1;
+		WaitForSingleObject(pi.hProcess, INFINITE);
+		GetExitCodeProcess(pi.hProcess, &exit_code);
+		CloseHandle(pi.hThread);
+		CloseHandle(pi.hProcess);
+		return (int)exit_code;
+	}
+#endif
+	return system(cmdline);
+}
+
+/****************************************************************************/
+/* Run a command and capture its standard output, appending one string per	*/
+/* line (the new-line included, as fgets() leaves it) to *lines, a string	*/
+/* list the caller initializes to NULL and frees with strListFree().		*/
+/* Returns the command's exit status (0 on success), or -1 if it could not	*/
+/* be run at all.															*/
+/*																			*/
+/* This is popen(cmd, "r"), read to EOF, pclose() -- except on Windows,		*/
+/* where it doesn't go through _popen(): that requires the calling process	*/
+/* to have a console of its own, and hangs (or fails) in one that doesn't,	*/
+/* e.g. a service or a GUI app.  Nor does it create a console window.		*/
+/****************************************************************************/
+int xp_popen(const char* cmdline, str_list_t* lines)
+{
+#ifdef _WIN32
+	/* Declare before the first statement: Borland C++ (sbbsctrl/useredit) is C89. */
+	SECURITY_ATTRIBUTES sa;
+	STARTUPINFOA        si;
+	PROCESS_INFORMATION pi;
+	HANDLE              rd;
+	HANDLE              wr;
+	const char*         comspec;
+	char*               cmd;
+	size_t              len;
+	BOOL                success;
+	DWORD               exit_code = -1;
+	char*               output = NULL;
+	size_t              output_len = 0;
+	char                buf[4000];
+	DWORD               rd_len;
+	char*               p;
+
+	memset(&sa, 0, sizeof sa);
+	sa.nLength = sizeof sa;
+	sa.bInheritHandle = TRUE;   /* the child needs the write end */
+
+	if (!CreatePipe(&rd, &wr, &sa, 0))
+		return -1;
+	/* ... but not the read end, or the pipe would never report EOF. */
+	SetHandleInformation(rd, HANDLE_FLAG_INHERIT, 0);
+
+	comspec = getenv("COMSPEC");
+	if (comspec == NULL)
+		comspec = "cmd.exe";
+	len = strlen(comspec) + strlen(cmdline) + 16;
+	cmd = malloc(len);
+	if (cmd == NULL) {
+		CloseHandle(rd);
+		CloseHandle(wr);
+		return -1;
+	}
+	/* /S: cmd.exe strips the outermost quote-pair and runs the rest
+	   verbatim, so any quoting or redirection within survives. */
+	snprintf(cmd, len, "\"%s\" /S /C \"%s\"", comspec, cmdline);
+
+	memset(&si, 0, sizeof si);
+	si.cb = sizeof si;
+	si.dwFlags = STARTF_USESTDHANDLES;
+	si.hStdInput = std_handle(STD_INPUT_HANDLE);
+	si.hStdOutput = wr;
+	/* popen(,"r") captures stdout only, leaving stderr to the parent's. */
+	si.hStdError = std_handle(STD_ERROR_HANDLE);
+	memset(&pi, 0, sizeof pi);
+	success = CreateProcessA(comspec, cmd, NULL, NULL, /* inherit: */ TRUE
+	                         , CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	free(cmd);
+	CloseHandle(wr);    /* the child holds the only write end now */
+	if (!success) {
+		CloseHandle(rd);
+		return -1;
+	}
+
+	while (ReadFile(rd, buf, sizeof buf, &rd_len, NULL) && rd_len > 0) {
+		char* np = realloc_or_free(output, output_len + rd_len + 1);
+		if (np == NULL) {
+			output = NULL;      /* realloc_or_free() already freed it */
+			output_len = 0;
+			break;
+		}
+		output = np;
+		memcpy(output + output_len, buf, rd_len);
+		output_len += rd_len;
+		output[output_len] = '\0';
+	}
+	CloseHandle(rd);
+
+	WaitForSingleObject(pi.hProcess, INFINITE);
+	GetExitCodeProcess(pi.hProcess, &exit_code);
+	CloseHandle(pi.hThread);
+	CloseHandle(pi.hProcess);
+
+	p = output;
+	while (p != NULL && *p != '\0') {
+		char* eol = strchr(p, '\n');
+		char  save;
+
+		if (eol == NULL) {
+			strListPush(lines, p);
+			break;
+		}
+		/* Keep the new-line with its line, then put back the first char of
+		   the next one. */
+		save = *(eol + 1);
+		*(eol + 1) = '\0';
+		strListPush(lines, p);
+		*(eol + 1) = save;
+		p = eol + 1;
+	}
+	free(output);
+	return (int)exit_code;
+#else
+	FILE* fp = popen(cmdline, "r");
+	if (fp == NULL)
+		return -1;
+	char  buf[1024];
+	while (fgets(buf, sizeof buf, fp) != NULL)
+		strListPush(lines, buf);
+	return pclose(fp);
+#endif
+}
+
+#ifdef _WIN32
+
+#ifndef FILE_FLAG_FIRST_PIPE_INSTANCE    /* missing from the Borland SDK headers */
+	#define FILE_FLAG_FIRST_PIPE_INSTANCE   0x00080000
+#endif
+
+/****************************************************************************/
+/* Both ends of a bidirectional pipe.  An anonymous pipe is one-way, so the	*/
+/* read-and-write mode needs a named one.  The name is guessable, but		*/
+/* FILE_FLAG_FIRST_PIPE_INSTANCE keeps another process from creating it		*/
+/* first and the single instance keeps one from connecting after we have:	*/
+/* losing that race loses the pipe, it doesn't hand the command's standard	*/
+/* input and output to a stranger.											*/
+/****************************************************************************/
+static HANDLE duplex_pipe(HANDLE* child_end)
+{
+	static LONG         counter;
+	SECURITY_ATTRIBUTES sa;
+	char                name[128];
+	HANDLE              server;
+	HANDLE              client;
+
+	snprintf(name, sizeof name, "\\\\.\\pipe\\xp_pipe.%lu.%lu.%lu"
+	         , (unsigned long)GetCurrentProcessId()
+	         , (unsigned long)InterlockedIncrement(&counter)
+	         , (unsigned long)GetTickCount());
+	server = CreateNamedPipeA(name
+	                          , PIPE_ACCESS_DUPLEX | FILE_FLAG_FIRST_PIPE_INSTANCE
+	                          , PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT
+	                          , /* max instances: */ 1, 4096, 4096, 0, NULL);
+	if (server == INVALID_HANDLE_VALUE)
+		return NULL;
+	memset(&sa, 0, sizeof sa);
+	sa.nLength = sizeof sa;
+	sa.bInheritHandle = TRUE;   /* the child needs its end */
+	client = CreateFileA(name, GENERIC_READ | GENERIC_WRITE, 0, &sa, OPEN_EXISTING, 0, NULL);
+	if (client == INVALID_HANDLE_VALUE) {
+		CloseHandle(server);
+		return NULL;
+	}
+	*child_end = client;
+	return server;
+}
+#endif
+
+/****************************************************************************/
+/* Run a command with a stream connected to its standard input, its output	*/
+/* or both: mode "r" reads what the command writes, "w" writes what it		*/
+/* reads, "r+" does both.  Append 'b' for binary (no new-line translation).	*/
+/* The command's standard error is left as the caller's, as popen() does.	*/
+/* Returns NULL if the command could not be run.							*/
+/*																			*/
+/* *child receives a token to hand xp_pipe_close(), which closes the stream	*/
+/* and waits for the command to exit.										*/
+/*																			*/
+/* This is popen(), portably.  Neither platform's C library gives the whole	*/
+/* contract: Windows' _popen() requires the calling process to own a		*/
+/* console (a service or a GUI app like sbbsctrl does not) and pops up a	*/
+/* console window, while the bidirectional mode is a BSD extension that		*/
+/* glibc rejects with EINVAL.												*/
+/****************************************************************************/
+FILE* xp_pipe_open(const char* cmdline, const char* mode, intptr_t* child)
+{
+	BOOL both;
+	BOOL reading;
+
+	*child = 0;
+	if (cmdline == NULL || mode == NULL || (*mode != 'r' && *mode != 'w')) {
+		errno = EINVAL;
+		return NULL;
+	}
+	both = strchr(mode, '+') != NULL;
+	reading = both || *mode == 'r';
+#ifdef _WIN32
+	{
+		/* Declare before the first statement: Borland C++ (sbbsctrl/useredit) is C89. */
+		SECURITY_ATTRIBUTES sa;
+		STARTUPINFOA        si;
+		PROCESS_INFORMATION pi;
+		BOOL                binary = strchr(mode, 'b') != NULL;
+		HANDLE              ours = NULL;
+		HANDLE              theirs = NULL;
+		const char*         comspec;
+		const char*         fmode;
+		char*               cmd;
+		size_t              len;
+		BOOL                success;
+		int                 fd;
+		FILE*               fp;
+
+		if (both) {
+			if ((ours = duplex_pipe(&theirs)) == NULL)
+				return NULL;
+		}
+		else {
+			HANDLE rd;
+			HANDLE wr;
+
+			memset(&sa, 0, sizeof sa);
+			sa.nLength = sizeof sa;
+			sa.bInheritHandle = TRUE;   /* the child needs its end */
+			if (!CreatePipe(&rd, &wr, &sa, 0))
+				return NULL;
+			ours = reading ? rd : wr;
+			theirs = reading ? wr : rd;
+			/* ... but not our end, or the pipe would never report EOF. */
+			SetHandleInformation(ours, HANDLE_FLAG_INHERIT, 0);
+		}
+
+		comspec = getenv("COMSPEC");
+		if (comspec == NULL)
+			comspec = "cmd.exe";
+		len = strlen(comspec) + strlen(cmdline) + 16;
+		cmd = malloc(len);
+		if (cmd == NULL) {
+			CloseHandle(ours);
+			CloseHandle(theirs);
+			return NULL;
+		}
+		/* /S: cmd.exe strips the outermost quote-pair and runs the rest
+		   verbatim, so any quoting or redirection within survives. */
+		snprintf(cmd, len, "\"%s\" /S /C \"%s\"", comspec, cmdline);
+
+		memset(&si, 0, sizeof si);
+		si.cb = sizeof si;
+		si.dwFlags = STARTF_USESTDHANDLES;
+		si.hStdInput = (both || !reading) ? theirs : std_handle(STD_INPUT_HANDLE);
+		si.hStdOutput = reading ? theirs : std_handle(STD_OUTPUT_HANDLE);
+		si.hStdError = std_handle(STD_ERROR_HANDLE);
+		memset(&pi, 0, sizeof pi);
+		success = CreateProcessA(comspec, cmd, NULL, NULL, /* inherit: */ TRUE
+		                         , CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+		free(cmd);
+		CloseHandle(theirs);    /* the child holds the only copy now */
+		if (!success) {
+			CloseHandle(ours);
+			return NULL;
+		}
+		CloseHandle(pi.hThread);
+		if ((fd = _open_osfhandle((intptr_t)ours, binary ? O_BINARY : O_TEXT)) == -1) {
+			CloseHandle(ours);
+			CloseHandle(pi.hProcess);
+			return NULL;
+		}
+		if (both)
+			fmode = binary ? "r+b" : "r+";
+		else if (reading)
+			fmode = binary ? "rb" : "r";
+		else
+			fmode = binary ? "wb" : "w";
+		if ((fp = fdopen(fd, fmode)) == NULL) {
+			close(fd);      /* closes the HANDLE with it */
+			CloseHandle(pi.hProcess);
+			return NULL;
+		}
+		*child = (intptr_t)pi.hProcess;
+		return fp;
+	}
+#else
+	if (!both)  /* popen() already handles the one-way modes everywhere */
+		return popen(cmdline, reading ? "r" : "w");
+	{
+		int   sv[2];
+		pid_t pid;
+		FILE* fp;
+
+		/* A pipe is one-way, so the bidirectional mode gets a socket pair,
+		   which is what the BSD popen() uses for it. */
+		if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) != 0)
+			return NULL;
+		fcntl(sv[0], F_SETFD, FD_CLOEXEC);  /* our end isn't the command's */
+		if ((pid = fork()) == 0) {
+			close(sv[0]);
+			dup2(sv[1], STDIN_FILENO);
+			dup2(sv[1], STDOUT_FILENO);
+			if (sv[1] > STDERR_FILENO)
+				close(sv[1]);
+			execl("/bin/sh", "sh", "-c", cmdline, (char*)NULL);
+			_exit(127);
+		}
+		close(sv[1]);
+		if (pid < 0) {
+			close(sv[0]);
+			return NULL;
+		}
+		if ((fp = fdopen(sv[0], "r+")) == NULL) {
+			close(sv[0]);
+			kill(pid, SIGKILL);
+			while (waitpid(pid, NULL, 0) < 0 && errno == EINTR)
+				;
+			return NULL;
+		}
+		*child = pid;
+		return fp;
+	}
+#endif
+}
+
+/****************************************************************************/
+/* Close a stream opened by xp_pipe_open() and wait for the command to		*/
+/* exit, returning its status as pclose() does (-1 if it could not be		*/
+/* waited for).																*/
+/****************************************************************************/
+int xp_pipe_close(FILE* fp, intptr_t child)
+{
+#ifdef _WIN32
+	HANDLE h = (HANDLE)child;
+	DWORD  exit_code = (DWORD)-1;
+
+	/* Close first: a command reading our stream has to see EOF before it can
+	   be expected to exit. */
+	if (fp != NULL)
+		fclose(fp);
+	if (h == NULL)
+		return -1;
+	WaitForSingleObject(h, INFINITE);
+	GetExitCodeProcess(h, &exit_code);
+	CloseHandle(h);
+	return (int)exit_code;
+#else
+	int status;
+
+	if (child == 0)     /* opened by popen() */
+		return pclose(fp);
+	if (fp != NULL)
+		fclose(fp);
+	while (waitpid((pid_t)child, &status, 0) < 0) {
+		if (errno != EINTR)
+			return -1;
+	}
+	return status;
+#endif
+}
+
+/****************************************************************************/
+/* Common realloc mistake: 'p' nulled but not freed upon failure			*/
+/* [memleakOnRealloc]														*/
+/****************************************************************************/
+void* realloc_or_free(void* p, size_t size)
+{
+	void* n = realloc(p, size);
+	if (n == NULL)
+		free(p);
+	return n;
+}

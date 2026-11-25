@@ -1,0 +1,86 @@
+void operators(){
+    ChatHub hub;auto a=caller(1),b=caller(2);check(hub.attach(a)&&hub.attach(b),"operator fixtures");
+    Identifier128 view;view.bytes[0]=10;auto next_view=[&]{++view.bytes[0];return view;};
+    check(!hub.operator_status().available&&hub.page(a.identity,0).code==ChatResult::unavailable,"availability starts Off");
+    hub.operator_available(true);auto page=hub.page(a.identity,100);
+    check(page.code==ChatResult::ok&&hub.operator_status().pages.size()==1,"accepted page visible once");
+    check(hub.page(a.identity,101).code==ChatResult::busy,"one page per caller");
+    hub.cancel_page(b.identity,page.request);check(hub.page_pending(a.identity,page.request),"other caller cannot cancel page");
+    hub.cancel_page(a.identity,page.request);check(hub.operator_status().pages.empty(),"caller cancels page");
+    check(hub.operator_start(a.identity,next_view(),page.request,false,102).code==ChatResult::unavailable,"cancelled page cannot answer");
+    page=hub.page(a.identity,200);hub.tick(30199);check(hub.page_pending(a.identity,page.request),"page lasts thirty seconds");
+    hub.tick(30200);check(!hub.page_pending(a.identity,page.request),"page expires exactly at thirty seconds");
+    check(hub.operator_start(a.identity,next_view(),page.request,false,30200).code==ChatResult::unavailable,"late page answer refused");
+    page=hub.page(a.identity,31000);hub.operator_available(false);check(hub.operator_status().pages.empty(),"availability Off cancels pages");
+    check(hub.join(a.identity,1)==ChatResult::ok,"operator caller starts in Lobby");
+    hub.poll(a.identity,true);hub.poll(b.identity,true);
+    auto op=hub.operator_start(a.identity,next_view(),0,false,40000);
+    check(op.code==ChatResult::ok&&op.pending&&!op.active&&!op.paused,"operator request waits for caller safe claim");
+    check(hub.operator_start(a.identity,view,0,false,40001).token==op.token,"start reply retry does not create another chat");
+    check(hub.operator_start(b.identity,view,0,false,40001).code==ChatResult::invalid,"view bound to exact caller");
+    check(*hub.operator_paused_millis(a.identity,40050)==0,"pending request does not pause time");
+    check(hub.claim_operator(a.identity,40100)&&hub.operator_active(a.identity),"safe caller claims operator chat");
+    check(hub.join(a.identity,1)==ChatResult::unavailable&&!hub.participant(a.identity)->room,"operator chat cannot rejoin public room");
+    check(hub.invite(b.identity,a.identity,40101).code==ChatResult::busy,"private caller cannot be taken over");
+    hub.poll(a.identity,true);hub.poll(b.identity,true);
+    check(hub.operator_send(op.token,view,1,"Controlled private text",40200)==ChatResult::ok,"operator sends private text");
+    check(hub.operator_send(op.token,view,1,"Controlled private text",40201)==ChatResult::ok,"lost send reply replay is idempotent");
+    check(hub.operator_send(op.token,view,1,"Different",40202)==ChatResult::invalid,"changed replay refused");
+    check(hub.operator_send(op.token,view,3,"Skipped",40202)==ChatResult::conflict,"send sequence gap refused");
+    const auto incoming=hub.poll(a.identity,true);check(incoming.size()==1&&incoming[0].text=="Sysop: Controlled private text","operator text delivered exactly once");
+    check(hub.poll(b.identity,true).empty(),"operator text not broadcast");
+    check(hub.say(a.identity,"Controlled caller reply")==ChatResult::ok,"caller replies to operator");
+    const auto shown=hub.operator_poll(op.token,view,0,40300);check(shown.lines.size()==3&&shown.paused,"operator sees connection and both private lines");
+    check(hub.operator_poll(op.token,view,0,40301).lines.size()==3,"lost poll reply repeats unacknowledged lines");
+    check(hub.operator_poll(op.token,view,shown.lines.back().sequence,40302).lines.empty(),"acknowledged lines retired");
+    Identifier128 wrong=view;wrong.bytes[1]=1;
+    check(hub.operator_poll(op.token,wrong,0,40303).code==ChatResult::unavailable,"unrelated view cannot read chat");
+    hub.operator_end(op.token,wrong,40400);check(hub.operator_active(a.identity),"unrelated view cannot end chat");
+    check(*hub.operator_paused_millis(a.identity,42100)==2000,"only active operator interval pauses calling time");
+    hub.operator_end(op.token,view,42100);check(!hub.operator_active(a.identity)&&hub.participant(a.identity)->room==1,"close restores original room");
+    check(*hub.operator_paused_millis(a.identity,45000)==2000,"pause stops accumulating after close");
+    hub.operator_end(op.token,view,45000);check(*hub.operator_paused_millis(a.identity,45001)==2000,"duplicate close does not double charge pause");
+    hub.poll(a.identity,true);hub.operator_available(true);page=hub.page(a.identity,50000);
+    op=hub.operator_start(a.identity,next_view(),page.request,false,50010);check(op.code==ChatResult::ok&&hub.claim_operator(a.identity,50020),"answer caller page");
+    check(!hub.operator_poll(op.token,view,0,51020).paused&&*hub.operator_paused_millis(a.identity,52020)==2000,"caller-requested page uses normal time");
+    hub.operator_end(op.token,view,52020);hub.poll(a.identity,true);
+    op=hub.operator_start(a.identity,next_view(),0,false,60000);check(hub.claim_operator(a.identity,60100),"second operator chat starts");
+    check(*hub.operator_paused_millis(a.identity,80000)==11900,"lost view pause capped at lease");
+    hub.tick(80000);check(!hub.operator_active(a.identity)&&*hub.operator_paused_millis(a.identity,90000)==11900,"lost operator window restores and resumes time");
+    op=hub.operator_start(a.identity,next_view(),0,false,100000);hub.operator_poll(op.token,view,0,101999);
+    check(!hub.claim_operator(a.identity,102000),"polling cannot extend pending takeover deadline");
+    check(!hub.operator_active(a.identity),"no delayed takeover");
+    op=hub.operator_start(a.identity,next_view(),0,false,110000);hub.safe(a.identity,false);hub.safe(a.identity,true);
+    check(!hub.claim_operator(a.identity,110001),"entering busy screen cancels pending request");
+    hub.safe(a.identity,false);check(hub.operator_start(a.identity,next_view(),0,false,120000).code==ChatResult::busy,"busy screen refuses immediately");hub.safe(a.identity,true);
+    a.preferences.dnd=true;hub.refresh(a);check(hub.operator_start(a.identity,next_view(),0,false,130000).code==ChatResult::dnd,"DND requires explicit operator override");
+    op=hub.operator_start(a.identity,next_view(),0,true,130010);check(hub.claim_operator(a.identity,130020)&&hub.participant(a.identity)->preferences.dnd,"single operator override retains DND");
+    hub.detach(a.identity);check(!hub.operator_poll(op.token,view,0,130030).active,"disconnect closes operator view");
+    a.identity.session.bytes[1]=42;check(hub.attach(a),"replacement caller attached");
+    check(hub.operator_send(op.token,view,1,"Stale",130040)==ChatResult::unavailable,"old view cannot send to reused node");
+    check(hub.poll(a.identity,true).empty(),"replacement gets no old private text");
+    ChatHub restarted;check(!restarted.operator_status().available,"Runtime restart resets availability");
+}
+void operator_codecs(){
+    std::vector<ChatOperatorRequest> requests(7);
+    for(unsigned n=0;n<requests.size();++n){auto& r=requests[n];r.action=static_cast<ChatOperatorAction>(n);
+        if(n>=2)r.view.bytes[0]=5;
+        if(n==1)r.available=true;
+        if(n==2||n==3){NodeAssignmentIdentity id;id.runtime_epoch.bytes[0]=9;id.node=2;id.generation=7;r.target=id;r.override_dnd=true;}
+        if(n==3)r.page=123;
+        if(n>=4)r.token=456;
+        if(n==4)r.sequence=12;
+        if(n==5){r.sequence=1;r.text="Synthetic text";}
+        const auto bytes=encode_chat_operator_request(r);check(!bytes.empty()&&decode_chat_operator_request(bytes).has_value(),"operator request roundtrip");
+        for(std::size_t i=0;i<bytes.size();++i)check(!decode_chat_operator_request({bytes.begin(),bytes.begin()+i}),"partial operator request refused");
+        auto bad=bytes;bad.push_back(0);check(!decode_chat_operator_request(bad),"trailing operator request refused");
+    }
+    auto invalid=requests[0];invalid.override_dnd=true;check(encode_chat_operator_request(invalid).empty(),"override only accepted for a start");
+    invalid=requests[5];invalid.text="bad\x1b[2J";check(encode_chat_operator_request(invalid).empty(),"operator wire rejects terminal controls");
+    ChatOperatorSnapshot snapshot;snapshot.code=ChatResult::ok;snapshot.available=true;snapshot.pages.push_back({1,caller(1).identity,"Caller 1"});
+    auto bytes=encode_chat_operator_snapshot(snapshot);check(!bytes.empty()&&decode_chat_operator_snapshot(bytes)->pages.size()==1,"page snapshot roundtrip");
+    snapshot.pages.clear();snapshot.token=10;snapshot.active=snapshot.paused=true;snapshot.name="Caller 1";snapshot.lines={{1,"Caller 1: synthetic"},{2,"Sysop: synthetic"}};
+    bytes=encode_chat_operator_snapshot(snapshot);check(decode_chat_operator_snapshot(bytes)->lines.size()==2,"operator lines snapshot roundtrip");
+    for(std::size_t n=0;n<bytes.size();++n)check(!decode_chat_operator_snapshot({bytes.begin(),bytes.begin()+n}),"partial operator snapshot refused");
+    snapshot.lines[1].sequence=1;check(encode_chat_operator_snapshot(snapshot).empty(),"duplicate line sequence refused");
+}

@@ -1,0 +1,41 @@
+SFX Linux general-file transfer helper - November 8 2026
+
+Separate executable, GPL-2.0-or-later. Original upstream/SFX notices and
+licenses are retained. Origin: the accepted section10-file-helper materials,
+recorded individually in LINUX_ORIGIN.json. Original Windows source is unchanged.
+No ANet materials were used. No GPL helper code is linked into SFX Runtime.
+
+Linux build entry: cmake/SfxLinuxFileTransfer.cmake in the SFX source tree.
+The corresponding-source distribution must include this complete helper tree,
+that build definition and standalone build instructions. This is distinct from
+the runtime installation payload and from standalone Door source exclusions.
+
+Linux changes:
+ - Dedicated locked main; no generic SEXYZ argument, INI or environment discovery.
+ - Private parent AF_UNIX stream with peer credentials; poll handles high FDs.
+ - Monotonic deadlines, SIGPIPE handling, normal UID and no capability admission.
+ - Fixed private job.cfg/result.txt, no following links or replacing receipts.
+ - Payloads are inherited reduced-access FDs, validated before receipt creation;
+   distinct descriptors must name distinct native objects. No payload path open.
+ - POSIX descriptor/fsync/free-space operations replace the Windows primitives.
+ - Existing strict protocol/CRC/EOF/batch completion and counted buffers retained.
+ - Exact strict completion routines copied from this fork into the Linux include.
+ - Unused generic CLI/event ring-buffer sources are excluded from Linux linking.
+ - Function/data section collection removes unreachable generic helper routines.
+ - genwrap random denominator cast precedes addition to avoid RAND_MAX overflow.
+
+The helper does not authenticate a caller or publish/credit an upload. Runtime
+must supervise deadlines/revocation, reserve actual storage, restrict inherited
+FDs/capabilities, reap the child, verify exact relay/receipt/object evidence, then
+perform its own durable intake/scan/acceptance transaction. A successful helper
+test is not proof of the complete Runtime integration or antivirus behavior.
+
+QWK packet executable addition, November 8 2026:
+ - SFXQWKTransfer is a separate target with sfx_linux_qwk_main.c. General-file
+   CLI, inherited-FD payload rules and its existing target remain unchanged.
+ - The accepted packet receive/send state machines use the same strict end,
+   CRC, one-file, REP/ZIP extension,16MiB and relay accounting rules.
+ - Linux private AF_UNIX parent channel, normal UID/no capabilities, fixed
+   private job names, no-follow/exclusive files and fsync replace Win32 APIs.
+ - Include this additional source and CMake target in corresponding source.
+   Packet validation, durable import and delivery progress belong to Runtime.

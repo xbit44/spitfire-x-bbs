@@ -1,0 +1,2 @@
+Win7 correction overlay relative to immutable bounded-stream-v1 and original ssh-trans.c. Adds opt-in non-waiting channel write for file pump/recovery. Finite16MiB credit, fixed64KiB rings, packet deadline/cancel/close unchanged. No retry after packet encryption. Runtime listener TCP receive bound is separate.
+Bounded receive credit renews in64KiB increments instead of half-window batches. Totaladvertisedcredit16MiB and everyacceptedring/packet/cancelguard remain unchanged.

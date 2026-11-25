@@ -1,0 +1,33 @@
+SPITFIRE-X BBS LINUX SOFTWARE CREDITS AND SOURCE
+
+This is the 1.0.0b1 Linux test build.
+
+The SFX license is in sfx-license.txt beside this file. Original notice text
+is kept below this folder. SFX wrapper names are lowercase; the upstream
+ClamAV notice tree keeps its required relative spelling. Original terms
+apply; this file does not replace them.
+
+SFXFileTransfer and SFXQWKTransfer are separate GPL-2.0-or-later programs
+based on SEXYZ by Rob Swindell and contributors. They do not link with SFX
+libraries. Installed paths from the board root are bin/tools/sfxfiletransfer
+and bin/tools/sfxqwktransfer. The matching complete source companion is:
+
+  SFX-1.0.0b1-rc2-Linux-Transfer-Helper-Source-20261124-r1.zip
+
+It contains the current helper source, original licenses and credits, Linux
+change notes, the exact build definition and a tested standalone build guide.
+
+ClamAV 1.4.7 binaries are unmodified files from Cisco Talos's signed Linux
+AMD64 RPM. SFX extracts the portable files from that package. Its detached
+signature and SHA-256 hash were checked before use.
+clamav/ contains original notices from the matching signed source archive,
+including its bundled dependencies. The upstream source and signature are
+supplied separately with this package as clamav-1.4.7.tar.gz and
+clamav-1.4.7.tar.gz.sig. The source includes the upstream build instructions
+and vendored Rust dependencies. It is not an SFX source fork.
+
+Other original notices include DeuceSSH/libcrux, OpenSSL, libsodium,
+libarchive, zlib, cpp-httplib, nlohmann JSON, Howard Hinnant date, time-zone
+data, Unicode CLDR, the Mozilla CA bundle and SecLists. SQLite is public
+domain; its source notice is included. Door credits and guides are in
+docs/doors. The original DOS games are not redistributed here.

@@ -1,0 +1,63 @@
+#include <windows.h>
+#include <commctrl.h>
+#include "resource.h"
+#include "../product_version.h"
+
+IDI_SFX_CONFIG ICON "../control_panel/assets/owner/sfx-control-panel-icon.ico"
+201 RCDATA "../control_panel/assets/owner/moebius-cp437.f16"
+
+IDD_FTN_RETENTION_REVIEW DIALOGEX 0, 0, 430, 278
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Review Processed Original Retention"
+FONT 9, "Segoe UI"
+BEGIN
+    EDITTEXT IDC_FTN_RETENTION_TEXT, 10, 10, 410, 226, ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON "Save Reviewed Changes", IDOK, 178, 248, 150, 20
+    DEFPUSHBUTTON "Cancel", IDCANCEL, 338, 248, 82, 20
+END
+
+IDD_FILE_CONTENTS_RESTORE_REVIEW DIALOGEX 0, 0, 430, 264
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Review File Contents Restore"
+FONT 9, "Segoe UI"
+BEGIN
+    LTEXT "Restore point", -1, 10, 9, 410, 10
+    EDITTEXT IDC_CONTENTS_RESTORE_SOURCE, 10, 21, 410, 16, ES_AUTOHSCROLL | ES_READONLY | WS_TABSTOP
+    LTEXT "Select file areas", -1, 10, 44, 145, 10
+    CONTROL "", IDC_CONTENTS_RESTORE_AREAS, "SysListView32", LVS_REPORT | LVS_SHOWSELALWAYS | WS_BORDER | WS_TABSTOP, 10, 56, 145, 146
+    LTEXT "Verified destinations and file counts", -1, 163, 44, 257, 10
+    EDITTEXT IDC_CONTENTS_RESTORE_DETAILS, 163, 56, 257, 146, ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | WS_VSCROLL | WS_TABSTOP
+    LTEXT "Restore fills missing files only. Existing files, settings, and the catalog are kept.", -1, 10, 207, 410, 12
+    LTEXT "After restoring, use File Manager Inspect to review any catalog or file differences.", -1, 10, 220, 410, 12
+    PUSHBUTTON "Preview Selection", IDC_CONTENTS_RESTORE_PREVIEW, 10, 236, 104, 20
+    PUSHBUTTON "Restore Missing Files", IDOK, 204, 236, 129, 20
+    DEFPUSHBUTTON "Cancel", IDCANCEL, 340, 236, 80, 20
+END
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION SFX_PRODUCT_VERSION_NUMERIC
+ PRODUCTVERSION SFX_PRODUCT_VERSION_NUMERIC
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0
+BEGIN
+ BLOCK "StringFileInfo"
+ BEGIN
+  BLOCK "040904b0"
+  BEGIN
+   VALUE "CompanyName", "Spitfire-X\0"
+   VALUE "FileDescription", "Spitfire-X BBS Configuration\0"
+   VALUE "FileVersion", SFX_PRODUCT_VERSION_STRING
+   VALUE "InternalName", "SFXConfig\0"
+   VALUE "OriginalFilename", "SFXConfig.exe\0"
+   VALUE "ProductName", "Spitfire-X BBS\0"
+   VALUE "ProductVersion", SFX_PRODUCT_VERSION_PRODUCT_STRING
+  END
+ END
+ BLOCK "VarFileInfo"
+ BEGIN
+  VALUE "Translation", 0x0409, 1200
+ END
+END

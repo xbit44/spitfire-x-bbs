@@ -1,0 +1,23 @@
+{
+  "version": "48",
+  "url": "https://github.com/unicode-org/cldr/tree/release-48",
+  "territory": "001",
+  "mapping_count": 139,
+  "files": [
+    {
+      "path": "windowsZones.xml",
+      "sha256": "9cf3db6a31fb382fee21b70be6feba1e82766b0fcd06e6261fb7936a73e537ff",
+      "bytes": 49378
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "b4c0ae8ef04f7059f96ce5bbe0467f9fe6f6d81bbe13517701dfeb961fb4d0b6",
+      "bytes": 2033
+    },
+    {
+      "path": "windows_zones.inc",
+      "bytes": 7012,
+      "sha256": "c72d33a12efb7e649c8681bd0bb8ff2d51f0aab33189e3d03ce8876b01b78fb2"
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+SFX LINUX INTEGRATION
+Installed program: doors/newswire-x-rss/newswire-x-rss
+This guide is installed under docs/doors/newswire-x-rss.
+Local companions use license, qualification.txt and notices/.
+Original standalone/source packages keep their own filename spelling.
+Their qualification records retain their original scope.
+
+NewsWire-X RSS 0.1.0-rc1 - Owner Test Candidate
+============================================
+Copyright (c) 2026 xbit ops. Original application code: MIT License.
+
+A native RSS/Atom news door. Choose a feed, choose a headline, and read
+the story at your terminal. Inspired by Craig Hendricks' NewsCenter.
+Independently written C++; no Synchronet JavaScript installation required.
+
+INSTALL
+-------
+FRESH INSTALL: extract the matching install ZIP into a new reader directory.
+Keep config/newsfeeds.json, config/cacert.pem and notices/ beside the executable.
+
+UPDATING AN EXISTING INSTALL: first keep a safe copy of your current
+config/newsfeeds.json. Extract the ZIP into a separate temporary directory,
+then replace the executable, documentation and notices in the live door
+directory. Preserve your existing config/newsfeeds.json and data/ directory.
+Do not overwrite your customized feeds, LAN URLs or allow_private settings
+with the stock config/newsfeeds.json supplied for fresh installations.
+Update the CA bundle separately if intended. Quit/reopen the door after an
+update; do not replace the executable while callers are running it.
+Install ZIPs do not contain source/. A separate shared source companion is
+available for rebuilding; it is not needed to install or run the door.
+
+Windows: NewsWire-X-RSS.exe (one x86 program for x86/x64 Windows).
+Linux:   newswire-x-rss (lowercase, static x86_64/musl).
+         chmod +x newswire-x-rss
+
+LOCAL REVIEW
+------------
+    NewsWire-X-RSS.exe /L
+    ./newswire-x-rss /L --utf8
+
+Local mode defaults to CP437; --utf8 and --ascii choose other local encodings.
+--plain uses a numbered, paged display without ANSI sequences. --ansi forces
+ANSI for a known capable terminal. No BBS login is needed in local mode.
+
+SET UP THE DOOR IN SPITFIRE-X
+----------------------------
+Supported drop files: DOOR32.SYS, BBSDEV.DRP 1.0, DOORDROP.INI.
+Supported communication: standard input/output or inherited connected socket.
+No DOS, serial/FOSSIL or Synchronet JS interface is provided.
+
+1. In SFXConfig, add the door as NewsWire-X RSS. Choose Native as the
+   program type and set the startup directory to the reader's directory.
+   Select Socket I/O; Standard I/O also works. Do not use a command shell.
+
+2. Use the Node Directory for drop-file placement. Select one drop-file
+   type and use its matching command line:
+
+   DOOR32.SYS
+       NewsWire-X-RSS.exe --drop "%D\DOOR32.SYS"
+
+   BBSDEV.DRP
+       NewsWire-X-RSS.exe --drop "%D\BBSDEV.DRP"
+
+   DOORDROP.INI (suggested SFX choice)
+       NewsWire-X-RSS.exe --drop "%D\DOORDROP.INI"
+
+   SFX replaces %D with the effective drop-file directory for that caller.
+   Keep the quotes, including when the directory names contain spaces.
+   SFX writes these uppercase filenames. With Socket I/O, the selected
+   drop file supplies the inherited connected socket.
+
+3. Add the door to a caller menu. Open a feed/story, press ESC to return
+   to the main feed picker, then Q there to return to the BBS. The BBS
+   must supervise session/AFK limits.
+
+SET UP THE DOOR IN SYNCHRONET FOR LINUX
+-------------------------------------
+Owner-tested configuration: Synchronet for Linux v3.22. In SCFG, configure
+the external program using the following settings:
+
+    Startup Directory             /sbbs/xtrn/newswire
+    Command Line                  newswire-x-rss --drop %f
+    Native Executable             Yes
+    I/O Method                    Socket
+    Use Shell or New Context      No
+    BBS Drop File Type            door32.sys
+    Place Drop File In            Node Directory
+    Multiple Concurrent Users     Yes
+
+The startup directory above is the owner's tested location; use your actual
+reader install directory if different. Keep the executable named newswire-x-rss.
+
+Synchronet replaces lowercase %f with the complete generated drop-file path
+and filename, quoting the value automatically when required. Do not append
+/door32.sys or another filename, and do not add duplicate quotes around %f.
+Uppercase %F is the non-auto-quoting form; this tested command uses %f.
+
+Use the bare executable name in this native SCFG command, as tested above.
+Synchronet launches it using the configured Startup Directory. This is a
+host-launcher setting, not an interactive Linux shell command or a universal
+rule for other BBS software. The local shell review command still uses
+./newswire-x-rss /L --utf8 when the executable is in the current directory
+and that directory is not in the shell's command search path.
+
+Synchronet token reference: https://wiki.synchro.net/config:cmdline
+This is owner-reported Synchronet/Linux operation, not Linux SFX-host
+qualification or proof of every Linux/BBS/Windows platform combination.
+
+OTHER BBS SYSTEMS AND DROP PATHS
+------------------------------
+Use the host BBS's documented drop-path substitution. SFX's %D is a drop
+directory; Synchronet's %f is a complete file path/name. They are different.
+A full-filename token goes directly after --drop without another filename.
+DOOR32.SYS is a useful first format to test on another BBS. Compatibility
+depends on its inherited socket/stdio contract; it is not universal.
+
+On Linux, match the filename case actually written by the BBS. Synchronet's
+%f supplies the selected filename, so there is no need to spell its case in
+the command. For a manual path, door32.sys and DOOR32.SYS are different names.
+For other hosts, follow their native-launcher or shell command rules rather
+than copying SCFG's executable lookup or token syntax.
+
+Without --drop, DOORDROP_INI or BBSDEV_DRP environment variables are recognized,
+then the current directory is checked for the three uppercase drop filenames.
+On Linux pass --drop explicitly when filenames use another case.
+
+Keep FILE_UTF8 (drop-file text encoding) separate from COMM_CHARSET (terminal
+encoding). CP437, UTF-8 and US-ASCII callers are supported. The BBS supplies
+ANSI capability and known dimensions; local terminal resize is detected.
+Remote dimensions are snapshots unless the terminal sends CSI 8;rows;cols t.
+
+HEADLINE DATES AND SPACE
+------------------------
+Headlines use the available width from the left edge of your terminal.
+Row numbers line up, and the date stays at the right in MM/DD/YY format.
+Post times are omitted. Missing or unrecognized dates show --/--/--.
+Article headings use the same short date. The date is the calendar day
+supplied by the feed; it is not converted to another time zone.
+The final terminal column stays unused to avoid wrapping a headline.
+
+KEYS
+----
+Arrows or J/K select; Enter opens. PgUp/PgDn, Home/End scroll or page.
+ESC from a headline list, article or status-details view returns directly to
+the main feed picker. During a fetch, ESC cancels owned work and returns there.
+ESC at the main picker stays there. Only Q/q at the idle main feed picker
+exits the door to the BBS. Q/q and B/b have no action inside a feed, article,
+details view or pending fetch, so those keys cannot accidentally exit the door.
+R refreshes the selected feed; feed/headline selections are retained.
+D opens the current status/error details; scroll there, then ESC returns to
+main. Long status messages wrap; if the screen is short, D shows all details.
+Plain mode: number + Enter opens; N/P page; ESC main; Q exit only at main.
+Feed text is always available first. Where configured, F retrieves text from
+the linked page. Guardian's feed text is treated as complete according to
+the supplied configuration. Linked extraction cannot bypass paywalls, logins
+or script-only pages; errors leave feed text intact.
+
+FEEDS AND NETWORK
+-----------------
+config/newsfeeds.json preserves the owner's 19 supplied feeds, in order, with
+X-Bit's BBS feed first and the approved full-article settings. Edit this UTF-8
+JSON array offline to add/change feeds (maximum 128):
+  name: display name; url: absolute HTTP/HTTPS URL
+  full_article_prompt: offer linked full-article text
+  description_is_full_article: feed text is complete; suppress linked prompt
+  allow_private: default false; true permits local/LAN HTTP destinations
+Only enable allow_private for a Sysop-trusted local feed. It also applies to
+that feed's linked article requests. Do not accept configuration from callers.
+Feed fetches never rewrite configuration or historical availability metadata.
+Configuration is loaded on door entry. After editing newsfeeds.json, quit and
+reopen the door. R refreshes feed content; it does not reload configuration.
+
+TLS certificate and hostname verification are enabled, using config/cacert.pem.
+Update that Mozilla CA bundle periodically from a trusted source, or select
+--ca FILE. Unsupported web encodings report an error rather than guessing
+CP437. UTF-8, UTF-16 LE/BE, Latin-1 and Windows-1252 are supported. No proxy,
+cookies, authentication or arbitrary URL-opening UI is provided.
+
+WRITABLE DATA / MULTIPLE NODES
+------------------------------
+Default: data/ beside the executable. Override with --data-dir DIR.
+--config FILE and --ca FILE select alternate read-only configuration and CA.
+Resolve supplied paths from the launch working directory; defaults resolve
+beside the actual executable. Keep the executable filename when upgrading.
+Allow only the BBS service account and Sysop to write these directories.
+Linux private records use mode 0600 and request directories use 0700.
+
+data/cache/: SHA256 URL-keyed JSON records, atomic publication and a stable
+publish.lock. Readers keep last usable records on refresh failure. Records are
+fresh for five minutes (feed) or one hour (article). Shared publication is
+nonblocking; a caller can display new data even if cache publication is busy.
+Cache publication trims oldest records toward 64 MiB/256 records.
+data/requests/: unique owned per-fetch scratch directories, removed on normal
+finish/cancel. After all door processes are stopped, Sysop may remove abandoned
+request directories or clear cache JSON files. Do not delete the lock file
+while callers are active. Preserve configuration during upgrades.
+Per-caller selection and scroll are memory-only and never shared.
+
+LIMITS AND SESSION BEHAVIOR
+---------------------------
+HTTP/HTTPS only; five redirects; 5-second connect, 15-second transfer timeout;
+2 MiB response limit after decompression; 32 KiB cumulative headers; 200 items
+per feed; bounded JSON/XML/HTML parsing. DTD/entity declarations are rejected.
+Text is sanitized before display; HTML scripts/styles are not terminal code.
+Common Latin-1 decomposed accents are composed consistently. This is bounded
+support, not complete Unicode normalization. CP437 retains representable text;
+ASCII transliterates common Latin text; unsupported scripts use visible '?'.
+UTF-8 wide-character width is a conservative policy, not full grapheme shaping.
+No speculative mojibake repair is applied to valid Unicode.
+
+Fetch workers cannot inherit the caller socket. ESC cancellation, EOF and precise
+BBSDEV/INI session deadlines are checked while fetching. A five-minute reader
+input-idle limit is a backstop; the BBS must enforce its own stricter AFK and
+session policy. HTTP/output/automatic redraws do not count as caller input.
+DOOR32 rounded minutes do not replace the BBS's precise session supervision.
+
+TEST STATUS / BUILD / LICENSE
+-----------------------------
+See qualification.txt for the original Door candidate coverage and owner tests.
+Win7 API/import checks are separate from physical Win7 execution. The Linux
+target is baseline x86_64, Linux kernel 3.2 ABI, static musl; intended portability
+must still be confirmed on each BBS/distribution. FreeBSD is not included.
+The optional source companion contains source/BUILD.txt. See license and
+notices/ in the install ZIP; third-party licenses remain intact.
+This candidate is for owner testing; installer integration remains separate.
+
+TROUBLESHOOTING LOCAL FEEDS AND CONFIGURATION
+-------------------------------------------
+A trusted local/LAN feed needs its own "allow_private": true setting. Public
+feeds remain protected by default. For example, the comma after false and
+the comma between feed entries are required JSON syntax:
+
+[
+  {
+    "name": "Trusted local RSS",
+    "url": "http://127.0.0.1/rss/rss.xml",
+    "full_article_prompt": false,
+    "allow_private": true
+  },
+  {
+    "name": "BBC News",
+    "url": "https://feeds.bbci.co.uk/news/rss.xml",
+    "full_article_prompt": true
+  }
+]
+
+Use the actual trusted server URL. This localhost example is not a replacement
+for the supplied 19 feeds. Do not enable private access globally or for callers.
+After saving, quit and reopen the door. R refreshes content, not configuration.
+
+If the BBS reports that the door could not start, try the same configuration
+locally from the install directory:
+    NewsWire-X-RSS.exe /L --config "config/newsfeeds.json"
+    ./newswire-x-rss /L --utf8 --config "config/newsfeeds.json"
+Invalid JSON is reported to standard error with the config filename and
+line/column, plus a syntax hint. Correct the file and re-enter. This local
+diagnostic is independent of how a particular BBS presents child errors.
+
+Private/LAN refusal is different from a bad JSON file: it occurs when opening
+the feed and explains the per-feed opt-in. Status text wraps on the current
+screen; use D to read all details on a small screen, then ESC to return to the main feed picker.

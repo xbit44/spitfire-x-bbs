@@ -1,0 +1,115 @@
+// Actual native TCP BinkP, portable session credentials, private NTFS custody and
+// managed SQLite queue transitions. Payloads are synthetic transport fixtures,
+// not a packet/tosser, installed Runtime, independent peer or owner/hub claim.
+#include <windows.h>
+#include <sodium.h>
+#include <openssl/ssl.h>
+#include <openssl/pem.h>
+#include <openssl/x509v3.h>
+#include "sfx/platform/win32/ftn_native_session.hpp"
+#include "sfx/platform/win32/ftn_secrets.hpp"
+#include "sfx/platform/win32/ftn_crypto.hpp"
+#include "sfx/platform/win32/portable_key_store.hpp"
+#include "sfx/adapters/storage/sqlite_storage.hpp"
+#include "sfx/test/storage_fakes.hpp"
+#include <atomic>
+#include <iostream>
+#include <fstream>
+#include <stdexcept>
+#include <thread>
+
+namespace app=sfx::application;
+namespace native=sfx::platform::win32;
+namespace ins=native::installation;
+namespace {
+unsigned checks{};
+void check(bool value,const char* reason){++checks;if(!value)throw std::runtime_error(reason);}
+#include "sfx/test/ftn_tls_fixture.inc"
+app::Identifier128 id(unsigned n){app::Identifier128 out;out.bytes[0]=0x71;out.bytes[14]=static_cast<std::uint8_t>(n>>8);out.bytes[15]=static_cast<std::uint8_t>(n);return out;}
+const app::MessageConfigurationActor owner_actor{true,{}};
+struct Fixture {
+    std::filesystem::path root;std::wstring owner;std::unique_ptr<native::FilePayloadDirectory> input,output;
+    sfx::test::FakeStoragePathPolicy paths;std::unique_ptr<sfx::adapters::storage::SqliteStorage> db;app::FtnConfiguration config;
+    unsigned dial_operation{10000};
+    Fixture(std::filesystem::path value,unsigned node,unsigned peer):root(std::move(value)),owner(ins::operator_sid()){
+        const auto descriptor=ins::mutable_descriptor(owner);for(const auto& path:{root,root/L"Config",root/L"Data",root/L"In",root/L"Out"})ins::create_directory(path,descriptor.get());
+        check(bool(native::create_portable_board_key(root,owner)),"fresh current Windows fixture portable credential key");
+        input=std::make_unique<native::FilePayloadDirectory>(native::FilePayloadDirectory::private_store(root/L"In",owner));output=std::make_unique<native::FilePayloadDirectory>(native::FilePayloadDirectory::private_store(root/L"Out",owner));
+        sfx::adapters::storage::SqliteStorageSettings settings;settings.data_directory=root/L"Data";settings.utc_now=[]{return std::int64_t{1792248000};};db=std::make_unique<sfx::adapters::storage::SqliteStorage>(settings,paths);check(db->start().succeeded(),"actual native session managed store starts");config=*db->ftn_configuration(owner_actor).value;
+        app::FtnNetwork network;network.code="TEST";network.name="Native Session Fixture";network.address="2:100/"+std::to_string(node)+"@test";network.enabled=true;config.networks.push_back(network);app::FtnLink link;link.network="TEST";link.code="PEER";link.name="Synthetic Peer Identity";link.address="2:100/"+std::to_string(peer)+"@test";link.host="127.0.0.1";link.enabled=true;const auto secret=native::protect_ftn_secret(root.u8string(),"TEST","PEER",native::FtnCredentialKind::session,"fixture-session-key");check(secret.has_value(),"actual board/purpose bound portable fixture credential");link.credentials.session=*secret;config.links.push_back(link);save(1);
+    }
+    ~Fixture(){if(db)db->shutdown();}
+    void save(unsigned operation){check(bool(db->change_ftn_configuration(owner_actor,id(operation).bytes,config)),"fixture current native link policy saved");config=*db->ftn_configuration(owner_actor).value;}
+    native::FtnNativeSessionPorts ports(bool client,std::function<bool()> live){return {*db,config,*input,*output,root.u8string(),id(60000),client?std::optional<app::FtnPeerMatch>{{"TEST","PEER"}}:std::nullopt,false,std::move(live),{}};}
+    app::FtnOutboundJob queue(unsigned number,std::string_view content){
+        app::FtnOutboundJob job;job.id=id(number);job.operation=id(number);job.network="TEST";job.link="PEER";job.kind=app::FtnOutboundKind::payload;job.file={std::to_string(number)+".bin",content.size(),1700000000+number};
+        {auto file=output->create(native::ftn_native_artifact_name(job.id),std::max<std::size_t>(1,content.size()));for(std::size_t offset=0;offset<content.size();){const auto count=std::min<std::size_t>(65536,content.size()-offset);file.append(reinterpret_cast<const std::uint8_t*>(content.data()+offset),count);offset+=count;}job.digest=file.identity().sha256;}
+        check(db->queue_ftn_jobs(owner_actor,config.revision,{job}).succeeded(),"actual immutable native artifact queued");return job;
+    }
+};
+struct Pair {native::FtnNativeSessionResult server,client;};
+Pair sessions(Fixture& server,Fixture& client,bool interrupt=false,bool tls=false){
+    auto listener=native::FtnNativeListener::open("127.0.0.1",0,tls,server.config.settings,server.owner);Pair result;const auto until=std::chrono::steady_clock::now()+std::chrono::seconds(20);const auto live=[&]{return std::chrono::steady_clock::now()<until;};
+    client.config.links.front().port=listener->port();client.save(++client.dial_operation);
+    std::atomic<bool> server_running{true};const auto server_live=[&]{return live()&&server_running.load();};
+    std::thread worker([&]{try{std::unique_ptr<native::FtnNativeChannel> channel;while(!channel&&live())channel=listener->accept(std::chrono::milliseconds(100),live);if(channel){auto ports=server.ports(false,server_live);if(interrupt)ports.observe=[&](const native::FtnNativeSessionResult& status){if(status.received_bytes>=262144)server_running=false;};result.server=native::run_ftn_native_session(*channel,std::move(ports));}}catch(const std::exception& error){result.server.reason=error.what();}});
+    try{auto channel=native::FtnNativeChannel::connect_ipv4({127,0,0,1},listener->port(),client.config.links.front(),client.owner,live);result.client=native::run_ftn_native_session(*channel,client.ports(true,live));}catch(const std::exception& error){result.client.reason=error.what();}worker.join();if(!result.server.completed||!result.client.completed)std::cerr<<"SESSION server="<<result.server.reason<<" client="<<result.client.reason<<'\n';return result;
+}
+struct Manual {native::FtnNativeSessionResult server;bool ok{},offered{},got{},candidate_seen{},premature_verified{};unsigned directory_calls{};};
+Manual manual(Fixture& server,std::string_view password,bool cram=false,bool file10=false,bool wrong_ack=false,int malformed=0,std::string_view claims="2:100/2@test",int data_mode=0){
+    auto listener=native::FtnNativeListener::open("127.0.0.1",0,false,server.config.settings,server.owner);Manual result;const auto until=std::chrono::steady_clock::now()+std::chrono::seconds(8);const auto live=[&]{return std::chrono::steady_clock::now()<until;};
+    std::thread worker([&]{try{std::unique_ptr<native::FtnNativeChannel> channel;while(!channel&&live())channel=listener->accept(std::chrono::milliseconds(100),live);if(channel){auto ports=server.ports(false,live);ports.observe=[&](const auto& s){if(!s.link.empty()&&!s.handshake_complete){result.candidate_seen=true;result.premature_verified=result.premature_verified||s.peer_verified;}};ports.directory=[&](std::string_view,bool outbound){++result.directory_calls;return outbound?*server.output:*server.input;};result.server=native::run_ftn_native_session(*channel,std::move(ports));}}catch(const std::exception& error){result.server.reason=error.what();}});
+    try{
+        app::FtnLink plain;plain.host="127.0.0.1";plain.port=listener->port();auto channel=native::FtnNativeChannel::connect_ipv4({127,0,0,1},listener->port(),plain,server.owner,live);app::BinkpDecoder decoder;app::BinkpOptions options;bool adr{},end{};while(!adr&&live()){const auto bytes=channel->read(std::chrono::milliseconds(100),live);if(bytes.outcome==native::FtnReadOutcome::closed)break;decoder.feed(bytes.bytes,[&](app::BinkpFrame frame){if(frame.command&&frame.id==0)app::observe_binkp_information(options,frame.bytes,true);if(frame.command&&frame.id==1)adr=true;return true;});}
+        channel->write(app::binkp_command(app::BinkpCommand::nul,file10?"VER ManualFixture binkp/1.0":"VER ManualFixture binkp/1.1"),live);channel->write(app::binkp_command(app::BinkpCommand::adr,claims),live);
+        if(data_mode==3)channel->write(std::string(2,'\0'),live);
+        if(cram){auto response=native::ftn_cram_response(password,options.challenge_hex);if(!response)throw std::runtime_error("fixture_cram_failed");std::string wire(response->view());if(malformed==1)wire+='\0';if(malformed==2)wire+=" option";if(malformed==3)wire.back()='g';if(malformed==4)wire.pop_back();
+            // Deliberately malformed raw frame: the normal command encoder may reject NUL.
+            const auto size=wire.size()+1;std::string frame;frame+=static_cast<char>(0x80|(size>>8));frame+=static_cast<char>(size&255);frame+=static_cast<char>(app::BinkpCommand::pwd);frame+=wire;channel->write(frame,live);SecureZeroMemory(wire.data(),wire.size());SecureZeroMemory(frame.data(),frame.size());}else channel->write(app::binkp_command(app::BinkpCommand::pwd,password),live);
+        if(data_mode==1)channel->write(std::string(2,'\0'),live);if(data_mode==2)channel->write(app::binkp_data("x"),live);
+        bool remote_eob{};while(!end&&live()){const auto bytes=channel->read(std::chrono::milliseconds(100),live);if(bytes.outcome==native::FtnReadOutcome::closed)break;decoder.feed(bytes.bytes,[&](app::BinkpFrame frame){if(!frame.command)return true;switch(static_cast<app::BinkpCommand>(frame.id)){case app::BinkpCommand::ok:result.ok=true;if(file10){channel->write(app::binkp_command(app::BinkpCommand::file,"ordinary.bin 4 1700000001 0"),live);channel->write(app::binkp_data("data"),live);if(data_mode==1)channel->write(std::string(2,'\0'),live);}else channel->write(app::binkp_command(app::BinkpCommand::eob),live);break;case app::BinkpCommand::got:result.got=true;channel->write(app::binkp_command(app::BinkpCommand::eob),live);if(remote_eob)end=true;break;case app::BinkpCommand::eob:remote_eob=true;if(!file10||result.got)end=true;break;case app::BinkpCommand::err:end=true;break;case app::BinkpCommand::file:result.offered=true;if(wrong_ack)channel->write(app::binkp_command(app::BinkpCommand::got,"not-current.bin 1 1700000001"),live);else end=true;break;default:break;}return true;});}
+    }catch(const std::exception&){}worker.join();return result;
+}
+}
+int main(int argc,char** argv){try{
+    check(argc==2,"new isolated native session root required");const auto root=std::filesystem::absolute(argv[1]);check(!std::filesystem::exists(root),"preserve every previous session fixture");std::filesystem::create_directories(root.parent_path());const auto descriptor=ins::mutable_descriptor(ins::operator_sid());ins::create_directory(root,descriptor.get());Fixture server(root/L"Server",1,2),client(root/L"Client",2,1);
+    const std::string one(70000,'a'),two(120000,'b'),three(280000,'c');const auto out1=client.queue(100,one),out2=client.queue(101,two),out3=server.queue(200,three);const auto pair=sessions(server,client);
+    check(pair.server.completed&&pair.client.completed&&pair.server.completed_batches>=2&&pair.client.completed_batches>=2,"actual full duplex BinkP1.1 NR/repeated empty batch completes");check(pair.server.peer_verified&&pair.server.proof==app::FtnIngressProof::inbound_cram&&!pair.client.peer_verified&&pair.client.proof==app::FtnIngressProof::outbound_tcp,"actual CRAM verifies originating client only; outbound M_OK is not mutual proof");check(pair.server.received_files==2&&pair.client.received_files==1&&pair.server.sent_files==1&&pair.client.sent_files==2,"actual bidirectional file/GOT counts match immutable artifacts");
+    const auto received_server=server.db->pending_ftn_ingress(owner_actor,16),received_client=client.db->pending_ftn_ingress(owner_actor,16);check(received_server&&received_server.value->size()==2&&received_client&&received_client.value->size()==1,"real receiving custody exists before remote GOT delivery state");
+    for(const auto& receipt:*received_server.value){auto file=server.input->read(native::ftn_native_artifact_name(receipt.id));const auto actual=file.identity();check(actual.bytes==receipt.file.size&&actual.sha256==receipt.digest&&(actual.sha256==out1.digest||actual.sha256==out2.digest),"independent actual receiving file identity/digest equals sent bytes");}
+    check(client.input->read(native::ftn_native_artifact_name(received_client.value->front().id)).identity().sha256==out3.digest,"opposite-direction real file content exact");
+    const auto client_remaining=client.db->claim_ftn_jobs(owner_actor,"TEST","PEER",id(60000),id(500),64,true),server_remaining=server.db->claim_ftn_jobs(owner_actor,"TEST","PEER",id(60000),id(501),64,true);check(client_remaining&&client_remaining.value->empty()&&server_remaining&&server_remaining.value->empty(),"only actual matching remote GOT makes outbound jobs delivered");
+    const std::string interrupted_bytes(1024*1024,'d');const auto resumed_job=client.queue(102,interrupted_bytes);const auto interrupted=sessions(server,client,true);check(!interrupted.server.completed&&!interrupted.client.completed&&!interrupted.server.received_files&&!interrupted.client.sent_files&&interrupted.server.last_ingress.valid(),"actual socket cancellation before full custody sends no false GOT");
+    const auto prefix=server.db->ftn_ingress_checkpoint(owner_actor,interrupted.server.last_ingress);check(prefix&&prefix.value&&prefix.value->has_value()&&(**prefix.value).bytes>=262144&&(**prefix.value).bytes<interrupted_bytes.size(),"actual interrupted session leaves flushed durable partial prefix");const auto resumed=sessions(server,client);check(resumed.server.completed&&resumed.client.completed&&resumed.server.last_ingress.bytes==interrupted.server.last_ingress.bytes&&resumed.server.received_bytes+(**prefix.value).bytes==interrupted_bytes.size()&&resumed.client.sent_files==1,"new verified native socket resumes exact receipt at durable NR/GET offset then completes");check(server.input->read(native::ftn_native_artifact_name(resumed.server.last_ingress)).identity().sha256==resumed_job.digest,"actual interrupted and resumed native file full digest remains exact");
+    const auto ordinary=manual(server,"fixture-session-key",true,true);check(ordinary.ok&&ordinary.got&&ordinary.server.completed&&ordinary.server.received_files==1&&ordinary.server.completed_batches==1,"actual BinkP1.0 ordinary FILE/data/GOT completes without NR or extra batch");
+    const auto wrong=manual(server,"wrong-fixture-key",true);check(!wrong.ok&&!wrong.server.completed&&wrong.server.reason=="ftn_session_cram_digest_mismatch"&&!wrong.server.peer_verified,"actual wrong CRAM refuses without downgrade");
+    check(wrong.candidate_seen&&!wrong.premature_verified&&!wrong.directory_calls&&wrong.server.network=="TEST"&&wrong.server.link=="PEER","failed auth names selected candidate but never selects custody or verifies peer");
+    const auto terminal_nul=manual(server,"fixture-session-key",true,false,false,1);check(terminal_nul.ok&&terminal_nul.server.peer_verified,"existing decoder tolerates one trailing NUL before CRAM validation");
+    for(int variant=2;variant<=4;++variant){const auto bad=manual(server,"fixture-session-key",true,false,false,variant);const char* reasons[]={"","","ftn_session_cram_response_length","ftn_session_cram_response_encoding","ftn_session_cram_response_length"};check(!bad.ok&&!bad.offered&&!bad.server.peer_verified&&!bad.directory_calls&&bad.server.reason==reasons[variant],"actual malformed CRAM categorized with no authentication or queue access");}
+    const auto forbidden_legacy=manual(server,"fixture-session-key");check(!forbidden_legacy.ok&&forbidden_legacy.server.reason=="ftn_session_legacy_refused","actual nonblank legacy password refuses without explicit policy");
+    server.config.links.front().allow_legacy_plain_auth=true;server.save(2);const auto legacy=manual(server,"fixture-session-key");check(legacy.ok&&legacy.server.completed&&legacy.server.proof==app::FtnIngressProof::inbound_legacy&&legacy.server.peer_verified,"explicit actual legacy credential verification remains distinctly labelled");
+    server.queue(201,"must not release private queued data");const auto wrong_got=manual(server,"fixture-session-key",true,false,true);check(wrong_got.offered&&!wrong_got.server.completed&&!wrong_got.server.sent_files&&wrong_got.server.reason=="ftn_session_ack_not_current_file","actual mismatched GOT cannot deliver or discard another outbound artifact");
+    const auto protected_secret=server.config.links.front().credentials.session;server.config.links.front().credentials.session=client.config.links.front().credentials.session;server.save(4);const auto unavailable=manual(server,"-");check(!unavailable.ok&&!unavailable.server.peer_verified&&unavailable.server.reason=="ftn_session_secret_unavailable","actual portable board-key mismatch is an error, never an empty credential downgrade");server.config.links.front().credentials.session=protected_secret;server.save(5);
+    server.config.links.front().credentials.session.clear();server.save(3);const auto empty=manual(server,"-");check(empty.ok&&empty.server.completed&&!empty.offered&&!empty.server.peer_verified&&empty.server.proof==app::FtnIngressProof::inbound_tcp,"known intentionally empty inbound session remains unverified and cannot pull unrelated queue");const auto empty_cram=manual(server,"CRAM-MD5-00000000000000000000000000000000");check(empty_cram.ok&&empty_cram.server.completed&&!empty_cram.offered&&!empty_cram.server.peer_verified&&empty_cram.server.proof==app::FtnIngressProof::inbound_tcp,"arbitrary no-secret CRAM is anonymous and cannot pull queued mail");
+    const auto anonymous_cram=manual(server,"synthetic-unsaved-password",true,false,false,0,"2:100/99@test");check(anonymous_cram.ok&&anonymous_cram.server.completed&&!anonymous_cram.offered&&!anonymous_cram.server.peer_verified&&anonymous_cram.server.proof==app::FtnIngressProof::nonsecure&&anonymous_cram.server.network.empty()&&anonymous_cram.server.link.empty(),"unknown CRAM sender remains anonymous with no configured-link queue authority");
+    const auto tls_files=ftn_test_tls_files(root/L"Certificates");Fixture tls_server(root/L"TlsServer",3,4),tls_client(root/L"TlsClient",4,3);tls_server.config.settings.tls_certificate=tls_files.certificate;tls_server.config.settings.tls_private_key=tls_files.key;tls_server.config.settings.tls_listener_enabled=true;tls_server.save(2);tls_client.config.links.front().tls=true;tls_client.config.links.front().tls_server_name="sfx-test.invalid";tls_client.config.links.front().tls_ca_file=tls_files.ca;tls_client.save(2);tls_server.queue(300,"server-over-verified-TLS");tls_client.queue(301,"client-over-verified-TLS");const auto tls_pair=sessions(tls_server,tls_client,false,true);check(tls_pair.server.completed&&tls_pair.client.completed&&tls_pair.server.proof==app::FtnIngressProof::inbound_cram&&tls_pair.client.proof==app::FtnIngressProof::outbound_verified_tls&&tls_pair.server.peer_verified&&tls_pair.client.peer_verified&&tls_pair.server.sent_files==1&&tls_pair.client.sent_files==1,"actual TLS chain/name/configured endpoint plus expected BinkP AKA binds proof3; inbound CRAM independently verifies client");
+    tls_server.config.links.front().credentials.session.clear();tls_server.save(3);tls_client.config.links.front().credentials.session.clear();tls_client.save(3);tls_server.queue(302,"must remain queued without client authentication");tls_client.queue(303,"one authorized outbound destination payload");const auto one_way=sessions(tls_server,tls_client,false,true);check(one_way.server.completed&&one_way.client.completed&&one_way.server.proof==app::FtnIngressProof::inbound_tcp&&!one_way.server.peer_verified&&one_way.client.proof==app::FtnIngressProof::outbound_verified_tls&&one_way.client.peer_verified&&one_way.server.sent_files==0&&one_way.client.sent_files==1,"actual server TLS alone never upgrades empty inbound client proof6 or permits unrelated queue pickup");
+    Fixture multiple(root/L"MultipleNetworks",1,2);
+    auto second_network=multiple.config.networks.front();second_network.code="SECOND";second_network.name="Second synthetic network";second_network.address="42:300/1@test";multiple.config.networks.push_back(second_network);
+    auto second_link=multiple.config.links.front();second_link.network="SECOND";second_link.code="OTHER";second_link.address="42:300/2@test";
+    const auto second_secret=native::protect_ftn_secret(multiple.root.u8string(),"SECOND","OTHER",native::FtnCredentialKind::session,"CaseNine9");check(second_secret.has_value(),"separate network secret protected");second_link.credentials.session=*second_secret;multiple.config.links.push_back(second_link);multiple.save(2);
+    const auto selected=manual(multiple,"CaseNine9",true,true,false,0,"42:300/2@test");
+    check(selected.ok&&selected.server.completed&&selected.server.network=="SECOND"&&selected.server.link=="OTHER"&&selected.server.peer_verified,"second network candidate authenticates with its own nine character secret, not first network secret");
+    const auto wrong_network_key=manual(multiple,"fixture-session-key",true,false,false,0,"42:300/2@test");
+    check(!wrong_network_key.ok&&wrong_network_key.server.network=="SECOND"&&wrong_network_key.server.link=="OTHER"&&wrong_network_key.server.reason=="ftn_session_cram_digest_mismatch"&&!wrong_network_key.directory_calls,"first network secret cannot authenticate second candidate");
+    const auto ambiguous=manual(multiple,"CaseNine9",true,false,false,0,"2:100/2@test 42:300/2@test");
+    check(!ambiguous.ok&&ambiguous.server.reason=="ftn_session_unknown_or_ambiguous_aka"&&ambiguous.server.link.empty()&&!ambiguous.directory_calls,"multiple configured remote identities remain rejected rather than selecting first");
+    Fixture empties(root/L"EmptyFrames",1,2);
+    const auto empty_frame=manual(empties,"fixture-session-key",true,true,false,0,"2:100/2@test",1);
+    check(empty_frame.ok&&empty_frame.got&&empty_frame.server.completed&&empty_frame.server.received_files==1,"empty frames before and after a file do not prevent authenticated transfer completion");
+    const auto unsolicited=manual(empties,"fixture-session-key",true,true,false,0,"2:100/2@test",2);
+    check(!unsolicited.server.completed&&unsolicited.server.reason=="ftn_session_unsolicited_data"&&unsolicited.server.received_files==0,"nonempty unsolicited data remains rejected");
+    const auto preauth=manual(empties,"fixture-session-key",true,true,false,0,"2:100/2@test",3);
+    check(!preauth.server.handshake_complete&&!preauth.server.peer_verified&&preauth.server.reason=="ftn_session_data_before_auth","empty data before authentication cannot bypass handshake");
+    std::cout<<"PASS "<<checks<<" actual native TCP/portable credential/BinkP/NTFS/SQLite session checks; synthetic payloads, no Runtime/tosser/independent-peer/hub claim\n";return 0;
+}catch(const std::exception& error){std::cerr<<"FAIL "<<checks<<": "<<error.what()<<" win32="<<GetLastError()<<'\n';return 1;}}

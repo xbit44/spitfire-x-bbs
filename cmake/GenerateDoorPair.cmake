@@ -1,0 +1,12 @@
+foreach(input RUNTIME DRIVER LAUNCHER)
+    if(NOT EXISTS "${${input}}")
+        message(FATAL_ERROR "Normal DOS host requires a matched ${input}")
+    endif()
+    file(SHA256 "${${input}}" ${input}_HASH)
+    string(TOUPPER "${${input}_HASH}" ${input}_HASH)
+endforeach()
+if(NOT DRIVER_HASH STREQUAL "D36589BDE11134B7F6019C32667B639BC465CA39CD39E22FEB6E053A2996A3F3" OR
+   NOT LAUNCHER_HASH STREQUAL "7512CC632275C310C29E3C8FF5554270C4C7885CF637A1528CCC8A47A101FBA2")
+    message(FATAL_ERROR "DOS pair differs from reviewed core and normal launcher candidate")
+endif()
+file(WRITE "${OUTPUT}" "#pragma once\n#define SFX_DLL_SHA256 \"${DRIVER_HASH}\"\n#define SFX_LAUNCHER_SHA256 \"${LAUNCHER_HASH}\"\n#define SFX_RUNTIME_SHA256 \"${RUNTIME_HASH}\"\n")

@@ -1,0 +1,178 @@
+SFX LINUX INTEGRATION
+Installed program: doors/sfxguess32/sfxguess32
+This guide is installed under docs/doors/sfxguess32.
+Local companions use license and third_party.txt.
+Original standalone/source packages keep their own filename spelling.
+Their qualification records retain their original scope.
+
+                               SFXGUESS32
+                                 Version 1
+                       Portable Linux x86_64 Test
+
+                         In memory of Mike Woltz
+
+
+INTRODUCTION
+------------
+
+SFXGuess32 is a quick Guess A Number door inspired by Mike Woltz's
+SFGuess for Buffalo Creek Software. The original was included with
+Spitfire in 1994 as a demonstration game to help new Sysops install
+their first door.
+
+This Linux test package contains a native 64-bit x86_64 executable
+named sfxguess32. Use this lowercase filename in Linux commands.
+
+
+INSTALL AND TRY IT LOCALLY
+-------------------------
+
+Extract the ZIP into a game directory owned by the account that runs
+your BBS. For example:
+
+    /sbbs/xtrn/sfxguess32
+
+Set the executable permission, then run local mode:
+
+    chmod +x sfxguess32
+    ./sfxguess32 /L
+
+For plain-text local play:
+
+    ./sfxguess32 /L --plain
+
+Local play needs no drop file. It can display the Top Ten, and local
+wins are excluded from scoring. Press Q during play to show the exit
+scoreboard, then Enter to return to your shell.
+
+Use a terminal at least 80 columns wide and 24 rows high for ANSI.
+An ordinary UTF-8 Linux terminal displays local mode's colors, timer
+bar, and box-drawing characters.
+
+
+SYNCHRONET TEST SETUP
+--------------------
+
+These settings are provided for your first live test on unix-bit BBS.
+In SCFG, open External Programs / Online Programs and add the game.
+
+    Name                       SFX Guess A Number
+    Start-up Directory         /sbbs/xtrn/sfxguess32/
+    Command Line               /sbbs/xtrn/sfxguess32/sfxguess32 --drop %f
+    Native Executable          Yes
+    I/O Method                 Socket
+    BBS Drop File Type         DOOR32.SYS
+    Place Drop File In         Node Directory
+    Multiple Concurrent Users  Yes
+    Use Shell to Execute       No
+
+Adjust the executable and directory paths for your installation.
+Synchronet expands %f to the generated drop-file path, including its
+actual filename case. Use the BBS's native door launch so it passes
+the inherited socket descriptor described in the drop file.
+
+Standard I/O is also supported when the drop file specifies that mode.
+The game echoes its own input, so disable BBS-side character echo if
+you use Standard I/O.
+
+Enable Synchronet's calling-time and inactivity supervision for this
+door. DOOR32.SYS reports only whole minutes, and the BBS must supervise
+the exact cutoff and its AFK policy during every replay and prompt.
+
+Source reference for the setup contract:
+https://github.com/SynchronetBBS/sbbs/blob/master/src/sbbs3/xtrn_sec.cpp
+
+
+OTHER SUPPORTED DROP FILES
+-------------------------
+
+The game also reads BBSDEV.DRP 1.0 and DOORDROP.INI. Pass the actual
+node-specific filename after --drop, for example:
+
+    ./sfxguess32 --drop /path/to/node/BBSDEV.DRP
+    ./sfxguess32 --drop /path/to/node/DOORDROP.INI
+
+Both standard I/O and inherited sockets are supported. The BBS
+creates the connection and the drop file. Linux paths are case
+sensitive. For BBSDEV_DRP or DOORDROP_INI environment variables, the
+game can read the file path without --drop.
+
+The game honors exact session deadlines supplied by BBSDEV.DRP and
+DOORDROP.INI. Returning to the BBS or replaying keeps the same session
+deadline. The BBS continues to own its AFK and disconnect policies.
+
+For ANSI callers, BBSDEV.DRP and DOORDROP.INI supply terminal size.
+DOOR32.SYS uses a conservative 80-by-24 ANSI layout.
+
+
+GAME PLAY
+---------
+
+Press Enter to start. Guess the randomly chosen number from 0 to 1000
+before the 30-second clock expires. Every submitted entry counts as
+a guess, including blank, invalid, and out-of-range entries.
+
+Follow the TOO HIGH or TOO LOW clues. After winning or running out
+of time, press Y to start a new number and 30-second round immediately.
+N shows the exit scoreboard. Q during a round ends it without a score
+and takes you to the exit scoreboard. Press Enter there to return.
+
+The timer changes from cyan to yellow to red as time runs short.
+Callers without ANSI get the same rules and scoring in plain text.
+Replay is available while the BBS session has time remaining.
+
+
+TOP TEN AND MULTIPLE CALLERS
+---------------------------
+
+Each caller plays independently. All processes using the same game
+executable share the SFXGUESS.TOP file beside it. The BBS service
+account needs permission to create and replace files in that directory.
+
+Every winning BBS round is considered. Fewer guesses rank first, then
+faster completion time. Exact ties keep the existing entry ahead.
+One caller can hold any number of positions, including all ten.
+
+The game creates SFXGUESS.TOP on its first qualifying BBS win. It is
+plain UTF-8 text, with up to ten lines in this form:
+
+      4 Tries in 12.345sec...................XBIT
+
+Keep the shared game directory on a local filesystem with working
+file locks and atomic rename. The game uses SFXGUESS.TOP.lock while
+reading or updating scores. Leave that lock file in place.
+
+To reset the board, take the door out of service, let all active
+copies exit, and rename SFXGUESS.TOP as a backup. The next qualifying
+win creates a new scoreboard.
+
+
+PORTABILITY AND TEST STATUS
+---------------------------
+
+The executable uses a baseline x86_64 CPU target and statically linked
+musl and C++ runtimes. It has no dynamic loader, GLIBC, GLIBCXX, or
+shared-library requirements.
+
+Local mode and isolated BBS fixtures were tested in x86_64 Ubuntu
+20.04.6 under WSL. Rob also confirmed successful live operation on
+Pop!_OS 22.04 LTS with Synchronet at unix-bit BBS.
+
+The build aims for broad compatibility across x86_64 Linux
+distributions. Distribution and kernel combinations beyond the tested
+environment still need their own checks. Runtime license notices are
+included in third_party.txt.
+
+INCLUDED SOURCE
+---------------
+
+The source/ folder contains the C++ source, CMake configuration,
+development checks, and BUILD.txt with Windows and Linux commands.
+
+LICENSE
+-------
+
+SFXGuess32's original source code is released under the MIT License.
+See license beside this installed guide. The separate standalone source ZIP
+retains source/LICENSE for the full terms.
+Third-party runtime components retain their own licenses. See third_party.txt.

@@ -1,0 +1,2 @@
+# Preserve exact shipped file bytes in Git checkouts and archives.
+* -text

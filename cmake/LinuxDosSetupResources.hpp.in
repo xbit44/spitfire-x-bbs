@@ -1,0 +1,7 @@
+#pragma once
+#include <string_view>
+namespace sfx::apps::runtime::web::dos_resources {
+inline constexpr std::string_view helper=R"SFXDOSHELPER(@SFX_DOS_SETUP_HELPER@)SFXDOSHELPER";
+inline constexpr std::string_view profile=R"SFXDOSPROFILE(@SFX_DOS_SETUP_PROFILE@)SFXDOSPROFILE";
+inline constexpr const char* identity="@SFX_DOS_SETUP_IDENTITY@";
+}

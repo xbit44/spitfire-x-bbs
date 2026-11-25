@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>Run your BBS each day | Spitfire-X Sysop Wiki</title>
+ <link rel="stylesheet" href="assets/sysop.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to article</a>
+<aside class="sidebar" aria-label="Wiki navigation">
+ <img class="sidebar-logo" src="images/sfx-about-approved.png" width="1254" height="1254" alt="Spitfire-X BBS bison logo">
+ <a class="brand" href="wiki.html">SPITFIRE-X<span>BBS / SYSOP WIKI</span></a>
+ <form action="search.html" method="get" role="search">
+  <label for="wiki-query">Search this wiki</label>
+  <div class="search-field"><input id="wiki-query" name="q" type="search" maxlength="160" placeholder="Search articles" autocomplete="off"><button type="submit" aria-label="Search">Go</button></div>
+ </form>
+ <nav aria-label="Topics"><p class="nav-heading">CONTENTS</p><a href="wiki.html">Wiki home</a><a href="get-ready.html">Get ready</a>
+<a href="linux-controls.html">Linux browser controls</a>
+<a href="daily-operation.html" aria-current="page">Daily operation</a>
+<a href="callers-chat.html">Callers &amp; chat</a>
+<a href="messages-mail.html">Messages &amp; mail</a>
+<a href="files-transfers.html">Files &amp; transfers</a>
+<a href="doors.html">Doors</a>
+<a href="ftn-networks.html">FTN networks</a>
+<a href="maintenance-recovery.html">Maintenance &amp; recovery</a>
+<a href="updates-help.html">Updates &amp; troubleshooting</a>
+<a href="customization-reference.html">Customization &amp; Displays</a>
+<a href="thanks-to.html">Thanks to</a>
+</nav>
+ <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
+</aside>
+<main id="main" tabindex="-1">
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">Sysop wiki</span></div>
+ <article data-search="article"><h1>Run your BBS each day</h1><p class="lead">Start and stop your BBS, change settings and watch caller activity.</p><h2>In this guide</h2>
+<ul class="article-links"><li><a href="#windows-startup">Windows startup</a></li><li><a href="#hosting">System &gt; Runtime Behavior</a></li><li><a href="#logging">Tools &gt; Logging</a></li><li><a href="#event-sounds">Event sound assignments</a></li></ul>
+<section id="windows-startup"><h2>Windows startup</h2>
+<p>For a new board, finish the Control Panel's First-Run Setup before configuring the board in SFXConfig or accepting callers. Windows Setup opens the wizard automatically. If you chose <strong>Finish Later</strong>, reopen Control Panel using that board's shortcut or <code>Bin\SFXControlPanel.exe</code>. At completion, check the board name, initial System Sysop and Runtime readiness. See <a href="get-ready.html#windows-first-run">Windows first run</a>.</p>
+<p>On a fresh Desktop Mode board, <strong>Save Setup and Start BBS</strong> deliberately commits setup and starts configured caller listeners; <strong>Finish Later</strong> leaves initial setup pending. Check saved/readable settings separately from actual listener status: a bind/start failure can follow a successful save. Read the retained listener diagnostic and the actual startup result below. If SFXConfig reports that initial setup is needed, complete it in the same Control Panel and reopen SFXConfig. Verification, IPC and configuration-read diagnostics are different failures; preserve their reported details.</p>
+
+<p>The Control Panel can open while SFX is still starting. Read its startup message and wait for the BBS and the listeners you use to report their actual running state. A visible window does not mean callers or FTN mail can connect yet. SFX completes required installation, database and connection-protection checks before accepting them.</p>
+<p>While Runtime opens, the dots after <strong>SFX: opening Runtime — checking configuration and protection</strong> cycle from one to three and repeat. This startup indicator stops before the panel reports Ready, opens First-Run Setup or reports an error. It also stops when cancellation begins. A quick startup can finish before the dots cycle.</p>
+<p>The Nodes table shows your configured nodes as <strong>Offline</strong> until SFX confirms their actual state. Wait for the listeners you use to report that they are running before connecting a caller.</p>
+<p>On the <strong>Nodes</strong> tab, <strong>Disable All Nodes</strong> applies immediately when nobody is connected. With active callers, it asks for confirmation on the page and shows how many callers would be disconnected. <strong>Enable All Nodes</strong> enables every configured node, including nodes disabled individually. The Runtime stays running and SFX saves the node settings across a restart.</p>
+<p>If startup fails, read the reported reason before trying again. Optional scanner and definition work can finish separately; uploads that require scanning still need a ready scanner. See <a href="files-transfers.html#clamav">ClamAV readiness and held uploads</a>. Desktop Mode and Windows Service keep the separate hosting behavior below.</p></section>
+<section id="hosting"><h2>System &gt; Runtime Behavior</h2>
+<h3>Windows: BBS Hosting</h3>
+<p><strong>Run BBS as</strong> chooses <strong>Desktop Mode</strong> or <strong>Windows Service (LocalSystem)</strong>. A fresh installation uses Desktop Mode, with the registered service Disabled. Updates preserve the selected mode. Desktop Mode uses the Control Panel to run the BBS; Service mode lets the BBS continue when SFXConfig or the Control Panel is closed.</p>
+<p><strong>Start BBS when Windows starts</strong> applies in Service mode. Checked means automatic service startup; unchecked means Manual. Desktop Mode disables service startup. Service mode runs as LocalSystem, and Doors inherit that account's privileges; consider that when choosing the mode for your board.</p>
+<p>Stop the BBS and close its stopped Control Panel before choosing <strong>Apply Hosting Settings</strong>. Review the mode and startup choice; Windows may ask for administrator approval. Applying the settings retains data and credentials and leaves the BBS stopped. When changing into Service mode, SFX offers a separate <strong>Start BBS now?</strong> choice. In Service mode, the page's Start BBS / Stop BBS control operates the service; in Desktop Mode, use the Control Panel.</p>
+<p><strong>Current mode</strong>, <strong>Service status</strong> and <strong>Current Windows startup</strong> show the actual saved/operating state. If hosting changed elsewhere or an outcome is uncertain, use <strong>Reload Hosting Settings</strong> to reconcile it before applying another change. A pending checkbox is not proof that Windows startup was changed. If the service registration is unavailable, use matching Setup Repair as the page directs.</p>
+<h3>Linux: Start BBS when Linux starts</h3>
+<p>This on/off choice starts <strong>off</strong> and is read when the installed Linux management service starts. Saving it does not start or stop the current BBS, register a service, or restart one. Opening the desktop launcher never starts the BBS for you. Updates preserve the saved choice.</p>
+<p>Starting management with Linux and starting the BBS automatically are separate steps. Install the reviewed <a href="linux-controls.html#service">Linux service plan</a> if you need boot startup and survival after logout, then use this checkbox to choose whether that service starts the BBS too. Read the page's service/startup result and use Refresh or Discard Changes to load a newer saved choice if another session changed it.</p></section>
+<section><h3>Change settings</h3><p>Changing settings, saving your work and knowing when the new settings take effect.</p></section>
+<section><h3>Caller Idle Limits</h3><p>If the BBS is running in Service mode, open the Control Panel before editing these limits. You can close the panel afterward without stopping the service.</p><p>Open SFXConfig &gt; Connections &gt; Caller Idle Limits, after Telnet &amp; SSH and before External Client. Set “Caller AFK (minutes, 2-1440):” and “Login idle (seconds, 30-600):”.</p><p>Choose “Save Idle Settings” to save. If there is a problem, correct it and use “Retry Idle Settings” when available to try the settings connection again. Your edits stay in place, but Retry does not save them. Choose “Save Idle Settings”, then check the message showing what is saved and what is in use. Saved limits apply to new caller sessions. Sysops who have logged in are exempt from caller AFK. The login idle limit still applies before they log in.</p><p>Moving these settings does not change your saved values. BBS Hosting stays under System &gt; Runtime Behavior. Editing idle limits is separate from starting or stopping the service.</p></section>
+<section><h3>Follow board activity</h3><p>Caller activity, Events, event sounds and logs. Scheduled jobs are covered under Maintenance &amp; recovery.</p></section>
+<section id="logging"><h2>Tools &gt; Logging</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Edit the separate Runtime, Callers and Attention log limits, then Save Changes. This does not perform the Control Panel’s Clear View action or mean that log files were deleted. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>Each of the three logs has its own active-file size and completed-archive count. A fresh board starts with <strong>10 MiB</strong> and <strong>10 archives</strong> for each log; updates keep your saved limits.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Log</th><th>Active size</th><th>Completed archives</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>Windows: <code>SFXRuntime.log</code>; Linux: <code>sfxruntime.log</code></td><td>1-100 MiB</td><td>1-100</td><td>Runtime and operational events.</td></tr>
+<tr><td>Windows: <code>CALLERS.LOG</code>; Linux: <code>callers.log</code></td><td>1-100 MiB</td><td>1-100</td><td>Caller records.</td></tr>
+<tr><td>Windows: <code>HEYSYSOP.LOG</code>; Linux: <code>heysysop.log</code></td><td>1-100 MiB</td><td>1-100</td><td>Items brought to the Sysop's attention.</td></tr>
+</tbody></table></div>
+<p>Use whole numbers. A MiB is 1,048,576 bytes. For example, a size of <code>20</code> and an archive count of <code>5</code> sets that log's rotation size to 20 MiB and retains five completed archives in addition to its active file. These are file-size and file-count limits, not a number of days. Records are kept whole rather than split at the size boundary.</p>
+<p>On Windows, choose <strong>Save Logging Settings</strong>; on Linux, save the page. A logging-only change can apply without restarting the BBS. Read Applied, Pending or Restart required if other settings are also pending. Completed archives beyond the retention limit are pruned oldest first, so lowering the count reduces retained history. Clearing the Control Panel's Live Logs display does not delete these files.</p>
+<p>If Save is refused, check all six values; zero, fractional values and numbers above 100 are invalid. If the requested change is saved but not active, resolve the displayed pending condition before assuming that the new limits are in use.</p></section>
+<section id="event-sounds"><h2>Event sound assignments</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Enter WAV paths on the Linux BBS computer. Test previews without saving; Save Changes keeps the assignments. This is separate from enabling sound playback in the browser Control Panel. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>On Windows, open Control Panel's <strong>BBS &gt; Event Sounds...</strong>. On Linux, open <strong>System &gt; Event Sounds</strong> in SFXConfig. Each of the ten assignments below holds a WAV path. Fresh assignments are blank (silent); updates preserve saved assignments.</p>
+<table class="settings-table"><thead><tr><th>Assignment</th><th>Event</th></tr></thead><tbody>
+<tr><td>Telnet Login</td><td>A caller logs in through Telnet.</td></tr><tr><td>Telnet Logout</td><td>A Telnet caller logs out.</td></tr>
+<tr><td>SSH Login</td><td>A caller logs in through SSH.</td></tr><tr><td>SSH Logout</td><td>An SSH caller logs out.</td></tr>
+<tr><td>Outbound RLogin Entry</td><td>A caller enters an outbound RLogin connection.</td></tr><tr><td>Outbound RLogin Exit</td><td>The outbound RLogin connection ends.</td></tr>
+<tr><td>Page Sysop</td><td>A caller pages the Sysop.</td></tr><tr><td>Security Alert</td><td>A reported security event.</td></tr>
+<tr><td>Operational/Error Alert</td><td>A reported operating failure or maintenance problem.</td></tr><tr><td>Inbound BinkP Connection</td><td>An inbound BinkP connection event.</td></tr>
+</tbody></table>
+<p>Use an absolute local <code>.wav</code> path, or blank for silence. The stored path limit is 768 UTF-8 bytes. Windows additionally limits the path to 259 characters and requires a local fixed drive, without links or junctions. Linux paths point to files on the BBS server, owned by its account; links and writable shared files are refused. For example, use <code>C:\SFXSounds\login.wav</code> on Windows or <code>/home/bbs/sounds/login.wav</code> on Linux.</p>
+<p>Both platforms accept uncompressed PCM WAV: 8- or 16-bit, mono or stereo, 8–48 kHz, at most 30 seconds and 2 MiB. Changing a filename extension does not convert an unsupported audio file. Every nonblank assignment must validate before the set can be saved.</p>
+<p>Use <strong>Test</strong> to preview an assignment without saving. Windows also offers file browsing. <strong>Clear</strong> removes the assignment from the draft and leaves the WAV file intact. Save the assignments to keep changes; no BBS restart is required. If the save result cannot be verified, reopen Event Sounds on Windows or use <strong>Reload Assignments</strong> on Linux before editing further.</p>
+<p>On Linux, choose <strong>Enable Sounds</strong> in the Control Panel tab to hear new events on that browser computer. Only one tab receives the live stream. Playback pauses during editing/previews and stops when the controls are closed, you sign out or you switch to SFXConfig. Old events are not replayed. See <a href="linux-controls.html#sounds">browser sound controls</a>.</p>
+</section>
+<aside class="notice"><strong>Service sound note</strong> In Service mode, the Control Panel plays event sounds. Keep it open or minimized to hear them. Sounds do not play with the panel closed; that feature is set aside for later.</aside><div class="related"><h2>Related topics</h2><a href="get-ready.html">Get your BBS ready</a><a href="callers-chat.html">Manage callers and chat</a></div></article>
+ <footer>Spitfire-X BBS <span aria-hidden="true">/</span> Sysop documentation <a href="#main">Back to top</a></footer>
+</main>
+
+</body>
+</html>

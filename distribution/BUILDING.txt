@@ -1,0 +1,165 @@
+BUILDING SPITFIRE-X BBS 1.0.0b1
+
+Use a new extracted SourceSnapshot folder. Required pinned dependency archives,
+qualified transfer-helper sources, original notices and exact build-qualification
+records are included. The separate ComponentSource folder supplies the external
+DOS component's corresponding source. Matching external DOS build inputs are
+included at the default paths used by CMake.
+
+WINDOWS
+Install CMake 3.22 or newer, PowerShell 7, Visual Studio 2022 C++ Build Tools
+with the Win32 MSVC 14.44 toolset and Windows SDK 10.0.26100.0, native Windows
+Perl and NASM. This is the build host; the SFX runtime still targets Windows 7
+or newer. Use a new extraction and build folder, rather than an old cache.
+Put Perl and NASM on PATH, or pass their full paths as
+SFX_OPENSSL_PERL_EXECUTABLE and SFX_OPENSSL_NASM_EXECUTABLE CMake cache values.
+
+From SourceSnapshot:
+  pwsh -NoProfile -File scripts/BuildQualifiedWindowsHelpers.ps1
+  cmake --preset windows-v143-x86 -DCMAKE_SUPPRESS_REGENERATION=ON
+  cmake --build --preset windows-v143-x86 --target SFXSetup --parallel 4 -- /nr:false
+
+The helper script discovers the current developer shell or an installed Visual
+Studio C++ toolchain with vswhere. For a different installation folder, pass
+-VisualStudio 'D:/Tools/Visual Studio/2022/BuildTools'. Its explicit options
+-VCToolsVersion 14.44 and -WindowsSdkVersion 10.0.26100.0 select the qualified
+defaults. Other versions must still produce the exact approved helper hashes;
+these options do not disable that check or authorize a substitute image.
+
+If Visual Studio or Perl/NASM are not on their usual paths, use explicit CMake
+cache values. For example, append these to the configure command, substituting
+your own existing paths:
+  -DCMAKE_GENERATOR_INSTANCE='D:/Tools/Visual Studio/2022/BuildTools'
+  -DSFX_OPENSSL_PERL_EXECUTABLE='D:/Tools/Perl/perl.exe'
+  -DSFX_OPENSSL_NASM_EXECUTABLE='D:/Tools/NASM/nasm.exe'
+To choose an installed compiler revision explicitly, add
+  -T 'v143,version=14.44.35207'
+Use a fresh build folder if the generator, compiler or SDK selection changes.
+No script installs a compiler or changes the machine's permanent PATH.
+
+The helper recipe builds Message, Packet and File helpers from their separate
+frozen sources. All three must match the exact qualified shipping image hashes;
+the normal CMake guards also check source and qualification records. The Message
+helper needs generated standard #line attribution for three old source-file
+strings. The release build uses source-relative names in those diagnostics.
+If an output differs, preserve it
+and check the documented toolchain. Unknown existing helpers are never replaced.
+
+LINUX AMD64
+Install GCC/G++, CMake 3.22 or newer, Ninja, make, Perl and normal build tools.
+The build uses the supplied pinned private OpenSSL and dependency sources.
+Extract with an unzip tool that preserves Unix permissions; Python extractall
+needs an explicit chmod step to restore the archive's executable modes.
+
+From SourceSnapshot:
+  cmake --preset linux-gcc
+  cmake --build --preset linux-gcc --target SFXWeb SFXRuntime SFXHostLookup SFXBinkD SFXFileTransfer SFXQWKTransfer --parallel 4
+
+The preset selects gcc/g++ from PATH. Explicit compiler/tool paths can be
+appended to the configure command when they are installed elsewhere:
+  -DCMAKE_C_COMPILER=/opt/toolchain/bin/gcc
+  -DCMAKE_CXX_COMPILER=/opt/toolchain/bin/g++
+  -DSFX_OPENSSL_PERL_EXECUTABLE=/opt/tools/bin/perl
+  -DSFX_OPENSSL_MAKE_EXECUTABLE=/opt/tools/bin/make
+This builds the current programs and their pinned dependency sources. It does
+not download, prepare or run a DOS emulator. The optional DOS preparation
+helper/profile and game qualification are separate from a clean source build.
+
+On Linux, the SFXConfig and Control Panel browser controls use the installed
+spitfire-x launcher and sfxweb. They are not separate CMake targets. CMake
+target IDs above stay unchanged; Linux output files are sfxweb, sfxruntime,
+sfxhostlookup, sfxbinkd, sfxfiletransfer and sfxqwktransfer.
+
+BUILD, STAGE AND INSTALL ON LINUX
+Use the complete Full-Source archive, not just individual C++ files. Extract
+it into a new folder with an unzip tool that preserves Unix permissions.
+Keep SourceSnapshot, linux-runtime-assets, ComponentSource and DoorSource
+together. On Ubuntu-family build hosts the usual prerequisites are:
+  sudo apt install build-essential cmake ninja-build perl python3 unzip
+This installs build tools, not SFX. Run the following steps as your normal
+account. The CMake version must be at least 3.22. From SourceSnapshot:
+  cmake --preset linux-gcc
+  cmake --build --preset linux-gcc --target SFXWeb SFXRuntime SFXHostLookup SFXBinkD SFXFileTransfer SFXQWKTransfer --parallel 4
+  python3 distribution/linux/stage-package.py --build-dir build/linux-gcc --output ../linux-install
+  python3 ../linux-install/install.py
+
+The ../linux-install output above is a staging folder containing the
+installer and payload. It is not your installed BBS folder. Keep it separate
+from the destination you choose below, such as $HOME/sfx. A fresh destination
+must be new or empty and must not contain the extracted/staged package.
+
+The last command asks where to install. Press Enter for ~/sfx, or enter a
+full path to a new empty folder you own. Review the path and confirm. For
+unattended installation, use an explicit destination instead:
+  python3 ../linux-install/install.py --prefix "$HOME/sfx"
+The destination's parent must already exist. Do not run install.py as root.
+For /home/sfx or /opt/sfx, an administrator must first create that NEW leaf
+folder and give your normal account ownership; see the Linux README. SFX
+does not adopt or rename an older uppercase installation. Keep the staged
+package separate from your installed board. Installation starts no services
+and opens no browser. At completion, run the exact selected-path launcher
+command printed by the installer on the Linux desktop. It opens the local
+Control Panel in the desktop browser. On a fresh board, complete Set Up Your
+BBS, choose Create My BBS, review settings and then Start BBS deliberately.
+For SSH from another computer, use the separate SSH access instructions in
+the Linux README or docs/sysop/linux-controls.html#ssh-access; --print-url
+alone prints a loopback link and does not open a remote browser.
+
+UPGRADE AN EXISTING LOWERCASE LINUX BOARD
+Keep a whole-board backup. Use the same account and current installation
+folder. Stop BBS, finish active work, then close management with the installed
+spitfire-x --stop-management command; if service-managed, follow its printed
+administrator stop command. Build/stage the new package separately as above.
+From SourceSnapshot, upgrade the existing default installation with:
+  python3 ../linux-install/install.py --prefix "$HOME/sfx" --upgrade
+Substitute your actual existing folder. Do not use a new empty destination or
+rerun initial BBS setup. Board data/settings and fresh-only files are retained;
+edited guides under docs stay intact. Read the final result, use the printed desktop
+launcher, verify the version/settings and deliberately Start BBS. Retained
+transaction/recovery work needs its reported recovery flow, not deletion.
+Older uppercase layouts are not converted by this same-layout upgrade.
+
+stage-package.py checks all inputs before creating its NEW output folder.
+It combines your six compiled SFX programs, current source-managed displays,
+Web files, help and launchers, and the pinned linux-runtime-assets supplied
+beside SourceSnapshot. --assets /full/path can select another copy of those
+same verified assets. Missing, modified or wrong-architecture inputs stop
+staging. Reuse of an existing output folder is refused.
+
+The asset bundle contains the stock standalone Doors, portable ClamAV and
+other unchanged vendor/runtime resources. The commands above build the six
+SFX programs, not every external program. ComponentSource, DoorSource,
+third-party notices and the ClamAV source offer describe those components'
+separate corresponding sources and build instructions. Do not replace pinned
+assets with unrelated system binaries and claim the same qualification.
+
+distribution/linux/package-inputs.json supplies the staging recipe;
+payload-layout.json records installed aliases and required case exceptions.
+package-manifest.json records the actual staged file hashes and policies.
+This is a complete SFX build-to-install route. Read BUILD_INFO.json and
+QUALIFICATION.txt for this release's actual build origin, source amendments
+and scoped tests. Helper outputs still require their exact qualified hashes.
+
+USEFUL FOCUSED CHECKS
+Windows:
+  cmake --build --preset windows-v143-x86 --target sfx_shared_telnet_stream_tests sfx_classic_information_tests sfx_ftn_serial_tests
+Linux:
+  cmake --build --preset linux-gcc --target sfx_shared_telnet_stream_tests sfx_classic_information_tests sfx_linux_ftn_serial_tests
+
+Run the first two programs without arguments. The serial test requires one
+absolute path to a NEW, nonexistent disposable fixture directory. It keeps its
+fixtures and refuses to reuse an earlier run. Historical installed/Internet/
+physical-client qualification is separate from these focused source checks.
+
+DELIVERY INPUTS
+The stock Door runtime archives are pinned inputs, separate from SFX programs.
+DoorSource has separately identified Windows/Linux source variants and original
+licenses. Their program versions and external CA asset revision are recorded
+separately. Read the actual source manifests and build notes for each variant.
+
+Use the source snapshot supplied with the v1.0.0b1 release.
+
+The commands above are rebuild instructions. Actual delivered build origin
+and bounded source amendments are recorded in BUILD_INFO.json and
+QUALIFICATION.txt; they are not a claim that every final beta snapshot was
+rebuilt from an empty dependency cache.

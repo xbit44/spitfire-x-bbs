@@ -1,0 +1,57 @@
+namespace ftn_retention_detail {
+namespace app=application;
+constexpr const char* columns="ingress_id,network,successful_utc,configuration_revision,volume,native_id,byte_count,sha256,protection_revision,deadline,(SELECT wire_name FROM sfx_ftn_ingress WHERE receipt_id=ingress_id)";
+app::FtnRetainedOriginal original(SqliteStatement& q){app::FtnRetainedOriginal r;r.ingress=q.identifier(0);r.network=q.text(1);r.successful_utc=q.int64(2);r.configuration_revision=q.int64(3);r.native={static_cast<std::uint64_t>(q.int64(6)),file_detail::digest(q,7),q.text(4),q.text(5)};r.protection_revision=q.int64(8);r.deadline=q.int64(9);r.wire_name=q.text(10);return r;}
+std::int64_t clock(sqlite3* db){SqliteStatement q(db,"SELECT high_water FROM sfx_ftn_retention_clock WHERE singleton_id=1","retention clock rollback guard");if(!q.row())file_detail::corrupt();return q.int64(0);}
+void observe_clock(sqlite3* db,std::int64_t now){if(now<1)return;SqliteStatement q(db,"UPDATE sfx_ftn_retention_clock SET high_water=max(high_water,?1) WHERE singleton_id=1","retain observed successful/expiry time without clock rollback");q.bind(1,now);q.step();}
+std::int64_t deadline(std::int64_t success,const app::FtnNetwork& network){if(success<1)message_detail::conflict();if(!network.keep_processed)return success;if(!network.retention_days)return 0;const auto span=std::int64_t{network.retention_days}*86400;if(success>INT64_MAX-span)message_detail::conflict();return success+span;}
+bool shortening(std::int64_t before,std::int64_t after){return after!=0&&(before==0||after<before);}
+struct Change {app::FtnRetainedOriginal before;std::int64_t after{};std::string name;};
+std::vector<Change> changes(sqlite3* db,const app::FtnConfiguration& previous,const app::FtnConfiguration& next){
+    std::vector<Change> result;
+    for(const auto& network:next.networks){
+        const auto old=std::find_if(previous.networks.begin(),previous.networks.end(),[&](const auto& n){return ftn_detail::same(n.code,network.code);});
+        // Off is future-only. Unrelated Save must not reinterpret older mixed
+        // receipt policies using today's unchanged network settings.
+        if(!network.keep_processed||old==previous.networks.end()||(old->keep_processed==network.keep_processed&&old->retention_days==network.retention_days))continue;
+        const auto sql=std::string("SELECT ")+columns+" FROM sfx_ftn_retained_originals r WHERE network=?1 COLLATE NOCASE AND (successful_utc>9223372036854775807-?2 OR deadline<>CASE WHEN ?2=0 THEN 0 ELSE successful_utc+?2 END) AND NOT EXISTS(SELECT 1 FROM sfx_ftn_expiry_intents e WHERE e.ingress_id=r.ingress_id AND e.outcome IN(1,2,3)) ORDER BY ingress_id LIMIT ?3";
+        SqliteStatement q(db,sql.c_str(),"bounded ALL changed existing protections, due now and later");q.bind(1,network.code);q.bind(2,std::int64_t{network.retention_days}*86400);q.bind(3,static_cast<std::int64_t>(app::kFtnRetentionReviewMaximum+1));
+        while(q.row()){if(result.size()==app::kFtnRetentionReviewMaximum)throw StorageFailure(app::StorageErrorCode::backpressure,"ftn_retention_review_capacity",SQLITE_BUSY);auto before=original(q);const auto after=deadline(before.successful_utc,network);if(after!=before.deadline)result.push_back({std::move(before),after,network.name});}
+    }
+    std::sort(result.begin(),result.end(),[](const auto& a,const auto& b){return a.before.ingress.bytes<b.before.ingress.bytes;});return result;
+}
+app::FtnRetentionPreview summary(const app::FtnTransferToken& token,const app::FtnConfiguration& c,const std::vector<Change>& items,std::int64_t now){
+    app::FtnRetentionPreview out;out.token=token;out.configuration_revision=c.revision;out.reviewed_utc=now;out.draft=ftn_detail::fingerprint(app::encode_ftn_configuration(c));out.changed=static_cast<std::uint32_t>(items.size());
+    for(const auto& item:items){if(!shortening(item.before.deadline,item.after))continue;++out.shortened;auto found=std::find_if(out.networks.begin(),out.networks.end(),[&](const auto& n){return ftn_detail::same(n.network,item.before.network);});if(found==out.networks.end()){out.networks.push_back({item.before.network,item.name,0,0,0,item.after,item.after});found=out.networks.end()-1;}if(item.after<=now)++found->due_now;else ++found->expire_later;if(!item.before.deadline)++found->from_forever;found->earliest=std::min(found->earliest,item.after);found->latest=std::max(found->latest,item.after);}
+    return out;
+}
+void require_same_items(sqlite3* db,const app::FtnTransferToken& token,const std::vector<Change>& current){
+    SqliteStatement q(db,"SELECT ingress_id,protection_revision,successful_utc,old_deadline,new_deadline,volume,native_id,byte_count,sha256 FROM sfx_ftn_retention_plan_items WHERE operation_id=?1 ORDER BY ingress_id","exact reviewed set; no later additions or silent subset");q.bind(1,token);std::size_t at{};
+    while(q.row()){if(at>=current.size())message_detail::conflict();const auto& item=current[at++];const auto& r=item.before;if(q.identifier(0)!=r.ingress||q.int64(1)!=r.protection_revision||q.int64(2)!=r.successful_utc||q.int64(3)!=r.deadline||q.int64(4)!=item.after||q.text(5)!=r.native.volume||q.text(6)!=r.native.file_id||q.int64(7)!=static_cast<std::int64_t>(r.native.bytes)||file_detail::digest(q,8)!=r.native.sha256)message_detail::conflict();}if(at!=current.size())message_detail::conflict();
+}
+void apply(sqlite3* db,const app::FtnTransferToken& token,const app::FtnConfiguration& previous,const app::FtnConfiguration& requested,std::int64_t now){
+    const auto items=changes(db,previous,requested);
+    SqliteStatement plan(db,"SELECT draft_sha256,expected_revision,applied_revision FROM sfx_ftn_retention_plans WHERE operation_id=?1","require the exact uploaded draft review before changing any old protection");plan.bind(1,token);if(!plan.row()){if(items.empty())return;message_detail::conflict();}if(file_detail::digest(plan,0)!=ftn_detail::fingerprint(app::encode_ftn_configuration(requested))||plan.int64(1)!=previous.revision||!plan.is_null(2))message_detail::conflict();require_same_items(db,token,items);
+    for(const auto& item:items){SqliteStatement update(db,"UPDATE sfx_ftn_retained_originals SET deadline=?2,protection_revision=protection_revision+1 WHERE ingress_id=?1 AND protection_revision=?3","atomic reviewed shortening or protection extension; old lineage retained");update.bind(1,item.before.ingress);update.bind(2,item.after);update.bind(3,item.before.protection_revision);update.step();if(sqlite3_changes(db)!=1)message_detail::conflict();}
+    SqliteStatement activate(db,"UPDATE sfx_ftn_retention_plans SET applied_revision=?2 WHERE operation_id=?1 AND applied_revision IS NULL","activate exact receipt set in SAME configuration transaction");activate.bind(1,token);activate.bind(2,previous.revision+1);activate.step();observe_clock(db,now);
+}
+// Called only on a NEW successful ingress transition. Legacy processed rows
+// are never backfilled from a later retry, process restart or directory scan.
+void record_processed(sqlite3* db,const app::Identifier128& id,std::int64_t now){
+    if(now<1||now<clock(db))return;
+    SqliteStatement q(db,"SELECT i.network,i.created_utc,n.volume,n.file_id,n.checkpoint_bytes,n.prefix_sha256,i.declared_size,i.content_sha256,o.kind,o.owner_id FROM sfx_ftn_ingress i JOIN sfx_ftn_ingress_native n USING(receipt_id) JOIN sfx_ftn_processing_owners o USING(receipt_id) WHERE i.receipt_id=?1 AND i.state=4 AND i.received_bytes=i.declared_size AND i.network<>'' AND i.proof IN(1,2,3,5)","bind complete processed managed custody, including separately admitted External credentials");q.bind(1,id);if(!q.row()||q.int64(1)>now||q.int64(4)!=q.int64(6)||file_detail::digest(q,5)!=file_detail::digest(q,7))return;
+    if(q.int64(8)==0){if(q.identifier(9)!=id)return;}else{SqliteStatement publication(db,"SELECT 1 FROM sfx_ftn_file_publications WHERE operation_id=?1 AND phase=6 AND (tic_receipt=?2 OR payload_receipt=?2)","file originals require completed original catalog publication");publication.bind(1,q.identifier(9));publication.bind(2,id);if(!publication.row())return;}
+    const auto c=ftn_detail::config(db);const auto network=std::find_if(c.networks.begin(),c.networks.end(),[&](const auto& n){return ftn_detail::same(n.code,q.text(0));});if(network==c.networks.end())return;
+    if(network->keep_processed&&network->retention_days&&now>INT64_MAX-std::int64_t{network->retention_days}*86400)return;
+    SqliteStatement add(db,"INSERT INTO sfx_ftn_retained_originals VALUES(?1,?2,?3,?4,?5,?6,?7,?8,1,?9)","save successful time and then-current policy atomically with processed receipt");add.bind(1,id);add.bind(2,network->code);add.bind(3,now);add.bind(4,c.revision);add.bind(5,q.text(2));add.bind(6,q.text(3));add.bind(7,q.int64(4));add.bind(8,file_detail::digest(q,5));add.bind(9,deadline(now,*network));add.step();observe_clock(db,now);
+}
+}
+application::StorageResult<application::FtnRetentionPreview> SqliteAccountRepository::preview_ftn_retention(const application::MessageConfigurationActor& a,const application::FtnTransferToken& token,const application::FtnConfiguration& c){
+    namespace app=application;using Result=app::FtnRetentionPreview;const auto bytes=app::encode_ftn_configuration(c);if(!a.installation_owner||a.caller||token==app::FtnTransferToken{}||bytes.empty())return read_failure<Result>(invalid("validate bounded exact retention preview"));const auto now=impl_->message_utc_now_();if(now<1)return read_failure<Result>(invalid("retention clock unavailable"));
+    return impl_->write_result<Result>("record exact uploaded retention policy review",bytes.size()*2+app::kFtnRetentionReviewMaximum*256,[a,token,c,now](sqlite3* db,std::optional<Result>& out){
+        message_detail::config_authority(db,a);const auto previous=ftn_detail::config(db);if(previous.revision!=c.revision||previous.message_catalog_revision!=c.message_catalog_revision||previous.file_catalog_revision!=c.file_catalog_revision)message_detail::conflict();const auto items=ftn_retention_detail::changes(db,previous,c);const auto summary=ftn_retention_detail::summary(token,c,items,now);const auto wire=app::encode_ftn_retention_preview(summary);if(wire.empty())message_detail::conflict();
+        SqliteStatement old(db,"SELECT draft_sha256,summary,applied_revision FROM sfx_ftn_retention_plans WHERE operation_id=?1","idempotent exact preview after lost response");old.bind(1,token);if(old.row()){if(file_detail::digest(old,0)!=summary.draft||!old.is_null(2))message_detail::conflict();ftn_retention_detail::require_same_items(db,token,items);const auto saved=app::decode_ftn_retention_preview(old.blob(1));if(!saved)file_detail::corrupt();out=*saved;return SQLITE_OK;}
+        SqliteStatement add(db,"INSERT INTO sfx_ftn_retention_plans VALUES(?1,?2,?3,?4,?5,NULL)","preview is not policy activation or deletion authority");add.bind(1,token);add.bind(2,summary.draft);add.bind(3,c.revision);add.bind(4,now);add.bind(5,wire);add.step();
+        for(const auto& item:items){const auto& r=item.before;SqliteStatement row(db,"INSERT INTO sfx_ftn_retention_plan_items VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10)","immutable before/after protection and full original identity");row.bind(1,token);row.bind(2,r.ingress);row.bind(3,r.protection_revision);row.bind(4,r.successful_utc);row.bind(5,r.deadline);row.bind(6,item.after);row.bind(7,r.native.volume);row.bind(8,r.native.file_id);row.bind(9,static_cast<std::int64_t>(r.native.bytes));row.bind(10,r.native.sha256);row.step();}out=summary;return SQLITE_OK;
+    });
+}

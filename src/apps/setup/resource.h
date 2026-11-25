@@ -1,0 +1,11 @@
+#pragma once
+#define IDI_SETUP 1
+#define IDD_SETUP 101
+#define IDC_ROOT 1001
+#define IDC_BROWSE 1002
+#define IDC_START_MENU 1003
+#define IDC_DESKTOP 1004
+#define IDC_UNINSTALL 1005
+#define IDC_PROGRESS 1006
+#define IDC_HOSTING 1007
+#define IDC_REMOVE_BOARD 1008

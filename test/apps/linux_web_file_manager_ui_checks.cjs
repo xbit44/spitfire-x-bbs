@@ -1,0 +1,22 @@
+'use strict';
+module.exports=async({assert,sandbox,evaluate,elements,response})=>{
+  evaluate("authenticated=true;page='panel';maintenanceActive=false;busy=false;fmClear();fmOpen=true");
+  let submits=0,prepares=0,release;const review={found:true,handle:'a'.repeat(64),choices:{action:'remove',file:'1',revision:'2'},submitted:false,known:false,status:null};
+  sandbox.fetch=async(path,options)=>{if(path==='/api/files/prepare'){++prepares;return response(review);}if(path==='/api/files/job'){const action=JSON.parse(options.body).action;if(action==='submit'){++submits;throw new Error('lost reply');}return response({found:false});}throw new Error(path);};
+  let action=evaluate("fmRun({action:'remove',file:'1',revision:'2'},true,'test.zip')");for(let i=0;i<8&&!elements.get('offline-dialog').open;++i)await Promise.resolve();
+  assert.equal(elements.get('offline-dialog').open,true);elements.get('offline-decline').onclick();await action;assert.equal(submits,0,'cancelled removal never starts');assert.equal(evaluate('fmJob'),null);
+  action=evaluate("fmRun({action:'remove',file:'1',revision:'2'},true,'test.zip')");for(let i=0;i<8&&!elements.get('offline-dialog').open;++i)await Promise.resolve();elements.get('offline-accept').onclick();await action;
+  assert.equal(submits,1);assert.equal(evaluate('fmJob.submitted'),true);assert.equal(evaluate('fmJob.known'),false);assert.equal(elements.get('fm-remove').disabled,true,'unknown result blocks new file changes');
+  await evaluate("fmRun({action:'pending'},false)");assert.equal(prepares,2,'unknown job cannot create replacement');
+  sandbox.fetch=async()=>response({...review,submitted:true,known:true,status:{state:'Completed',running:false,ok:true,detail:'Removed',bytes_done:'1',bytes_total:'1',view:null,report:null}});await evaluate('fmCheck(true)');assert.equal(evaluate('fmJob.status.state'),'Completed');
+  evaluate('fmClear();fmOpen=true');sandbox.fetch=()=>new Promise(resolve=>release=resolve);const late=evaluate('fmBrowse()');evaluate('authenticated=false;cpClearCallerViews()');release(response({groups:[{id:'1',name:'late group',enabled:true}],areas:[],next:null}));await late;assert.equal(elements.get('fm-body').children.length,0,'late read cannot restore signed-out data');
+  evaluate("authenticated=true;page='panel';fmClear();fmOpen=true");sandbox.fetch=async()=>response({ok:true,records:[{id:'9007199254740993',area:'1',revision:'2',name:'<script>bad</script>.zip',short:'<img src=x>',bytes:'18446744073709551615',state:0,pending:false,purged:false}],pending:[],next:'0',pending_next:null});await evaluate("fmBrowse({kind:'records',area:'1'})");
+  assert.equal(evaluate('fmData.records[0].id'),'9007199254740993');const text=n=>[n.textContent,...n.children.map(c=>typeof c==='object'?text(c):c)].join(' ');assert.match(text(elements.get('fm-body')),/<script>bad/,'filenames are text nodes');assert.equal(elements.get('fm-next').disabled,true);
+  elements.get('fm-select-page').onclick();assert.equal(elements.get('fm-body').querySelectorAll('input')[0].checked,true,'bulk selection checks visible box');
+  evaluate("fmClear();fmOpen=true;fmSelected.set('1',{id:'1',revision:'2',name:'one'});fmSelected.set('2',{id:'2',revision:'3',name:'two'})");
+  let current=null,count=0;const completed={state:'Completed',running:false,ok:true,detail:'Removed',bytes_done:'1',bytes_total:'1',view:null,report:null};
+  sandbox.fetch=async(path,options)=>{if(options.method!=='POST')return response(current);const data=JSON.parse(options.body);if(path==='/api/files/prepare'){current={found:true,handle:String(++count).repeat(64),choices:data,submitted:false,known:false,status:null};return response(current);}if(data.action==='submit'){current={...current,submitted:true,known:true,status:{...completed,state:'Running',running:true}};return response(current);}throw new Error('unexpected batch action');};
+  let batch=evaluate('fmRemove()');elements.get('offline-accept').onclick();await batch;assert.equal(count,1);assert.equal(evaluate('fmBatch.index'),0,'second file waits for actual first completion');current={...current,status:completed};await evaluate('fmCheck(true)');assert.equal(count,2);assert.equal(evaluate('fmBatch.removed'),1);
+  current={...current,status:completed};await evaluate('fmCheck(true)');assert.equal(evaluate('fmBatch'),null);assert.equal(evaluate('fmSelected.size'),0);assert.match(elements.get('fm-detail').textContent,/Confirmed removed: 2/);
+  evaluate('fmClear()');
+};

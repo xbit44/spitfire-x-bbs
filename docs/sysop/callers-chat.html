@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>Manage callers and chat | Spitfire-X Sysop Wiki</title>
+ <link rel="stylesheet" href="assets/sysop.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to article</a>
+<aside class="sidebar" aria-label="Wiki navigation">
+ <img class="sidebar-logo" src="images/sfx-about-approved.png" width="1254" height="1254" alt="Spitfire-X BBS bison logo">
+ <a class="brand" href="wiki.html">SPITFIRE-X<span>BBS / SYSOP WIKI</span></a>
+ <form action="search.html" method="get" role="search">
+  <label for="wiki-query">Search this wiki</label>
+  <div class="search-field"><input id="wiki-query" name="q" type="search" maxlength="160" placeholder="Search articles" autocomplete="off"><button type="submit" aria-label="Search">Go</button></div>
+ </form>
+ <nav aria-label="Topics"><p class="nav-heading">CONTENTS</p><a href="wiki.html">Wiki home</a><a href="get-ready.html">Get ready</a>
+<a href="linux-controls.html">Linux browser controls</a>
+<a href="daily-operation.html">Daily operation</a>
+<a href="callers-chat.html" aria-current="page">Callers &amp; chat</a>
+<a href="messages-mail.html">Messages &amp; mail</a>
+<a href="files-transfers.html">Files &amp; transfers</a>
+<a href="doors.html">Doors</a>
+<a href="ftn-networks.html">FTN networks</a>
+<a href="maintenance-recovery.html">Maintenance &amp; recovery</a>
+<a href="updates-help.html">Updates &amp; troubleshooting</a>
+<a href="customization-reference.html">Customization &amp; Displays</a>
+<a href="thanks-to.html">Thanks to</a>
+</nav>
+ <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
+</aside>
+<main id="main" tabindex="-1">
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">Sysop wiki</span></div>
+ <article data-search="article"><h1>Manage callers and chat</h1><p class="lead">Accounts, access, limits and Sysop chat.</p><h2>In this guide</h2>
+<ul class="article-links"><li><a href="#accounts">Users &amp; Access &gt; Accounts</a></li><li><a href="#security-levels">Users &amp; Access &gt; Security Levels</a></li><li><a href="#registration">Users &amp; Access &gt; New User Registration</a></li><li><a href="#caller-password-policy">Users &amp; Access &gt; Caller Password Policy</a></li><li><a href="#idle-limits">Connections &gt; Caller Idle Limits</a></li><li><a href="#chat-rooms">Chat &gt; Chat Rooms</a></li></ul>
+<section id="accounts"><h2>Users &amp; Access &gt; Accounts</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Use Find, explicitly select the named caller or choose New User, then edit the grouped fields. Save Changes saves the account editor; password reset and account-state actions keep their separate reviews and session effects. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>Use <strong>Find</strong> with a name prefix or the user number shown in Accounts, then select the record. Previous and Next move through the results. Check the selected name and number before saving or using a password or account-state action. On Windows, the fields are divided into <strong>Personal</strong> and <strong>Security</strong> tabs.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Field</th><th>What to enter</th></tr></thead><tbody>
+<tr><td>Name</td><td>1-30 printable ASCII characters. Use single spaces between words and none at either end. Account-name comparisons ignore letter case, so changing capitalization does not create a distinct name.</td></tr>
+<tr><td>Real name</td><td>Optional, up to 64 printable ASCII characters. Use single spaces between words and none at either end.</td></tr>
+<tr><td>Location</td><td>Optional, up to 64 printable ASCII characters, without leading/trailing spaces.</td></tr>
+<tr><td>Phone</td><td>Optional, up to 32 printable ASCII characters, without leading/trailing spaces.</td></tr>
+<tr><td>Email</td><td>Optional, up to 254 printable ASCII characters, without leading/trailing spaces.</td></tr>
+<tr><td>Birth date</td><td>Blank or a real date in <code>YYYY-MM-DD</code> form, such as <code>1980-05-21</code>.</td></tr>
+<tr><td>Sex</td><td><code>M</code>, <code>F</code>, <code>X</code>, or blank.</td></tr>
+<tr><td>Assigned level</td><td>An active configured security level from 1 to 999. This changes the selected caller's assignment; edit shared level definitions separately in Security Levels.</td></tr>
+<tr><td>Allow automatic purge</td><td>On allows the account to be considered by automatic purge policy; off protects it from that eligibility. This checkbox does not itself run a purge.</td></tr>
+</tbody></table></div>
+<p>There are no replacement defaults for an existing caller: the form loads that record, and an update preserves it. Optional profile fields may be left empty. To rename <code>River Runner</code>, edit Name and save; do not create another account merely to change the display name.</p>
+<h3>Create or save a caller</h3>
+<p>Choose <strong>New User</strong>, enter a name and an initial password twice, then <strong>Save</strong>. New profile fields start empty. The account receives the configured New User level when saved and starts with automatic-purge permission off. Its user number is assigned on Save. After creating it, find and select the saved record before changing its assigned level or purge choice.</p>
+<p>Passwords must meet the active <a href="#caller-password-policy">caller password policy</a>. For an existing caller, ordinary Save writes the name, profile, assigned level and purge choice; password reset is a separate action. Saved profile changes do not require a BBS restart. Renaming disconnects that caller's sessions. Reduced access applies to online callers; newly granted Sysop access requires the caller to log in again and complete System Password authentication.</p>
+<h3>Reset a password</h3>
+<p>Select the existing caller, save or discard ordinary record edits, enter the temporary password in Password and Confirm, then choose <strong>Reset Password...</strong> and review the action. The reset disconnects that caller's sessions. The temporary password expires after 72 hours or first use, and the caller must replace it at login. Entering a password and choosing ordinary Save does not perform this reset. Passwords are never shown as recovered existing values; enter them again when a retry requires it.</p>
+<h3>Deactivate, reactivate or delete</h3>
+<p><strong>Deactivate User</strong> disconnects the caller and blocks login until the account is reactivated. <strong>Reactivate User</strong> returns it to active status; the usual password, access and network checks still apply. <strong>Delete User</strong> blocks login and disconnects sessions, while retaining the deleted-account record and retained session/audit history. It does not purge that history or provide an undo that recreates the deleted account.</p>
+<p>The last usable Sysop is protected. The designated System Sysop also needs an eligible replacement before deactivation, deletion or demotion. If an action is refused because the record or policy changed, reload and review. If a result says a change committed but cleanup did not finish, inspect the saved account and Runtime status before doing anything again; do not treat it as an untouched record.</p></section>
+<section id="security-levels"><h2>Users &amp; Access &gt; Security Levels</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Choose a named level or Add Level and save that level’s fields. New caller level and Sysop threshold, and the message body limit, retain their separate save scopes; changing the selected level does not silently submit them. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>A security level is a shared definition used by callers assigned to that number. Editing a level changes that definition; it does not select one caller for editing. A fresh board contains level <strong>10, New User</strong>, and level <strong>999, Sysop</strong>. Normal updates retain your configured levels and their saved limits.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Field</th><th>Rules</th><th>Starting value</th></tr></thead><tbody>
+<tr><td>Level number</td><td>Whole number 1-999. Choose an unused number for a new level. Removed numbers cannot be reused.</td><td>Windows New Level starts blank; Linux Add starts at 1. These are drafts until saved.</td></tr>
+<tr><td>Label</td><td>1-32 printable ASCII characters, with no leading or trailing spaces.</td><td>New User for 10; Sysop for 999. A new level needs a label.</td></tr>
+<tr><td>Description</td><td>Optional, up to 128 printable ASCII characters. Leave empty or use text without leading/trailing spaces.</td><td>Empty.</td></tr>
+<tr><td>Minutes Per Call</td><td>0-4,294,967,295 whole minutes; 0 means unlimited. Level 999 must remain unlimited.</td><td>180 for fresh level 10; unlimited for 999 and a new level draft.</td></tr>
+<tr><td>Minutes Per Day</td><td>The same range. Total caller time available in a BBS-local calendar day; 0 means unlimited. Level 999 remains unlimited.</td><td>180 for fresh level 10; unlimited for 999 and a new level draft.</td></tr>
+<tr><td>Minutes Per Private Chat</td><td>The same range, per private conversation; 0 means unlimited. Linux labels this Private chat minutes per call.</td><td>Unlimited.</td></tr>
+<tr><td>Private Chat Minutes Per Day</td><td>The same range, for accumulated private-chat time that day; 0 means unlimited.</td><td>Unlimited.</td></tr>
+<tr><td>New User level / New caller security level</td><td>An active configured level, 1-999, assigned to newly registered callers. Existing callers keep their assigned levels.</td><td>10.</td></tr>
+<tr><td>Sysop threshold / Sysop security threshold</td><td>An active configured level, 1-999. Callers at or above it have Sysop authority, subject to Sysop authentication.</td><td>999.</td></tr>
+</tbody></table></div>
+<p>The 180-minute fresh level-10 limits are not imposed retroactively on an older completed installation whose calling allowances were unconfigured: that upgrade case retains unlimited allowances. Check the displayed values after an upgrade. For a new regular-caller level, for example, choose an unused number such as <code>20</code>, label it <code>Regular</code>, and set a per-call allowance of <code>60</code> and a daily allowance of <code>120</code>. The caller can use at most the time remaining under both limits. Daily time follows the BBS time zone.</p>
+<h3>Save a level or shared defaults</h3>
+<p>On Windows, select a level or choose <strong>New Level</strong>, fill in its fields and choose <strong>Save</strong>. Review the shared New User level and Sysop threshold too: the Windows save review includes them. On Linux, select a level or Add, then save; use the separate <strong>New caller level and Sysop threshold</strong> entry to save those shared defaults.</p>
+<p>These changes do not require a BBS restart. Reduced access and time allowances apply to online callers. Newly granted Sysop access requires a fresh login and System Password authentication; merely changing a level is not a way to turn an ordinary live session into an authenticated Sysop session. Level 999 has unlimited calling time and may have simultaneous sessions; the Sysop threshold does not give those two special level-999 privileges to other levels. Authenticated Sysops are exempt from caller AFK as described under <a href="#idle-limits">Caller Idle Limits</a>.</p>
+<p>Private-chat limits are separate from ordinary calling time. A conversation can end when either participant exhausts an applicable private-chat allowance. A zero in one field removes only that field's limit. It does not bypass the other participant's limits or the rest of the board's access policy.</p>
+<p>The selected level also has a separate <a href="messages-mail.html#shared-message-settings">message body-line limit</a>. Save Message Limit changes that limit separately from the calling-time and security fields.</p>
+<h3>Remove a level</h3>
+<p>Choose <strong>Remove Level...</strong> on Windows, or the selected level's remove action on Linux. Review the affected callers and choose another active level for reassignment. A shared default that used the removed level moves to the chosen replacement too. Removal permanently retires the number; it is not an undoable rename. The operation refuses an outdated review or a change that violates last-usable-Sysop protection. If the caller list or policy changed, reload and review again.</p>
+<p>If a normal Save is refused, check the level number, label and description, whole-minute limits and active shared defaults. A removed level cannot be restored by saving its number again. If a result says the database change committed but publication needs recovery, do not repeat the change; reopen SFXConfig and follow the recovery message.</p></section>
+<section id="registration"><h2>Users &amp; Access &gt; New User Registration</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Change the registration choice and use Save Changes. Read its actual saved/active result; it does not create accounts or change existing callers’ assigned levels. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p><strong>Allow New Users</strong> on Windows, or <strong>Allow new callers to register</strong> on Linux, controls whether a new caller may create an account. It is an on/off choice and starts <strong>on</strong> for a fresh board. Turning it off does not itself block existing accounts from logging in; their normal account and security checks still apply.</p>
+<p>Save the change and read the result. When a running BBS reports <strong>Applied</strong>, new connections use the changed setting. Callers already at a login prompt keep the settings from when they connected. If the BBS is stopped, the saved setting is used when it starts. If other changes were saved too, follow the actual Applied, Pending or Restart-required result.</p>
+<p>For a private board, turn registration off while keeping established callers' access. To accept new callers again, turn it on and verify Applied before testing a new connection. Choose the <strong>New User level</strong> separately in <strong>Security Levels</strong>; this checkbox does not assign a level or grant Sysop access.</p>
+<p>A normal update preserves an existing saved choice. Very old configuration formats that have no registration choice load with registration enabled, so check this setting after converting an old board. If a caller still sees the old choice, reconnect before testing again. If Save reports a revision conflict, reload the saved settings before retrying.</p></section>
+<section id="caller-password-policy"><h2>Users &amp; Access &gt; Caller Password Policy</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Choose the caller-password rule and use Save Changes. Follow the required BBS restart and check the active policy; this does not replace the permanent System Password or rewrite existing caller credentials. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p><strong>Require Strong Passwords</strong> on Windows, or <strong>Require strong caller passwords</strong> on Linux, chooses the rules for newly set caller passwords. It starts <strong>off</strong> (Standard). An update preserves your saved policy and existing credentials.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Choice</th><th>Rules</th></tr></thead><tbody>
+<tr><td>Off: Standard</td><td>4-128 printable ASCII characters, including spaces.</td></tr>
+<tr><td>On: Strong</td><td>15-128 printable ASCII characters, checked against the packaged local blocklist and account/board context.</td></tr>
+</tbody></table></div>
+<p>Strong does not require a particular mixture of capitals, digits and symbols. It rejects complete passwords found in the blocklist without regard to case, and simple forms derived from the account name, BBS name, <code>Spitfire</code> or <code>SFX</code>. Adding a few digits to a name is not a way around the context check. Choose an unrelated phrase within the allowed length; do not reuse a documentation example as a real password.</p>
+<p>On Windows, choose <strong>Save Changes</strong>; on Linux, save the page. A policy change requires a BBS restart. It does not replace or invalidate existing passwords, or force all callers to change them. After restarting, check the active policy before relying on it for new passwords.</p>
+<p>If a new password is refused, check its length, printable characters and the stated policy reason. Strong needs its packaged blocklist; unavailable blocklist data is a failure, not permission to skip the check. SFX uses the local data and does not download a list during password entry. The separate <strong>System Password</strong> protects Sysop access and management; changing caller policy does not replace that password.</p>
+<h3 id="caller-change-password">Caller Change Password</h3>
+<p>Two consecutive empty <strong>Enter</strong> entries at <strong>Current password</strong> return the caller to <strong>Your Settings</strong>. To change the password, enter the current password and follow the new-password prompts and active policy. This caller action is separate from the Sysop <strong>Reset Password</strong> action.</p></section>
+<section id="idle-limits"><h2>Connections &gt; Caller Idle Limits</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Keep the minute and second units distinct, then Save Changes. Applied limits are for new calls; an existing call can retain its captured interval. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>Idle limits release a connection when the caller stops entering commands. They are different from the total calling-time allowances in Security Levels. Updates keep the saved idle choices.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Setting</th><th>Starting value</th><th>Allowed values</th></tr></thead><tbody>
+<tr><td>Caller AFK / Caller idle limit</td><td>5 minutes</td><td>Whole minutes from 2 to 1440. Applies after authentication; authenticated Sysops are exempt.</td></tr>
+<tr><td>Login idle / Login idle limit</td><td>60 seconds</td><td>Whole seconds from 30 to 600. Bounds idle login input before authentication.</td></tr>
+</tbody></table></div>
+<p>For example, a caller idle limit of <code>10</code> means ten minutes, while a login idle limit of <code>120</code> means two minutes. Zero does not disable either limit. Caller keyboard input resets the post-login idle timer; output, redraws and transport traffic do not. Windows provides a warning one minute before disconnection.</p>
+<aside class="notice"><strong>Linux idle-warning limitation</strong> Do not rely on a visible warning before the idle cutoff. The cutoff and authenticated-Sysop exemption still apply.</aside>
+<p>On Windows, choose <strong>Save Idle Settings</strong>; on Linux, save the page. An idle-only change can apply without restarting the BBS. Applied settings are used for new calls; a caller who is already authenticated keeps the idle interval assigned to that session. A login already in progress keeps its captured login limit. Windows takes the post-login interval when authentication completes, while Linux keeps the interval captured when the call began.</p>
+<p>Read the Save result before retrying. On Windows, <strong>Retry Idle Settings</strong> reloads the page's connection and settings context while retaining an unsaved draft for review; use <strong>Save Idle Settings</strong> to submit it. If a value is refused, check its units and range. To check a changed limit, start a new ordinary caller connection after Applied; an authenticated Sysop session is exempt from caller AFK and is not a suitable check of that timeout.</p></section>
+<section id="chat-rooms"><h2>Chat &gt; Chat Rooms</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Select a named room or use Add Room, edit its grouped fields, then Save Changes. These are room settings; the separate chat controls send messages. Existing occupied-room and entry-room protections still apply. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>A fresh board has one enabled entry room named <strong>Lobby</strong>, using a minimum security level of <strong>10</strong> with Sysop Only off. Updates keep the saved room list. You can define up to 128 rooms; the entry room must stay enabled and cannot be deleted.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Field</th><th>Rules and starting choice for Add</th></tr></thead><tbody>
+<tr><td>Room name</td><td>Required text, up to 64 bytes; plain ASCII allows 64 characters. No control characters or line breaks. Add starts with an empty name.</td></tr>
+<tr><td>Enabled / Enable this room</td><td>Starts on. Off hides the room from callers. This choice cannot be turned off for the entry room.</td></tr>
+<tr><td>Access Requirements / Security level rule</td><td>Minimum (at least), maximum (at most), or exact level. Starts at minimum.</td></tr>
+<tr><td>Security level</td><td>Whole number 1-999; starts at 10. For example, minimum 20 allows callers at level 20 and above.</td></tr>
+<tr><td>Sysop Only</td><td>Starts off. On uses the BBS Sysop threshold instead of the numeric minimum/maximum/exact rule, and requires authenticated Sysop access.</td></tr>
+</tbody></table></div>
+<p>On Windows, choose <strong>Add Room</strong> or select a room and choose <strong>Edit Room</strong>, then <strong>Save Changes</strong>. <strong>Cancel / Reload</strong> returns to the saved settings. Linux offers the same fields through its room selection and Add flow. For example, create <code>Regulars</code> with minimum level 20, or turn on Sysop Only for a private operator room.</p>
+<p>A room must be empty when you save a change or delete it. SFX refuses a change to an occupied room; it does not move callers out to make the edit fit. A successful save applies without a BBS restart. If another session changed the room list, reload and review the current list before saving again.</p>
+<p><strong>Delete Room</strong> removes the selected empty room and cannot be undone. The entry room is protected. If Save is refused, check the name, level range, room count, occupied-room status and the saved revision.</p></section>
+<div class="related"><h2>Related topics</h2><a href="get-ready.html#connection-limits">Connection limits</a><a href="daily-operation.html">Run your BBS each day</a><a href="messages-mail.html">Messages and offline mail</a></div></article>
+ <footer>Spitfire-X BBS <span aria-hidden="true">/</span> Sysop documentation <a href="#main">Back to top</a></footer>
+</main>
+
+</body>
+</html>

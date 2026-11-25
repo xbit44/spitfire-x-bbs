@@ -1,0 +1,100 @@
+ONE-FILE SYSTEM32 PLAN - STOP FOR DR REVIEW BEFORE OWNER EXECUTION
+SFXEXEC System32 Test 20261024-r2. CR has performed NO System32 placement.
+These are manual PowerShell steps, not an automatic installer/helper.
+Use the designated Win10/32 test host only after DR/owner release. Win7 SP1 x86
+is a later native check; no x64/SysWOW64/Sysnative or third-party runtime path.
+
+Stop only designated SFX test hosts normally and let their owned test VDMs exit.
+Keep production Sync and ordinary callers running. Verify the Test ZIP's outer
+SHA256, extract separately (example D:\SFXSYS), then run Verify-Package.ps1.
+The ONLY proposed system target is native System32/SFXEXEC.DLL. Never change
+SBBSEXEC.DLL, DOSXTRN, Sync INI, registry, PATH, ACLs, Defender or security policy.
+Do not run regsvr32. Do not place SFXLDR.DLL or any other file in System32.
+
+In elevated Windows PowerShell used ONLY for placement, set/review:
+  if ([IntPtr]::Size -ne 4 -or $env:PROCESSOR_ARCHITEW6432) { throw '32-bit Windows required' }
+  $source = 'D:\SFXSYS\SYSTEM32\SFXEXEC.DLL'
+  $target = [IO.Path]::Combine([Environment]::SystemDirectory,'SFXEXEC.DLL')
+  $receipt = 'D:\SFXDOS\System32-placement-20261024-r2.txt'
+  $expected = 'D36589BDE11134B7F6019C32667B639BC465CA39CD39E22FEB6E053A2996A3F3'
+  $target
+Adjust only source to the separately verified extraction. Receipt must be NEW.
+Review the printed target; do not assume Windows is on C:. Keep the receipt.
+
+The complete block below reuses an EXACT existing target or creates an absent
+file without replacement. A different file is a conflict requiring a reviewed
+update plan. CreateNew inherits the destination directory's Windows ACL; no
+archive ACL is copied. Partial failure leaves a pending receipt/file for review.
+Do not force retry, create another receipt to hide failure, or remove partials.
+
+BEGIN PLACE-BODY
+$ErrorActionPreference = 'Stop'
+function Read-SfxDigest($stream) {
+    $stream.Position=0; $sha=[Security.Cryptography.SHA256]::Create()
+    try { return [BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-','') }
+    finally { $sha.Dispose(); $stream.Position=0 }
+}
+foreach($p in @($source,$target,$receipt)) {
+    if(-not [IO.Path]::IsPathRooted($p) -or $p.StartsWith('\\') -or $p -match "[`r`n]"){throw 'Absolute local paths required'}
+    $walk=[IO.Path]::GetFullPath($p)
+    while($walk){if([IO.File]::Exists($walk) -or [IO.Directory]::Exists($walk)){if(([IO.File]::GetAttributes($walk) -band [IO.FileAttributes]::ReparsePoint) -ne 0){throw 'Redirected path refused'}};$walk=[IO.Path]::GetDirectoryName($walk)}
+}
+if([IO.Path]::GetFileName($target) -cne 'SFXEXEC.DLL' -or $source -ieq $target -or $receipt -ieq $target -or $receipt -ieq $source){throw 'Invalid one-file paths'}
+$inputFile=[IO.File]::Open($source,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+$targetFile=$null; $record=$null
+try {
+    if((Read-SfxDigest $inputFile) -cne $expected){throw 'Source hash differs from approved candidate'}
+    $existed=[IO.File]::Exists($target)
+    if($existed){$targetFile=[IO.File]::Open($target,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+        if((Read-SfxDigest $targetFile) -cne $expected){throw 'CONFLICT: existing SFXEXEC.DLL differs; preserved. Ask for reviewed update plan'}}
+    $record=[IO.File]::Open($receipt,[IO.FileMode]::CreateNew,[IO.FileAccess]::ReadWrite,[IO.FileShare]::Read)
+    $pending=[Text.Encoding]::UTF8.GetBytes("SFX-System32-1`n$target`n$expected`npending`nfalse`n")
+    $record.Write($pending,0,$pending.Length);$record.Flush()
+    if(-not $existed){
+        $targetFile=[IO.File]::Open($target,[IO.FileMode]::CreateNew,[IO.FileAccess]::ReadWrite,[IO.FileShare]::Read)
+        $buffer=New-Object byte[] 16384
+        while(($count=$inputFile.Read($buffer,0,$buffer.Length)) -gt 0){$targetFile.Write($buffer,0,$count)}
+        $targetFile.Flush()
+        if((Read-SfxDigest $targetFile) -cne $expected){throw 'Copy verification failed; preserve pending receipt and file for review'}
+    }
+    $introduced=if($existed){'false'}else{'true'}
+    $verified=[Text.Encoding]::UTF8.GetBytes("SFX-System32-1`n$target`n$expected`nverified`n$introduced`n")
+    $record.Position=0;$record.SetLength(0);$record.Write($verified,0,$verified.Length);$record.Flush()
+    Write-Output "VERIFIED $target SHA256=$expected introduced=$introduced receipt=$receipt"
+} finally {if($targetFile){$targetFile.Dispose()};if($record){$record.Dispose()};$inputFile.Dispose()}
+END PLACE-BODY
+
+introduced=false means the file pre-existed and MUST remain on rollback. Keep
+the exact receipt. Leave the elevated window after placement. Run test hosts in
+their existing matching Runtime user/elevation context, not newly elevated.
+
+ROLLBACK, ONLY IF NEEDED
+Stop only designated SFX test hosts/owned VDMs normally, then restore the prior
+recorded BIN selection per README. Keep old BINs, ZIPs, profiles, games, LOGS,
+NODE results and placement receipt. Never stop production Sync/ordinary callers.
+Use the SAME target/receipt/expected variables above and review the target again.
+The block makes one ordinary deletion attempt ONLY for an introduced file still
+matching the recorded approved hash. No force/reboot/scheduling/process killing.
+Keep the target unchanged between verification and deletion; stop if another
+administrator/update is changing it. A different replacement is preserved.
+
+BEGIN ROLLBACK-BODY
+$ErrorActionPreference='Stop'
+$lines=[IO.File]::ReadAllLines($receipt)
+if($lines.Length -ne 5 -or $lines[0] -cne 'SFX-System32-1' -or $lines[1] -ine $target -or $lines[2] -cne $expected -or $lines[3] -cne 'verified'){throw 'Not a completed matching receipt; preserve for review'}
+if($lines[4] -cne 'true'){Write-Output 'PRESERVED: pre-existing system file'}
+else {
+    if(([IO.File]::GetAttributes($target) -band [IO.FileAttributes]::ReparsePoint) -ne 0){throw 'Replacement redirect preserved'}
+    $verifyFile=[IO.File]::Open($target,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+    try {$sha=[Security.Cryptography.SHA256]::Create();try {$current=[BitConverter]::ToString($sha.ComputeHash($verifyFile)).Replace('-','')}finally{$sha.Dispose()}}
+    finally {$verifyFile.Dispose()}
+    if($current -cne $expected){throw 'Different replacement file preserved; rollback refused'}
+    [IO.File]::Delete($target)
+    [IO.File]::AppendAllText($receipt,"removed-by-owner-normal-delete`n")
+    Write-Output 'Removed only the introduced matching SFXEXEC.DLL; receipt retained'
+}
+END ROLLBACK-BODY
+
+If normal deletion fails, leave file/receipt and report. Never delete a
+pre-existing or different file. Missing/pending receipt does not authorize
+deletion. There are no System32 cleanup sweeps in this plan.

@@ -1,0 +1,439 @@
+{
+  "origin": "research/architecture/section10-file-helper",
+  "destination": "third_party/sfx_file_transfer_linux/20261108",
+  "files": [
+    {
+      "path": "build-file.ps1",
+      "bytes": 4844,
+      "sha256": "c4a639eafae06fa452dccfb123e2b52914a33484c0008fc6228d7b4382bb5e7f"
+    },
+    {
+      "path": "build-packet.ps1",
+      "bytes": 4702,
+      "sha256": "a0f0b1e940a6a4327c2b9f87ab7a76049e18cce3c213776577bd90fef2dbd49c"
+    },
+    {
+      "path": "build.ps1",
+      "bytes": 4661,
+      "sha256": "0f44a4e7d85ddf1d20dd84e03c189e67d199029b2b7245fe2ff486e44aa74120"
+    },
+    {
+      "path": "file-protocol-tests.cpp",
+      "bytes": 26006,
+      "sha256": "ae0bab49cca8f9fe4244424259f4785f09f5a20bf4988b96abf52ef073723052"
+    },
+    {
+      "path": "git_branch.h",
+      "bytes": 50,
+      "sha256": "f019ab96079683abb81ba9fa970c1d10b3aa21cc67862fd56d95ec6e3fdbd420"
+    },
+    {
+      "path": "git_hash.h",
+      "bytes": 155,
+      "sha256": "d3a70d3bf3a114eca4294eed88232c0b585c9db16d9099c1c167c3aa2f39d130"
+    },
+    {
+      "path": "host-completion-review.hpp",
+      "bytes": 2879,
+      "sha256": "fc2a8edc1d76520bab45d31fd5d2ade65f70fc3036599f05a91b4e2d7197d3ac"
+    },
+    {
+      "path": "hostile-sexyz.ini",
+      "bytes": 152,
+      "sha256": "5689cd85128ec584718826696d84a7ae82091140e7f9e905bd478dd1dc6a945b"
+    },
+    {
+      "path": "licenses/GPL-2.0.txt",
+      "bytes": 17984,
+      "sha256": "edaef632cbb643e4e7a221717a6c441a4c1a7c918e6e4d56debc3d8739b233f6"
+    },
+    {
+      "path": "licenses/LGPL-2.0.txt",
+      "bytes": 25270,
+      "sha256": "cc535c21133c895b56b374c8a1dc1eb948d99003ed2b47372069456b62f42b24"
+    },
+    {
+      "path": "licenses/upstream-copyright.html",
+      "bytes": 4757,
+      "sha256": "5fecf0a78b9201443677afc214952289178ebab84d0d86e17088ff321f80ab9d"
+    },
+    {
+      "path": "make-client-review-receipt.ps1",
+      "bytes": 6595,
+      "sha256": "0bac7e0552a70522d44e6c0076def9ada7d6eb529fdef1dcf8577fbc9eb073ef"
+    },
+    {
+      "path": "make-review-receipt.ps1",
+      "bytes": 246,
+      "sha256": "6ef9f3a9379ddcabef7a2cbf6b6425fd27e04c20fb88ed5d185fb8a95ebefebe"
+    },
+    {
+      "path": "NOTICES.md",
+      "bytes": 13808,
+      "sha256": "2e4e3617422e91db3d22c50414dadd4792ae74664bb86a6905e5c7f163579327"
+    },
+    {
+      "path": "packet-protocol-tests.cpp",
+      "bytes": 20473,
+      "sha256": "081d480c97d4a9c8e13901dc5fae53efcf5cb8935acc03cbb926c007abcbad24"
+    },
+    {
+      "path": "protocol-tests.cpp",
+      "bytes": 46110,
+      "sha256": "6ee084e1c6d11faed41ebd27b31d72c6db7779d0b3d334f1aa6303c14e5ce77c"
+    },
+    {
+      "path": "qualify-file.ps1",
+      "bytes": 3464,
+      "sha256": "a38f8da8315f902458e8ccde8582e61ea2d779a2fbe3ba63eec7e5aebb737776"
+    },
+    {
+      "path": "qualify-packet.ps1",
+      "bytes": 4137,
+      "sha256": "d70c1950dcea8eb1785c2e44942c4874935f6aba41d990f6badf574b641d9be6"
+    },
+    {
+      "path": "source/src/hash/crc16.c",
+      "bytes": 3626,
+      "sha256": "72a133371f90b98a5b2ff29de6fca4141a916d93056fcf78eba3517113f72645"
+    },
+    {
+      "path": "source/src/hash/crc16.h",
+      "bytes": 1514,
+      "sha256": "534b3f169347aff93dc4f7b2c6c57ddb4a764c63bd38467e59034c560f811de3"
+    },
+    {
+      "path": "source/src/hash/crc32.c",
+      "bytes": 16093,
+      "sha256": "b05410620a98460ed8f64637f724d4fb892bd29d5924895b711cb4b525cbfacc"
+    },
+    {
+      "path": "source/src/hash/crc32.h",
+      "bytes": 2033,
+      "sha256": "8d9c620146aadb7daf57f6655949043666f2cf69cc46169c67832f04efaf89c3"
+    },
+    {
+      "path": "source/src/hash/md5.h",
+      "bytes": 2003,
+      "sha256": "e9cd8ea4df2728558cadf22a4b58efa5ab38bd3ec33d8c3883529123e7421261"
+    },
+    {
+      "path": "source/src/hash/sha1.h",
+      "bytes": 795,
+      "sha256": "acb88751fb567f56fd618f36515c7aa5bfa6d7a15b2d996e90f67270e7078896"
+    },
+    {
+      "path": "source/src/sbbs3/date_str.c",
+      "bytes": 13907,
+      "sha256": "d7c3c60e82afee73aa18bc8bd208037dc65cb7752bdd6a1ee213c58b96c64167"
+    },
+    {
+      "path": "source/src/sbbs3/date_str.h",
+      "bytes": 2406,
+      "sha256": "30c5b14a8b54bc9444c6fb468911f4a023fd1ed146e4e0eea9b81ce237dcd4cf"
+    },
+    {
+      "path": "source/src/sbbs3/dllexport.h",
+      "bytes": 260,
+      "sha256": "fa8d841ce15a0e1df893a5b67076da02b28f387454872ea38f73e5f504df831c"
+    },
+    {
+      "path": "source/src/sbbs3/fidodefs.h",
+      "bytes": 10677,
+      "sha256": "f3c0c999ee745f8e49c93bd7eb3fce3d61668838183f599ecc76811f6d1eed4e"
+    },
+    {
+      "path": "source/src/sbbs3/nodedefs.h",
+      "bytes": 6165,
+      "sha256": "ddea4c939f6f09442f7605923dea1f15c9d8725138552346d7735b528b5e53dd"
+    },
+    {
+      "path": "source/src/sbbs3/nopen.c",
+      "bytes": 9232,
+      "sha256": "8da23237eca19172627da12ebbada7cf7e89cdfa26b78ccfef329eeba04897c6"
+    },
+    {
+      "path": "source/src/sbbs3/nopen.h",
+      "bytes": 2223,
+      "sha256": "2526da2cc866930345e7952287d99f60595dfcc1668c57e043bb6df4d32fd4b3"
+    },
+    {
+      "path": "source/src/sbbs3/ringbuf.c",
+      "bytes": 8997,
+      "sha256": "5377ae875f9378792ca9bbc93436f11bbd3f0b852f47e87e33c1e662104a2afb"
+    },
+    {
+      "path": "source/src/sbbs3/ringbuf.h",
+      "bytes": 2777,
+      "sha256": "863d5b796e6675c1b6c1f5289bfd299e844fe5516187910bee8dd5db939a1067"
+    },
+    {
+      "path": "source/src/sbbs3/sbbsdefs.h",
+      "bytes": 60460,
+      "sha256": "305e74450006c89882371655a4e221611c47597657ebf542e611d8ccb7bcf4e2"
+    },
+    {
+      "path": "source/src/sbbs3/scfgdefs.h",
+      "bytes": 28706,
+      "sha256": "08b550490274515ec008b3a8488d0af93aad43946907579de9c374d50e67b214"
+    },
+    {
+      "path": "source/src/sbbs3/sexyz.c",
+      "bytes": 62160,
+      "sha256": "c03946a7753f39d3161e5473f3d8577f50656b9fb3d68d3a1a5c330e8cfe818d"
+    },
+    {
+      "path": "source/src/sbbs3/sexyz.h",
+      "bytes": 2207,
+      "sha256": "43d725aeb076a077a468cd5c171cf84221381156083c7789c0b7f8c4ddf0b6b2"
+    },
+    {
+      "path": "source/src/sbbs3/sfx_file_transfer.inc",
+      "bytes": 16919,
+      "sha256": "70aa6a14fa031dd362d73a0c3d8097667328caab91276944f988ec8eac291845"
+    },
+    {
+      "path": "source/src/sbbs3/sfx_message_profile.h",
+      "bytes": 5077,
+      "sha256": "f32e55c329ce6a9a95b2309085119201a05270b96f821e5ef85e86f212ce11ac"
+    },
+    {
+      "path": "source/src/sbbs3/sfx_message_receive.inc",
+      "bytes": 16067,
+      "sha256": "7e4117291c657c2d13ca5c637c94cf14c1d6423331c2876f9a7333c5b8d7ec35"
+    },
+    {
+      "path": "source/src/sbbs3/sfx_packet_send.inc",
+      "bytes": 7504,
+      "sha256": "318c118980d86952251827175723c62c1728b0fbf6df3158b781f1b3ec1e69b4"
+    },
+    {
+      "path": "source/src/sbbs3/sfx_xy_transfer.inc",
+      "bytes": 10288,
+      "sha256": "9c93a6f358b3e2e5182d620fad27dc5f2f6a4a414ba3d458b2352478c1a50e3e"
+    },
+    {
+      "path": "source/src/sbbs3/telnet.c",
+      "bytes": 5109,
+      "sha256": "6d676d7761d00c3f94c346f25099e02816b9bc92732cc2a9844129dadcd5f949"
+    },
+    {
+      "path": "source/src/sbbs3/telnet.h",
+      "bytes": 5222,
+      "sha256": "a07664551c62620248025e8d0398a66080d6928cf2d7f6b5af08f7b7dbd9252d"
+    },
+    {
+      "path": "source/src/sbbs3/text.h",
+      "bytes": 17116,
+      "sha256": "a25103be9f0bc07594513b931ac795a53d79b93753aa6dd08d579eae6694d970"
+    },
+    {
+      "path": "source/src/sbbs3/xmodem.c",
+      "bytes": 18028,
+      "sha256": "8ed06418d501bf5c7b4020a9c8c370adf2fb4ebb4515d8bd728a4e9fcefc0638"
+    },
+    {
+      "path": "source/src/sbbs3/xmodem.h",
+      "bytes": 3520,
+      "sha256": "d96a11e86fecea757350e4bcc615c77c2045aee45ce05fdafea0fec0c1fa8313"
+    },
+    {
+      "path": "source/src/sbbs3/zmodem.c",
+      "bytes": 76051,
+      "sha256": "b77e786b00cf373305411b6ca68ef8ce370ed8d700551bbf574e221e016f012b"
+    },
+    {
+      "path": "source/src/sbbs3/zmodem.h",
+      "bytes": 15104,
+      "sha256": "d95f0201c400033e7fbcad53fd5c294aaaf3994fe2cbfae0e3295320b08679fd"
+    },
+    {
+      "path": "source/src/smblib/smbdefs.h",
+      "bytes": 31370,
+      "sha256": "427509280621692bd653bf469065054021d7bf01bacf180b5bb4dc967d97216c"
+    },
+    {
+      "path": "source/src/xpdev/conwrap.h",
+      "bytes": 1639,
+      "sha256": "67fea08a489412ac2d397d0f09b8abb1c980fd81db0c85ac54c82673022ee6e2"
+    },
+    {
+      "path": "source/src/xpdev/cp437defs.h",
+      "bytes": 6678,
+      "sha256": "b564ff3df3546e973e2b575f1d87ace2b1937e6e0d997b9f891ae5957bc8da68"
+    },
+    {
+      "path": "source/src/xpdev/datewrap.c",
+      "bytes": 5141,
+      "sha256": "120e6b9b18c4882f6fcd6ac7951cb2b974d8a6096d89e70863bcfd015a966ff5"
+    },
+    {
+      "path": "source/src/xpdev/datewrap.h",
+      "bytes": 3333,
+      "sha256": "0195016c6c2d24b47aed3c8ff78bf24329bb47edeef74e0fb201711cf33d0838"
+    },
+    {
+      "path": "source/src/xpdev/dirwrap.c",
+      "bytes": 33263,
+      "sha256": "394235e7dd33a928490203b258b63980ad17136250039afad3832badadd5a8ea"
+    },
+    {
+      "path": "source/src/xpdev/dirwrap.h",
+      "bytes": 8638,
+      "sha256": "f7732d601752842981cec8035a9aa825a86447fb9d3150136b5ac6075f6968c5"
+    },
+    {
+      "path": "source/src/xpdev/eventwrap.h",
+      "bytes": 1506,
+      "sha256": "5b25500c3c9885ae0cffee9d9e8b4e8a921a60ca9c6c193fab539d8bae9b721a"
+    },
+    {
+      "path": "source/src/xpdev/filewrap.c",
+      "bytes": 15134,
+      "sha256": "5ad54c7404def9a1d96be8d6c85a8fe0ad69002def3c8e365e6f151fe782d612"
+    },
+    {
+      "path": "source/src/xpdev/filewrap.h",
+      "bytes": 5421,
+      "sha256": "daa9ab0a0b179aeccbab7edf56b9ff6f3127d5cf5bcdafc23b5ec1a643b7f4a3"
+    },
+    {
+      "path": "source/src/xpdev/gen_defs.h",
+      "bytes": 18476,
+      "sha256": "0fb4d4763e2275246c5840618ca5907dc2ca611e27f6d6e05b340b1f1ee06e4d"
+    },
+    {
+      "path": "source/src/xpdev/genwrap.c",
+      "bytes": 45651,
+      "sha256": "811b26c86bcf9a594fb216090c85e1457eb2fef691fdd2c91007f3ea1fd0d1b7"
+    },
+    {
+      "path": "source/src/xpdev/genwrap.h",
+      "bytes": 14257,
+      "sha256": "ee5cd90b264bc32ade08b166c8b2d7c30de9b76aaa22502cebb108324a792d7d"
+    },
+    {
+      "path": "source/src/xpdev/ini_file.c",
+      "bytes": 89316,
+      "sha256": "8b17143d805057534e93dab21be368a819f38f9595fb647ef4eb5e7e5241c08d"
+    },
+    {
+      "path": "source/src/xpdev/ini_file.h",
+      "bytes": 19233,
+      "sha256": "469121013ce5ca22d296d3a348647cf37615cb5d66243f8a9dfe2098a3d645b2"
+    },
+    {
+      "path": "source/src/xpdev/netwrap.c",
+      "bytes": 9852,
+      "sha256": "e6a01b702220db8ca1f168f6846986799eb611ccec528513f0943a9acc056a06"
+    },
+    {
+      "path": "source/src/xpdev/netwrap.h",
+      "bytes": 2073,
+      "sha256": "bb062a9581b850b8a4b3b3097e535a9bf285661f5b3f8a93bf6568000e3b05bd"
+    },
+    {
+      "path": "source/src/xpdev/os_info.c",
+      "bytes": 6222,
+      "sha256": "2778c96059cea5b570135e61221e540bc53874b8cbd27984d1057275638b498a"
+    },
+    {
+      "path": "source/src/xpdev/os_info.h",
+      "bytes": 1568,
+      "sha256": "74b8dd1c08c1541a2f2c6f7a1b4675771fcc94b39696ef0dc10ce2b014bbef48"
+    },
+    {
+      "path": "source/src/xpdev/semwrap.h",
+      "bytes": 2951,
+      "sha256": "117e14c8ff5a28cb92e380e2aebc4b179f052f640133777de4b551cf232f3730"
+    },
+    {
+      "path": "source/src/xpdev/sockwrap.c",
+      "bytes": 22121,
+      "sha256": "6d58f130a0b308a2dda47373a3ba6408005e95316c6a6d3ebed2339f7871da50"
+    },
+    {
+      "path": "source/src/xpdev/sockwrap.h",
+      "bytes": 10182,
+      "sha256": "7667b0739aa4cdd14c3d320f3d7dfb45e45027608ea6435fd29ed0ea159c3071"
+    },
+    {
+      "path": "source/src/xpdev/str_list.c",
+      "bytes": 18479,
+      "sha256": "dbfb3deff0f0da01ef2629b176f18839ec4c2861e581927bc1d5df77ca2ef5dc"
+    },
+    {
+      "path": "source/src/xpdev/str_list.h",
+      "bytes": 9083,
+      "sha256": "6933adb658ee5f76a1609da83bfd10da79a2ed7a568982f8586adec157d6cdb5"
+    },
+    {
+      "path": "source/src/xpdev/strwrap.h",
+      "bytes": 918,
+      "sha256": "4f992dc2853770817c26ec4fee4a6882cb67fd66d74865aedc8435aa706156f6"
+    },
+    {
+      "path": "source/src/xpdev/threadwrap.c",
+      "bytes": 10006,
+      "sha256": "756b52d59610465c05cf4b50512165c492cf6ffe4d46f20757fd4832da21ee6b"
+    },
+    {
+      "path": "source/src/xpdev/threadwrap.h",
+      "bytes": 11363,
+      "sha256": "93bc461f157e5a9597a4fde7aa7c3181ef3aa63508910b7dd29ec0d0bbbd40b8"
+    },
+    {
+      "path": "source/src/xpdev/wrapdll.h",
+      "bytes": 1521,
+      "sha256": "c34e6ad4c4906412ce4e1ab4335398346de6895c63bc4a88eed64ebf289a0ec3"
+    },
+    {
+      "path": "source/src/xpdev/xpbeep.h",
+      "bytes": 9443,
+      "sha256": "844d49c8141335e2d73e95fac1b16f93f2f450a5c5cd356e7f0ab65044db5b8e"
+    },
+    {
+      "path": "source/src/xpdev/xpdatetime.c",
+      "bytes": 12616,
+      "sha256": "03c1f75ca94d6a90898351f27edbc0abe26d92a14bd7332bbc56f88f43165f87"
+    },
+    {
+      "path": "source/src/xpdev/xpdatetime.h",
+      "bytes": 6428,
+      "sha256": "7b9c4fc9be51ca277e2516900171c9a214718ddc08a51ccb99881629d8ba505d"
+    },
+    {
+      "path": "source/src/xpdev/xpendian.h",
+      "bytes": 3262,
+      "sha256": "b21b3138ef813492aa67b61250151404f9499ef18635d4b2d48870edd0c75b87"
+    },
+    {
+      "path": "source/src/xpdev/xpevent.c",
+      "bytes": 6138,
+      "sha256": "1c57f614f5c0f3e6220a6abb074a4078c1a6eea4702c312de8902d918a56938e"
+    },
+    {
+      "path": "source/src/xpdev/xpprintf.c",
+      "bytes": 40714,
+      "sha256": "fefb08455858c6192e949f90c21cd9efcb19b06fe6bbf1171c20047dc12238b4"
+    },
+    {
+      "path": "source/src/xpdev/xpprintf.h",
+      "bytes": 3218,
+      "sha256": "8f336cc5795f3c11e8590bc428a4b94a41d39a895dc0ec742619251d045b0f2c"
+    }
+  ],
+  "status": "Fork only; no Linux transfer/helper qualification. GPL executable process boundary retained; no GPL link into SFX.",
+  "source_preparation": [
+    {
+      "path": "build-file.ps1",
+      "original_sha256": "5ecf041135ef36260e265c82fd8125a60f0c726a0ec14ae0deb4fda96938699d",
+      "reason": "Removed the local checkout path guard. Retained the explicit commit guard."
+    },
+    {
+      "path": "build-packet.ps1",
+      "original_sha256": "c42b65b692dba0b277a96854c1063c3b7ffe837551f1819827f5e91902e3bd41",
+      "reason": "Removed the local checkout path guard. Retained the explicit commit guard."
+    }
+  ]
+}

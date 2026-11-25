@@ -1,0 +1,59 @@
+--- bounded-stream-v2/ssh-trans.c
++++ bounded-stream-v3/ssh-trans.c
+@@ -1588,9 +1588,14 @@
+ 	if (dssh_thrd_check(sess, mtx_lock(&sess->trans.tx_queue_mtx)) != thrd_success)
+ 		return DSSH_ERROR_TERMINATED;
+ 	bool wait_failed = false;
++	struct timespec slot_deadline;
++	/* Even an API caller selecting an unlimited I/O timeout cannot leave
++	 * the demux stuck behind a peer's undrained global reply forever. */
++	dssh_deadline_from_ms(&slot_deadline,
++	    sess->timeout_ms > 0 && sess->timeout_ms < 75000 ? sess->timeout_ms : 75000);
+ 
+ 	while (atomic_load(&slot->ready) && !sess->terminate) {
+-		if (cnd_wait(&sess->trans.tx_slot_cnd, &sess->trans.tx_queue_mtx) != thrd_success) {
++		if (cnd_timedwait(&sess->trans.tx_slot_cnd, &sess->trans.tx_queue_mtx, &slot_deadline) != thrd_success) {
+ 			wait_failed = true;
+ 			break;
+ 		}
+@@ -2507,6 +2512,20 @@
+ 	uint8_t  msg_type;
+ 	uint8_t *peer_payload;
+ 	size_t   peer_len;
++	/* Cover the whole retained queue, including a prior rekey whose packets
++	 * have not yet been replayed. Match the accepted 16MiB credit ceiling;
++	 * the packet count also bounds many tiny control messages. */
++	const size_t maximum_bytes = 16U * 1024U * 1024U;
++	const size_t maximum_messages = 1024U;
++	size_t buffered_bytes = 0, buffered_messages = 0;
++	for (struct dssh_rekey_msg *prior = sess->trans.rekey_queue_head; prior != NULL; prior = prior->next) {
++		if (buffered_messages >= maximum_messages || prior->len > maximum_bytes - buffered_bytes) {
++			session_set_terminate(sess);
++			return DSSH_ERROR_TOOLONG;
++		}
++		buffered_bytes += prior->len;
++		++buffered_messages;
++	}
+ 
+ 	for (;;) {
+ 		int res = recv_packet(sess, &msg_type, &peer_payload, &peer_len);
+@@ -2516,6 +2535,10 @@
+ 			break;
+ 
+ 		/* Buffer for replay after rekey completes */
++		if (buffered_messages >= maximum_messages || peer_len > maximum_bytes - buffered_bytes) {
++			session_set_terminate(sess);
++			return DSSH_ERROR_TOOLONG;
++		}
+ 		struct dssh_rekey_msg *rmsg = malloc(sizeof(struct dssh_rekey_msg) + peer_len);
+ 		if (rmsg == NULL)
+ 			return DSSH_ERROR_ALLOC;
+@@ -2528,6 +2551,8 @@
+ 		else
+ 			sess->trans.rekey_queue_head = rmsg;
+ 		sess->trans.rekey_queue_tail = rmsg;
++		buffered_bytes += peer_len;
++		++buffered_messages;
+ 	}
+ 
+ 	sess->trans.peer_kexinit = malloc(peer_len);

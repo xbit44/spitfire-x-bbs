@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.16)
+project(sfx_linux_transfer_helpers LANGUAGES C)
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(FATAL_ERROR "This source companion builds the Linux transfer helpers.")
+endif()
+find_package(Threads REQUIRED)
+include(cmake/SfxLinuxFileTransfer.cmake)

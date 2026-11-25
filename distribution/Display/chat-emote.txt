@@ -1,0 +1,42 @@
+# Spitfire-X BBS stock chat emotes
+#
+# Format: COMMAND|TARGET|TEXT
+# TARGET is TARGET when the command requires another caller, or NONE otherwise.
+# Use {caller} for the caller performing the emote.
+# Use {target} only when the second field is TARGET.
+# Command names are stored without a leading command prefix and are
+# case-insensitive. Blank lines and lines beginning with # are ignored.
+
+HUG|TARGET|{caller} hugs {target} close.
+KISS|TARGET|{caller} kisses {target} lightly on the cheek.
+WAVE|TARGET|{caller} waves to {target}
+LOOK|TARGET|{caller} is looking {target} up and down...
+HANDSHAKE|TARGET|{caller} is shaking hands with {target}
+SLEEP|NONE|{caller} is nodding off in his chair....   zzzzzzzzzzzzz....
+LAUGH|NONE|{caller} is laughing so hard it hurts!
+BEAT|TARGET|{caller} has picked up a large heavy object and is pummeling {target}!
+HELP|NONE|{caller} doesn't know how to work the chatroom controls... Will somebody help?
+KICK|TARGET|{caller} spins and neatly plants a foot dead in the middle of {target}'s chest.
+BRB|NONE|{caller} will be right back after this brief commercial message...   STAY TUNED.
+BURP|NONE|A loud stomach originated noise is coming from {caller}.
+BARF|TARGET|{caller} has just lost his lunch all over {target}.
+CRY|NONE|Small delicate droplets are welling up in {caller}'s eyes.
+FALL|NONE|{caller} has fallen...    And can't get UPPPPP....
+NUDGE|TARGET|{caller} is giving {target} a slight elbow to the side.  Know what I mean... SAY NO MORE!
+POTTY|NONE|{caller} will be right back...  Has to use the rest room real bad.
+OUCH|NONE|{caller} screams Ouch! and has a facial expression indicating extreme PAIN!
+CONFUSED|NONE|{caller} is confused and has no idea what the hell this conversation is about.
+GIGGLE|NONE|{caller} is snickering... NOT laughing...  just snickering.
+BBL|NONE|{caller} has to leave now, but will return when the babysitter has been serviced.
+SLAP|TARGET|{caller} just backhanded {target}.   For no good reason at all!
+WHATUP|NONE|{caller} says: Whaaaaaaast's UuuuuuuuuuP!
+NODS|NONE|{caller} nods and understands.
+SPOCK|NONE|{caller} raises an eyebrow like Spock.
+BYE|NONE|{caller} disappears in a puff of 90s pixel smoke
+BOARD|NONE|{caller} is board and says "Time to play L.O.R.D."
+DANCE|TARGET|{caller} challenges {target} to a dance-off, DDR style
+FACEPALM|NONE|{caller} face palms
+BOOT|TARGET|{caller} boots {target} offline with a well-aimed +++ATHO
+LORDDUEL|TARGET|{caller} challenges {target} to a LORD duel behind the Inn
+MODEM|NONE|{caller} logs in with a 14.4 modem. *BZZZRRREEEkkkk!*
+LAG|TARGET|{caller} casts a "Lag Spike" at {target}.

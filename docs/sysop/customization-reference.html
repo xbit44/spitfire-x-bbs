@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>Customization &amp; Displays | Spitfire-X Sysop Wiki</title>
+ <link rel="stylesheet" href="assets/sysop.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to article</a>
+<aside class="sidebar" aria-label="Wiki navigation">
+ <img class="sidebar-logo" src="images/sfx-about-approved.png" width="1254" height="1254" alt="Spitfire-X BBS bison logo">
+ <a class="brand" href="wiki.html">SPITFIRE-X<span>BBS / SYSOP WIKI</span></a>
+ <form action="search.html" method="get" role="search">
+  <label for="wiki-query">Search this wiki</label>
+  <div class="search-field"><input id="wiki-query" name="q" type="search" maxlength="160" placeholder="Search articles" autocomplete="off"><button type="submit" aria-label="Search">Go</button></div>
+ </form>
+ <nav aria-label="Topics"><p class="nav-heading">CONTENTS</p><a href="wiki.html">Wiki home</a><a href="get-ready.html">Get ready</a>
+<a href="linux-controls.html">Linux browser controls</a>
+<a href="daily-operation.html">Daily operation</a>
+<a href="callers-chat.html">Callers &amp; chat</a>
+<a href="messages-mail.html">Messages &amp; mail</a>
+<a href="files-transfers.html">Files &amp; transfers</a>
+<a href="doors.html">Doors</a>
+<a href="ftn-networks.html">FTN networks</a>
+<a href="maintenance-recovery.html">Maintenance &amp; recovery</a>
+<a href="updates-help.html">Updates &amp; troubleshooting</a>
+<a href="customization-reference.html" aria-current="page">Customization &amp; Displays</a>
+<a href="thanks-to.html">Thanks to</a>
+</nav>
+ <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
+</aside>
+<main id="main" tabindex="-1">
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">Sysop wiki</span></div>
+ <article data-search="article"><h1>Customization &amp; Displays</h1>
+<p class="lead">Make your BBS look like your BBS. Keep the working commands and access rules while you change the screens callers see.</p>
+<p>This reference describes the existing display features in <strong>1.0.0b1</strong> on Windows and Linux. Start with a copied test board and keep your original artwork. Use the linked <a href="custom-display-checks.html">custom-display test sheet</a> before putting a changed screen in front of callers.</p>
+<h2>In this guide</h2><ul class="article-links">
+<li><a href="#files">Display folder and file choice</a></li><li><a href="#menus">Caller menu filenames</a></li><li><a href="#door-art">Door menus and launch screens</a></li><li><a href="#login-files">Login, welcome and other screens</a></li><li><a href="#special-files">BotGate and private chat files</a></li><li><a href="#codes">Display codes and includes</a></li><li><a href="#limits">File and output limits</a></li><li><a href="#newsletter">Edit the SF Newsletter</a></li><li><a href="#display-settings">Colors, lightbars and preview</a></li></ul>
+<section id="files"><h2>Display folder and file choice</h2>
+<p>Put caller artwork in <code>Display</code> on Windows or <code>display</code> on Linux, directly under your SFX installation folder. <code>.ANS</code> files contain CP437 text and supported ANSI screen controls; <code>.ASC</code> files contain plain ASCII/CP437 without ANSI controls. Save BBS artwork in the intended character set: a UTF-8 file is not automatically converted to CP437. Fresh Linux uses lowercase SFX-generated filenames; a supplied custom artwork filename retains its actual spelling.</p>
+<p>Names are matched without ASCII letter-case differences on both platforms. On Linux, keep just one spelling of each name: <code>MAIN.ASC</code> and <code>main.asc</code> together are ambiguous and are refused. Use ordinary files in the real Display folder, not symbolic links or Windows reparse points. On Linux, keep files owned by the account running SFX, with no group/world write permission or extra hard links. Preserve the installation's normal permissions.</p>
+<p>For a menu with security variants, an ANSI caller at level 10 gets the first usable file in this order:</p>
+<ol><li><code>MAIN10.ANS</code></li><li><code>MAIN.ANS</code></li><li><code>MAIN10.ASC</code></li><li><code>MAIN.ASC</code></li></ol>
+<p>A plain caller tries <code>MAIN10.ASC</code>, then <code>MAIN.ASC</code>. ANSI artwork always takes priority over plain artwork within the ANSI choice, even when the plain file has the exact level. Missing, unreadable or invalid files are skipped in favor of the next candidate. Main caller menus fall back to generated menus if no custom candidate works; the file-group/area picker has the special limit below. An optional screen is normally skipped when no usable file exists; special refusal/chat fallbacks are described below.</p>
+<p>Security suffixes are the caller's <strong>exact level, 1 through 999, without leading zeroes</strong>: <code>MAIN10</code> and <code>MAIN999</code>. SFX does not search nearby levels or treat a suffix as a minimum. Artwork does not give a caller extra access or create commands. Keep its labels and keys in step with the configured commands. Generated menus handle lightbar positions; custom artwork does not define new lightbar hit areas.</p></section>
+<section id="menus"><h2>Caller menu filenames</h2>
+<p>Each base below uses <code>.ANS</code> and/or <code>.ASC</code>. All except <code>BULLETIN</code> accept the exact security suffix just described.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Base</th><th>Where callers see it</th></tr></thead><tbody>
+<tr><td><code>MAIN</code></td><td>Main menu.</td></tr><tr><td><code>MSG</code></td><td>Message menu.</td></tr><tr><td><code>FILE</code></td><td>File menu.</td></tr><tr><td><code>BATCH</code></td><td>Batch transfer menu.</td></tr><tr><td><code>QWK</code></td><td>Offline mail menu.</td></tr><tr><td><code>SYSOP</code></td><td>Sysop Utilities for an authorized caller.</td></tr><tr><td><code>DOOR</code></td><td>Root Door menu.</td></tr><tr><td><code>DBUL</code></td><td>Optional Door Bulletin header; the live index follows.</td></tr><tr><td><code>CHAT</code></td><td>Chat menu, separate from the live chat frame.</td></tr><tr><td><code>YOUR</code></td><td>Caller settings menu.</td></tr><tr><td><code>FGRP</code></td><td>File-group choice.</td></tr><tr><td><code>FAREA</code></td><td>File-area choice.</td></tr><tr><td><code>BULLETIN</code></td><td>Regular bulletins menu; generic pair only. <code>BULLETIN10</code> is not a level-specific variant.</td></tr>
+</tbody></table></div>
+<p><code>BULLET1</code> through <code>BULLET99</code> are regular bulletin pages, not menu security variants. The number is the bulletin number; use <code>BULLET1.ANS</code> or <code>BULLET1.ASC</code>, not <code>BULLET001</code>. The page reader chooses ANSI then plain for ANSI callers, and plain only for plain callers. Use <a href="messages-mail.html">Messages &amp; mail</a> for the bulletin controls.</p>
+<p>The live file-group and file-area picker supplies no board/caller value fields to <code>FGRP</code>/<code>FAREA</code> in this build. Use literal artwork or <code>@GRAPHICS@</code>; a required value such as <code>@BBSNAME@</code> makes that candidate unusable. Missing artwork uses the generated list. If artwork is present but no candidate is usable, the choice can end instead; restore a working file or keep the custom files out of Display while you use the picker.</p>
+<p>Caller <strong>?</strong> help and its command explanations are built into SFX. This build has no general <code>HELP.ANS</code>/<code>HELP.ASC</code> replacement hook. A recognized filename in the tables below does not replace that help.</p></section>
+<section id="door-art"><h2>Door menus and launch screens</h2>
+<p><code>DOOR</code> is the root. A submenu uses <code>DRnnn</code>, where <code>nnn</code> is its zero-padded <strong>menu ID</strong>, 001 through 999. A Door's prelaunch screen uses <code>DPnnn</code>, with the zero-padded <strong>Door ID</strong>. These are IDs from the Door configuration, not the entry's visible position.</p>
+<p>For menu ID 1, use <code>DR001.ANS</code>/<code>DR001.ASC</code>. For its exact level-10 artwork, use <code>DR00110.ANS</code>/<code>DR00110.ASC</code>. Door ID 7 uses <code>DP007</code> and optionally <code>DP00710</code>. Each follows the same ANSI/exact-level/generic/plain fallback order as <code>DOOR</code>.</p>
+<p>The hierarchy allows <strong>three displays in a path: root &rarr; category &rarr; subcategory</strong>. Artwork does not add another level or change the configured hierarchy. Use the stable numeric selections for custom Door menus. If a menu contains entries hidden from that caller, SFX uses a generated, caller-filtered menu instead of showing the authored menu. It checks access again when the caller enters a submenu or launches a Door.</p>
+<p><code>DPnnn</code> is tried for a Door selected from the Door menu before launch. Automatic logon/logoff Door events do not show it. Returning from a Door retains the launching menu path/page. See <a href="doors.html#menus">Door menus</a> for configuration.</p>
+<p>Door Bulletin pages use permanent <strong>Bulletin IDs</strong>: <code>DB001.ANS</code>/<code>DB001.ASC</code> through <code>DB999.ANS</code>/<code>DB999.ASC</code>, with normal exact-security variants such as <code>DB00110.ANS</code>. These are distinct from Door and menu IDs. Optional <code>DBUL.ANS</code>/<code>DBUL.ASC</code> appears as a compact header before the live generated index and its controls. Use the <a href="doors.html#door-bulletins">Door Bulletins setup guide</a> for static pages, Door-generated scores and publication.</p>
+<p>In this build, <code>DRnnn</code> and <code>DPnnn</code> artwork accepts the public display-code group below. Caller, Door and other full menu codes are not enabled for these two filename families; <code>@DOORNAME@</code> is therefore not a usable DP launch-screen code.</p></section>
+<section id="login-files"><h2>Login, welcome and other screens</h2>
+<p>Unless stated otherwise, these optional files have an ANSI/plain pair, with ANSI falling back to plain. They have no security suffix in the normal caller flow.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>File base</th><th>When it is used</th><th>Keep in mind</th></tr></thead><tbody>
+<tr><td><code>SFPRELOG.ASC</code></td><td>Interactive prelogin display, before account authentication.</td><td>Plain file only. Not the BotGate challenge or an SSH password-exchange banner.</td></tr>
+<tr><td><code>NEWUSER</code>, <code>NEWREG</code></td><td>Entering interactive registration, before the account form; NEWUSER is tried first, then NEWREG.</td><td>Use generic files. Although the selector can recognize NEWUSER plus a level, normal registration supplies no authenticated level. Do not expect <code>NEWUSER10</code> to be selected or account details to be filled in here.</td></tr>
+<tr><td><code>WELCOME1</code> &hellip; <code>WELCOME99</code></td><td>After a successful login or registration, following the normal greeting.</td><td>Sequential page numbers, without padding. Gaps are allowed; available pages appear in numeric order and each has an acknowledgment.</td></tr>
+<tr><td><code>ALL</code></td><td>After the welcome sequence for a successful login or registration.</td><td>One optional acknowledged display, not a security-specific menu.</td></tr>
+<tr><td><code>LOCKOUT</code></td><td>Interactive locked-account rejection and certain refused registration names.</td><td>Not a universal authentication-failure screen. An SSH password rejection has no interactive screen on which to show it.</td></tr>
+<tr><td><code>GOODBYE</code></td><td>Normal confirmed logoff.</td><td>Quick goodbye bypasses this display.</td></tr>
+<tr><td><code>SFNWSLTR</code></td><td>SF Newsletter reader.</td><td>Use the Sysop editor below for the plain file; it protects an existing ANSI edition.</td></tr>
+<tr><td><code>SFASLEEP</code></td><td>Windows caller inactivity disconnect.</td><td>No interactive pause can prolong this ending. The Linux caller path does not invoke this custom screen in this build.</td></tr>
+<tr><td><code>NONODES.ASC</code></td><td>Windows offline connection refusal.</td><td>Literal plain text, at most 4 KiB. <code>@BBSNAME@</code>, <code>@@</code> and email addresses are printed unchanged. No ANSI or interactive controls. An unusable file gives the built-in offline reply. The current Linux caller path does not load it.</td></tr>
+<tr><td><code>NONODES.ANS</code>, <code>CHATDONE</code>, <code>EVENTIME</code></td><td>Recognized by the display selector, but not invoked by the normal caller paths for these events.</td><td>Do not rely on these as working custom event screens in this build. The live Windows refusal uses literal NONODES.ASC.</td></tr>
+</tbody></table></div></section>
+<section id="special-files"><h2>BotGate and private chat files</h2>
+<p>These also live in <code>Display</code> on Windows or <code>display</code> on Linux, but use their own rules. They do not expand the <code>@</code> codes or includes listed below.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>File</th><th>Use and limits</th></tr></thead><tbody>
+<tr><td><code>bg-prelog.ans</code></td><td>Artwork for the configured BotGate human challenge on an ANSI-capable connection. At most 16 KiB, with supported ordinary ANSI display controls. <code>##</code> is the remaining-seconds field. An unusable file or plain connection gets the built-in challenge text. No general display-code expansion.</td></tr>
+<tr><td><code>pchat.ans</code></td><td>Private-chat frame when ANSI is active and the terminal is at least 80 columns by 24 rows. At most 32 KiB; frame occupies columns 1-79, rows 1-23. Leave columns 3-77 blank on rows 2, 4-19, 21 and 22 for title, conversation, input and controls. Only supported color and absolute cursor-position ANSI controls are allowed. Invalid/missing artwork gives the stock frame.</td></tr>
+<tr><td><code>pchat.asc</code></td><td>Optional private-chat heading on the plain/nonframed path, at most 32 KiB, 79 columns and 23 newline breaks, without control bytes other than CR/LF. Missing/invalid text is omitted; the built-in chat title, conversation and prompt remain. It is not an ANSI-frame fallback.</td></tr>
+<tr><td><code>chat-emote.txt</code></td><td>Chat emote definitions. Current runtime reader accepts at most 32 KiB, up to 128 valid definitions. One line is <code>NAME|NONE|text</code> or <code>NAME|TARGET|text</code>. Names are 1-24 letters, case-insensitive, without duplicates; mode must be uppercase. Empty lines and lines starting <code>#</code> or <code>;</code> are ignored. <code>{caller}</code> and <code>{target}</code> insert the names; a TARGET emote needs a target. Other display codes are literal.</td></tr>
+</tbody></table></div>
+<pre><code>WAVE|NONE|{caller} waves to everyone.
+GREET|TARGET|{caller} greets {target}.</code></pre>
+<p>Keep emote text short and on one line. Control characters are removed and chat text is bounded; these definitions are not a script or a way to run a command.</p></section>
+<section id="codes"><h2>Display codes and includes</h2>
+<p>Trusted menu and optional display files can insert values using codes such as <code>@BBSNAME@</code>. Code names ignore case. <code>@@</code> produces one literal <code>@</code>; an ordinary email address or the standalone <code>@ Sysop Utilities</code> key stays literal. Unknown, incomplete, unavailable required or disallowed codes make that candidate unusable, so SFX tries its fallback. <code>@PASSWORD@</code> and <code>@BIRTHDATE@</code> are forbidden.</p>
+<h3>Which codes fit which screen?</h3>
+<p>The <strong>public group</strong> is <code>BBSNAME SYSOP VERSION DATE TIME DATETIME NODE NODES TRANSPORT COLS ROWS</code>. These are the only value codes enabled for general optional event screens, bulletin pages and DR/DP artwork. A value still needs to exist in that event's context; for example, an early or ending screen may not have node information. Start those screens with literal text and add only values you have checked.</p>
+<p>WELCOME, NEWREG and NEWUSER also accept <code>GRAPHICS</code>. NEWUSER can accept caller fields when an authenticated context is explicitly supplied, but normal registration runs it before an account exists. Use public codes there, not caller-specific examples. NONODES.ASC, BotGate and the special chat files follow their literal/separate rules above.</p>
+<p>The thirteen normal menu bases in the caller-menu table recognize all the value names below, subject to the live FGRP/FAREA context limit above. Optional values show empty when that menu has no matching caller, message, file, Door, chat or FTN context. A recognized value is not a promise that every menu has a current file or message selected.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Group</th><th>Value names</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Board and session</td><td><code>BBSNAME SYSOP VERSION DATE TIME DATETIME NODE NODES ONLINE TRANSPORT UPTIME GRAPHICS COLS ROWS</code></td><td>Board name, Sysop, version, local date/time, node/count, online count, transport, uptime, graphics choice and terminal size.</td></tr>
+<tr><td>Caller</td><td><code>FNAME NAME ALIAS EMAIL PHONENUM CITYSTATE SLEVEL LOGONS ORGLOG LASTCALL LOGTIME TIMEON TIMELEFT SUBDATE PROTOCOL QUIET HOTKEY IPADDR HOSTNAME PWAGE</code></td><td>Caller identity/contact, security/logons, original/last call, logon minutes, time on/left, subscription days, transfer protocol, preferences, address/host and password age.</td></tr>
+<tr><td>Activity</td><td><code>UPLOADS DOWNLOADS UPK DOWNK POSTS MAILTOTAL MAILUNREAD</code></td><td>Upload/download counts and KiB, posts and mail counts.</td></tr>
+<tr><td>Messages</td><td><code>MSGCONF MSGCONFNUM MSGCOUNT NEWMSGS MSGNUM MSGTO MSGFROM MSGSUBJECT MSGDATE</code></td><td>Current message conference and number, counts, selected message and header fields.</td></tr>
+<tr><td>Files</td><td><code>FILEAREA FILEAREANUM FILECOUNT NEWFILES FILENAME FILEDESC FILESIZE FILEUPLOADER FILEDATE FILEDLS</code></td><td>Current file area and number, counts, selected file and description, size, uploader, date and download count.</td></tr>
+<tr><td>Doors, chat and FTN</td><td><code>DOORNAME DOORNUM DOORMENU CHATROOM CHATCOUNT FTNNET FTNADDR</code></td><td>Current Door/menu, chat room/count and FTN network/address when the menu supplies them. DR/DP files have the narrower public-only rule.</td></tr>
+</tbody></table></div>
+<h3>Field widths and menu formats</h3>
+<p><code>@BBSNAME|L20@</code> makes a 20-byte field. Use <code>L</code> for left, <code>R</code> for right, <code>C</code> for center, or <code>Z</code> for numeric zero padding, with width 1-200. A value longer than its width is clipped: L keeps the left, R/Z the right, and C the middle. Width is bytes in the CP437 output, not a Unicode character count. Z requires an unsigned decimal value.</p>
+<p>Normal menu files also accept the following named formats, for example <code>@TIMELEFT:HMS@</code>. Choose either a named format or a field width for one code; they cannot be combined.</p>
+<ul><li><code>TIMEON TIMELEFT UPTIME</code>: <code>:HMS</code>, <code>:MIN</code> or <code>:SHORT</code>. Raw durations are seconds; MIN is whole minutes. An Unlimited value stays Unlimited.</li><li><code>FILESIZE</code>: <code>:AUTO</code>, <code>:B</code>, <code>:K</code>, <code>:M</code> or <code>:G</code>. K/M/G use powers of 1024 and whole units.</li><li><code>DATE DATETIME ORGLOG LASTCALL MSGDATE FILEDATE</code>: <code>:SHORT</code> keeps the canonical date/time form; <code>:LONG</code> spells out the month.</li><li><code>TIME</code>: <code>:12</code> or <code>:24</code>.</li></ul>
+<p>Optional event screens and DR/DP files use simpler formatting. SHORT, LONG, 12 and 24 leave their value text unchanged there. HMS/MIN require an unsigned number, as do the B/K/M/G/AUTO size conversions. Use plain public values on these screens unless you have checked the exact output; the normal menu's date/clock conversion does not carry over.</p>
+<h3>Screen and paging controls</h3>
+<p><code>@CLS@</code> clears the display; <code>@BEEP@</code> requests a caller bell; <code>@PAUSE@</code> asks for acknowledgment. <code>@PROMPTOFF@</code>/<code>@PROMPT@</code> turn automatic paging off/on, and <code>@NOABORT@</code>/<code>@ABORTON@</code> disable/enable caller abort of the display. A client may silence bells. These controls do not run a shell or menu command. A noninteractive disconnect/refusal can omit or refuse interactive controls.</p>
+<h3>Reuse a header or footer</h3>
+<p><code>@INCLUDE:HEADER.ASC@</code> inserts another file from the same Display folder. Use a simple leaf filename made from letters, digits or underscores and an <code>.ASC</code> or <code>.ANS</code> extension. No path, subfolder, drive, wildcard or <code>..</code> is allowed. Plain displays may include ASC only; ANSI displays may include ASC or ANS. Included text keeps the parent screen's code permissions. A missing, unsafe, invalid or recursive include makes the parent candidate unusable.</p>
+<pre><code>@CLS@
+Welcome to @BBSNAME@.
+@INCLUDE:HEADER.ASC@
+Your next menu keeps its normal commands.</code></pre></section>
+<section id="limits"><h2>File and output limits</h2>
+<p>A normal trusted display file is limited to <strong>256 KiB</strong>. A resolved display allows at most <strong>1 MiB</strong> of source including includes, <strong>8</strong> include levels, <strong>64</strong> include instances and <strong>1 MiB</strong> of rendered output. The whole welcome sequence shares the aggregate/include/output limits. The smaller NONODES, BotGate and private-chat limits take precedence for those files.</p>
+<p>Use ordinary screen colors and cursor movement in ANSI art. Unsupported terminal queries, unsafe controls, bad display codes or files that change while being read can make an asset unusable. Keep the generic ASC version useful so plain callers and ANSI fallbacks have a readable screen. SFX's program update keeps unrecognized/custom artwork; retain your own backup and use the test sheet to check an update on the spare board.</p></section>
+<section id="newsletter"><h3>Edit the SF Newsletter</h3>
+<p>Choose <strong>@ Sysop Utilities &gt; N Edit SF Newsletter</strong> to edit the whole newsletter file: <code>Display/SFNWSLTR.ASC</code> on Windows or <code>display/sfnwsltr.asc</code> on Linux. <strong>Ctrl-Z</strong> saves; <strong>Ctrl-A</strong> asks before discarding edits. <strong>Esc</strong> opens help and actions.</p>
+<p>On a plain terminal, use <code>/L</code> to list lines, <code>/E#</code> to edit, <code>/I#</code> to insert, <code>/D#</code> to delete, <code>/S</code> to save and <code>/A</code> to cancel. Replace <code>#</code> with a line number, such as <code>/E16</code>.</p>
+<p>The editor preserves tabs, spacing, line endings and a missing final newline. It does not sort entries or add dates. Use ASCII/CP437 text up to 256 KiB; ANSI controls are refused. If <code>SFNWSLTR.ANS</code> exists, the editor refuses to edit the ASC file and leaves both files unchanged to protect your artwork.</p>
+<p>Setup does not seed a newsletter. A missing ASC file is created only when you explicitly save.</p></section><section id="display-settings"><h2>General &gt; Displays &amp; Menus</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Edit the grouped caller colors and menu choices, then Save Changes. Menu preview and Door Commands remain separate tasks; a preview does not change a live caller screen. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>These board defaults control generated menu text, caller input and lightbar selection. They do not recolor your authored ANSI artwork or change plain ASCII files. Saved changes apply at the next menu redraw and to new logins; no BBS restart is needed for these settings alone.</p>
+<p>On Windows, the <strong>Message Pipe Colors</strong> section places the private mail and NetMail switch beside the <strong>Pipe color style</strong> selector. <strong>Door Commands…</strong> is on the same row as <strong>Open Display Folder</strong>. See <a href="messages-mail.html#message-pipe-colors">message pipe color modes</a> for the code ranges and line behavior.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Option</th><th>Values and starting value</th><th>What it does</th></tr></thead><tbody>
+<tr><td>Default text color</td><td>Palette 1-15; starts at Light gray (7).</td><td>Default color for generated ANSI menu text. Black is excluded.</td></tr>
+<tr><td>Input color</td><td>Palette 1-15; starts at Bright cyan (11).</td><td>Color used for caller input. Black is excluded.</td></tr>
+<tr><td>Use lightbar menus</td><td>On or off; starts on.</td><td>Enables lightbar selection where supported. Callers may turn lightbars off; direct command entry still works.</td></tr>
+<tr><td>Selected item text</td><td>Palette 0-15; starts at Black (0).</td><td>Foreground of the selected lightbar item.</td></tr>
+<tr><td>Selected item background</td><td>Palette 0-7; starts at Light gray (7).</td><td>Background of the selected item. Bright background colors are not offered.</td></tr>
+<tr><td>Use compact menu footer</td><td>On or off; starts off.</td><td>Chooses the shorter SFX footer instead of the original-style footer.</td></tr>
+</tbody></table></div>
+<p>The palette is 0 Black, 1 Blue, 2 Green, 3 Cyan, 4 Red, 5 Magenta, 6 Brown, 7 Light gray, 8 Dark gray, 9 Bright blue, 10 Bright green, 11 Bright cyan, 12 Bright red, 13 Bright magenta, 14 Yellow and 15 White. Choose contrasting selection colors: Black text on Light gray is the starting combination. A foreground and background with the same base color are refused, including a bright foreground over its matching normal background.</p>
+<p>Windows labels these controls <strong>Default ANSI text</strong>, <strong>Caller input</strong>, <strong>Selected light-bar text</strong>, <strong>Selected light-bar background</strong> and <strong>Enable light bars (callers may turn them off)</strong>. Its <strong>Menu Footer</strong> choices are <strong>SF Original</strong> and <strong>SFX New</strong>; SFX New is the Linux compact-footer choice. Use <strong>Save</strong> after reviewing your changes.</p>
+<p>The starting values are for a fresh board. An existing board keeps its saved menu choices during a normal update. To try a different appearance, change the selection colors and preview an ANSI menu before saving. If Save refuses the colors, choose different base foreground/background colors. If artwork looks unchanged, check whether it supplies its own ANSI colors or you are viewing plain ASCII.</p>
+<h3 id="menu-preview">Preview without changing a caller session</h3>
+<p>The menu preview uses sample caller information. Select the menu, ANSI or ASCII, a security level from <strong>1 to 999</strong>, and whether the sample is a Sysop. Refresh the preview to see what those choices can display. Windows starts with ANSI, level 10, Sysop authorization Off and Use matching artwork On. Clear Use matching artwork to inspect the built-in menu instead. Previewing does not save caller preferences, execute menu commands or grant anyone access. Windows shows a final 80-by-25 viewport; a long display can scroll within that view.</p>
+<p>On Windows, <strong>Open Display Folder</strong> opens the board's Display folder for your ANSI or text editor. Refresh Preview after an artwork edit. Missing or unusable artwork falls back to built-in menus; normal Setup restores missing stock files. The preview's artwork switch changes only the preview. For registered Door hotkeys on primary menus, see <a href="doors.html#door-commands">Door Commands</a>.</p></section>
+<div class="related"><h2>Related topics</h2><a href="custom-display-checks.html">Try custom displays on a test board</a><a href="doors.html">Configure Doors</a><a href="updates-help.html">Update SFX and solve problems</a></div></article>
+ <footer>Spitfire-X BBS <span aria-hidden="true">/</span> Sysop documentation <a href="#main">Back to top</a></footer>
+</main>
+
+</body>
+</html>

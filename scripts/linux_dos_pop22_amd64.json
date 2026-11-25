@@ -1,0 +1,55 @@
+{
+  "profile": "Pop!_OS 22.04 AMD64; DOSEMU2 2.0pre9-10399",
+  "packages": [
+    {
+      "url": "https://ppa.launchpadcontent.net/dosemu2/ppa/ubuntu/pool/main/c/comcom64/comcom32_0.5-0~202610040914+202610161046~ubuntu22.04.1_all.deb",
+      "bytes": 166720,
+      "sha256": "0d4c0f260327bf02b01a0cc5ddb9f112f6bff9e5b18aabf5e62cabfd191952ea"
+    },
+    {
+      "url": "https://ppa.launchpadcontent.net/dosemu2/ppa/ubuntu/pool/main/c/comcom64/comcom64_0.5-0~202610040914+202610161046~ubuntu22.04.1_amd64.deb",
+      "bytes": 182796,
+      "sha256": "88b2346aa458c40d639885c6f82db3c8146eea3603339f93837738977f9060c1"
+    },
+    {
+      "url": "https://ppa.launchpadcontent.net/dosemu2/ppa/ubuntu/pool/main/d/dj64dev/dj64_0.5-0~202610031149+202610052358~ubuntu22.04.1_amd64.deb",
+      "bytes": 280644,
+      "sha256": "97cad10cbd59680ac903c57b6a0221e9a7eb9a43acaf3aa07fbddb427da294dd"
+    },
+    {
+      "url": "https://ppa.launchpadcontent.net/dosemu2/ppa/ubuntu/pool/main/d/dosemu2/dosemu2_2.0~pre9-10399-7e7f3da95+202610261035~ubuntu22.04.1_amd64.deb",
+      "bytes": 1378182,
+      "sha256": "0fa89ea87cdeaa3dd5c92a13046f013732a455de7a8dca5d886d1a85a96b9f84"
+    },
+    {
+      "url": "https://ppa.launchpadcontent.net/dosemu2/ppa/ubuntu/pool/main/d/djdev64/libdjdev64-0_0.5-0~202609232118+202610161256~ubuntu22.04.1_amd64.deb",
+      "bytes": 9240,
+      "sha256": "e90e895d17da37d64b54dafcf6b011c795f953ad065bc6a6e546fe395847069b"
+    },
+    {
+      "url": "https://ppa.launchpadcontent.net/dosemu2/ppa/ubuntu/pool/main/d/djdev64/libdjstub64-0_0.5-0~202609232118+202610161256~ubuntu22.04.1_amd64.deb",
+      "bytes": 9684,
+      "sha256": "533ae1a1d189759af2ec833c64e74e876eab274df731de52498e116e3d9840f0"
+    },
+    {
+      "url": "https://ppa.launchpadcontent.net/dosemu2/ppa/ubuntu/pool/main/f/fdpp/libfdldr35_1.11-10003-1717-f2e1f7d+202610211533~ubuntu22.04.1_amd64.deb",
+      "bytes": 24690,
+      "sha256": "581c293e37f4c519ff957a3ef9775c98ea510f9b5bb2ad2fea5c87fa8ad2c1ec"
+    },
+    {
+      "url": "https://ppa.launchpadcontent.net/dosemu2/ppa/ubuntu/pool/main/f/fdpp/libfdpp35_1.11-10003-1717-f2e1f7d+202610211533~ubuntu22.04.1_amd64.deb",
+      "bytes": 378942,
+      "sha256": "3a21dbaee708a09dd73767a46427c2656ca40d8c335eef69aab2c231f724adfd"
+    },
+    {
+      "url": "https://apt.pop-os.org/ubuntu/pool/universe/libb/libb64/libb64-0d_1.2-5_amd64.deb",
+      "bytes": 9324,
+      "sha256": "a606b0683719a53bcdfc5d2fc7b1cf52b76fb3261a28c41f965c3d08fe982411"
+    },
+    {
+      "url": "https://apt.pop-os.org/ubuntu/pool/universe/libs/libsearpc/libsearpc1_3.2.0-7-g50ff08b-1_amd64.deb",
+      "bytes": 17272,
+      "sha256": "5b589b178cae86c1722dc4397bdcbac7af7b30835a81d1ba21eb8364449683d8"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "windows-v143-x86",
+      "displayName": "Windows MSVC v143 Win32/x86",
+      "generator": "Visual Studio 17 2022",
+      "binaryDir": "${sourceDir}/build/windows-v143-x86",
+      "architecture": "Win32",
+      "toolset": "v143",
+      "cacheVariables": { "BUILD_TESTING": "ON" }
+    },
+    {
+      "name": "linux-gcc",
+      "displayName": "Linux GCC portability verification",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/linux-gcc",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "linux-clang",
+      "displayName": "Linux Clang portability verification",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/linux-clang",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "BUILD_TESTING": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "windows-v143-x86", "configurePreset": "windows-v143-x86", "configuration": "Release" },
+    { "name": "linux-gcc", "configurePreset": "linux-gcc" },
+    { "name": "linux-clang", "configurePreset": "linux-clang" }
+  ],
+  "testPresets": [
+    { "name": "windows-v143-x86", "configurePreset": "windows-v143-x86", "configuration": "Release", "output": { "outputOnFailure": true } },
+    { "name": "linux-gcc", "configurePreset": "linux-gcc", "output": { "outputOnFailure": true } },
+    { "name": "linux-clang", "configurePreset": "linux-clang", "output": { "outputOnFailure": true } }
+  ]
+}

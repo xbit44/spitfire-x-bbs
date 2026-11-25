@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+"""Open the local controls without changing the BBS running state."""
+import os
+from pathlib import Path
+import sys
+root = Path(__file__).resolve().parent
+args = [str(root / 'bin/sfxweb'), '--launch', '--root', str(root), '--tzdata', str(root / 'bin/tzdata')]
+if sys.argv[1:] == ['--print-url']:
+    args.append('--print-url')
+elif sys.argv[1:] == ['--stop-management']:
+    args = [str(root / 'bin/sfxweb'), '--stop-management', '--root', str(root)]
+elif sys.argv[1:]:
+    raise SystemExit('Usage: spitfire-x [--print-url | --stop-management]')
+os.execv(args[0], args)

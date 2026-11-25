@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>Connect to FTN networks | Spitfire-X Sysop Wiki</title>
+ <link rel="stylesheet" href="assets/sysop.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to article</a>
+<aside class="sidebar" aria-label="Wiki navigation">
+ <img class="sidebar-logo" src="images/sfx-about-approved.png" width="1254" height="1254" alt="Spitfire-X BBS bison logo">
+ <a class="brand" href="wiki.html">SPITFIRE-X<span>BBS / SYSOP WIKI</span></a>
+ <form action="search.html" method="get" role="search">
+  <label for="wiki-query">Search this wiki</label>
+  <div class="search-field"><input id="wiki-query" name="q" type="search" maxlength="160" placeholder="Search articles" autocomplete="off"><button type="submit" aria-label="Search">Go</button></div>
+ </form>
+ <nav aria-label="Topics"><p class="nav-heading">CONTENTS</p><a href="wiki.html">Wiki home</a><a href="get-ready.html">Get ready</a>
+<a href="linux-controls.html">Linux browser controls</a>
+<a href="daily-operation.html">Daily operation</a>
+<a href="callers-chat.html">Callers &amp; chat</a>
+<a href="messages-mail.html">Messages &amp; mail</a>
+<a href="files-transfers.html">Files &amp; transfers</a>
+<a href="doors.html">Doors</a>
+<a href="ftn-networks.html" aria-current="page">FTN networks</a>
+<a href="maintenance-recovery.html">Maintenance &amp; recovery</a>
+<a href="updates-help.html">Updates &amp; troubleshooting</a>
+<a href="customization-reference.html">Customization &amp; Displays</a>
+<a href="thanks-to.html">Thanks to</a>
+</nav>
+ <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
+</aside>
+<main id="main" tabindex="-1">
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">Sysop wiki</span></div>
+ <article data-search="article">
+<h1>Connect to FTN networks</h1>
+<p class="lead">Set up your network, choose the echoes your callers can use, and exchange mail with your hub.</p>
+<p>Open SFXConfig &gt; FTN Networking &gt; Networks. On Linux, open Configuration &gt; FTN Networking in the browser controls. You need the address assigned to your board and the connection details supplied by your network or hub. A preset does not assign an address or arrange membership.</p>
+<p>These controls describe the 1.0.0b1 test build. See the <a href="external-binkd.html">External BinkD guide</a> for the included optional Windows companion and Linux helper. Existing saved choices stay in place when you update. The defaults below apply to a new entry, and the guided setup differences are called out separately.</p>
+<h2>In this guide</h2>
+<ul><li><a href="#save">Save, drafts and activation</a></li><li><a href="#mailer">Mailer and listeners</a></li><li><a href="#external-guide">External BinkD</a></li><li><a href="#network">Network settings</a></li><li><a href="#setup">Set Up a Network</a></li><li><a href="#connections">Connections and passwords</a></li><li><a href="#echoes">Message echoes</a></li><li><a href="#import">Import an EchoList</a></li><li><a href="#clone">Clone Options</a></li><li><a href="#files">File echoes</a></li><li><a href="#permissions">Connection echo permissions</a></li><li><a href="#routing">Routing and polling</a></li><li><a href="#originals">Keep processed originals</a></li><li><a href="#history-recovery">Message ID history recovery</a></li><li><a href="#held">Held Mail</a></li></ul>
+
+<section id="save"><h2>Save, drafts and activation</h2>
+<p>On Windows, use Save Changes on the page you are editing. During guided setup, Keep in Setup Draft and Apply to Draft retain your choices until the final Save Network. Save and Finish Later saves an unfinished network disabled.</p>
+<p>On Linux, Apply to Draft keeps the current form in your unpublished FTN draft. Use Save FTN Settings to publish that draft. The browser keeps ordinary entries for the same tab where possible; password replacements are cleared when you leave or reload the form. Re-enter a replacement if the page asks for it. A draft is not a backup and is not shared with another browser session.</p>
+<p>If settings changed elsewhere, reload and review the saved version before trying again. If a save result is unconfirmed, use Check Save Result to recover that exact save before starting another save or import. Reload and Discard have different purposes: read their prompt before abandoning unsaved choices.</p>
+<p>Settings saved with the BBS stopped are used at the next start. With the BBS running, a successful save asks the mailer to activate the new configuration, including listener addresses/ports/TLS and network, connection, echo and routing policy. No full BBS restart is needed. Current mail sessions and processing are stopped and joined before the replacement configuration starts; an active backup hold delays this change. Check BinkP status afterward: saving and activation are separate, and a saved port or certificate does not prove that the listener opened successfully.</p>
+<p>Remove Network removes its FTN connections, mappings, routes and permissions. Remove Connection also removes dependent routes and permissions and clears its default-hub or upstream-provider use. Remove Mapping removes the FTN association. These actions preserve local conferences, messages, file areas, files and retained spool data. Review the named item before confirming.</p>
+</section>
+
+<section id="mailer"><h2>Mailer and listeners</h2>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Setting</th><th>Value and purpose</th><th>Fresh default</th></tr></thead><tbody>
+<tr><td>Mailer</td><td>Built-in SFX / Native SFX processes network mail. Disabled retains mail without processing it. External BinkD support is included in this build. In <a href="external-binkd.html#choose-the-mailer">External mode</a>, SFX processes mail while separate stock BinkD handles connections and retries.</td><td>Built-in SFX.</td></tr>
+<tr><td>External binkd program</td><td>This names the stock BinkD executable in External mode, up to 1,024 UTF-8 bytes; saving it does not launch BinkD, generate a profile or install a service. Leave unused for the built-in mailer.</td><td>Blank.</td></tr>
+<tr><td>Shared listen address / Listen address</td><td>The local interface used by the classic and TLS listeners. Up to 253 ASCII characters; host/IP syntax accepts letters, digits, dot, hyphen, colon and IPv6 brackets. Use an address on the BBS computer. For example, <code>127.0.0.1</code> restricts it to that computer.</td><td><code>0.0.0.0</code>, all IPv4 interfaces.</td></tr>
+<tr><td>Accept inbound classic BinkP connections</td><td>Enable the classic listener. Its port must be 1–65535.</td><td>On; port 24554.</td></tr>
+<tr><td>Accept inbound BinkP over TLS</td><td>Enable the separate TLS listener. Its port must be 1–65535 and differ from the classic port when both are enabled. 24555 is SFX's proposed TLS port; agree on it with the remote Sysop.</td><td>Off; port 24555.</td></tr>
+<tr><td>TLS certificate file / TLS private key file</td><td>Paths on the BBS computer, each up to 1,024 UTF-8 bytes. Both are required to enable TLS. Check the actual listener result after saving; a path that passes the form still has to be readable and usable by the mailer.</td><td>Both blank.</td></tr>
+<tr><td>Allow direct local NetMail from unconfigured systems</td><td>Allow the direct-local-NetMail admission path. This does not grant an unknown sender message-echo or file-echo access.</td><td>On.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="external-guide"><h2>External BinkD</h2><p>Read <a href="external-binkd.html">setup and daily use</a> and the <a href="external-binkd-profile.html">supported profile reference</a> for this build.</p><p>In External mode, saved Native endpoints and contact/timer values remain preserved but do not control BinkD. Scan Outbound requests SFX processing; Poll is unavailable because BinkD owns calling. Handed to BinkD does not mean Delivered. Stop both programs before a consistent backup, restore or mailer change. <a href="external-binkd.html#areafix-attachments-and-retained-mail">Managed-original expiry</a> remains separate from retained raw BinkD copies and history.</p></section>
+
+<section id="network"><h2>Network settings</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Choose the network, then its named task and records. Apply to Draft keeps the current task unpublished; Save FTN Settings is the final save for that draft. The network setup, imports, held mail and recovery tools keep their own reviews. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>Select a network and open Network Settings. A new ordinary Add entry starts disabled. On Windows it is named “New Network” and its Origin starts with the BBS name; Linux's ordinary new form starts with those text fields blank. The guided setup has its own starting choices.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Setting</th><th>Value, default and effect</th></tr></thead><tbody>
+<tr><td>Network code</td><td>Linux's ordinary Add form asks for a unique code: 1–48 ASCII letters, digits, underscore or hyphen, starting with a letter or digit. Reserved device names such as CON, NUL, COM1 and LPT1 are refused. Windows and guided setup generate the code. A saved code identifies the network; changing the display name does not rename its identity.</td></tr>
+<tr><td>Network name / Description</td><td>Name is required, up to 96 UTF-8 bytes in full settings. Guided setup limits its name to 64. Description is optional, up to 256 bytes. Text must be valid UTF-8 without control characters.</td></tr>
+<tr><td>Your FTN address</td><td>Required before enabling the network. Use <code>zone:net/node[.point][@domain]</code>, up to 96 bytes, such as <code>2:123/456.1@example</code> as a format example only. Use your assigned address. Numeric parts are 0–65535, with zone and net greater than zero. An optional domain is at most 48 ASCII letters/digits/dots/hyphens, starts and ends with a letter or digit, and has no doubled dots.</td></tr>
+<tr><td>Additional FTN addresses</td><td>Up to 32 additional assigned addresses, blank initially. Do not repeat the primary address or another alias. Windows uses a comma-separated list; Linux uses one address per line.</td></tr>
+<tr><td>Origin line</td><td>Optional network Origin text, up to 128 UTF-8 bytes in full settings; guided setup offers 78 characters. Follow your network's convention.</td></tr>
+<tr><td>Enable this network</td><td>Off in ordinary Add. Enable after reviewing the assigned address, connections, mappings and permissions. Disabling preserves the configuration.</td></tr>
+<tr><td>Message group / Name for a new Message Group</td><td>Choose an existing group or provide a new name of 1–64 printable ASCII characters without leading or trailing spaces. Setup/import can match a group by name or create it at the final save. If the network name is used as the group name, it must meet this same local-name rule; otherwise provide a suitable group name or choose an existing group. A new FTN-created group is enabled, has Access 10 and is placed after existing groups. An existing group keeps its settings. Windows offers this choice in setup and echo creation; Linux also shows it in Network Settings.</td></tr>
+<tr><td>Default NetMail hub</td><td>Initially None. Choose an outgoing connection in this network; an enabled network requires the selected hub to be enabled. See <a href="#routing">Routing and polling</a>.</td></tr>
+<tr><td>Saved EchoList source</td><td>HTTP/HTTPS URL initially, or Local .NA file. This saves where to read a list; it does not download or import it.</td></tr>
+<tr><td>EchoList URL</td><td>Blank initially; explicit <code>http://</code> or <code>https://</code> URL up to 2,048 bytes. No embedded username/password, fragment, spaces, backslashes or quotes. An enabled network can use manual echo entry with a blank URL.</td></tr>
+<tr><td>Local EchoList file</td><td>Blank initially, up to 1,024 UTF-8 bytes in saved network settings. Required if you enable a network with Local file selected. It is a file on the BBS computer, not an upload from the browser computer.</td></tr>
+<tr><td>Local nodelist file</td><td>Optional path, up to 1,024 UTF-8 bytes; blank initially. A nodelist can supply a configured connection's missing host/port. It does not replace your chosen NetMail route.</td></tr>
+<tr><td>External .MSG NetMail scanning for this network / Network .MSG NetMail directory</td><td>Off initially. To enable, choose On — use this network's directory and enter that directory, up to 1,024 UTF-8 bytes. Use the full local directory path. Each numbered .MSG supplies its own attachment paths.</td></tr>
+<tr><td>Keep processed incoming originals / Days to keep</td><td>On and 30 days for a new network. Allowed days: 0–65535; 0 means Forever. See the separate <a href="#originals">original-retention review</a> before shortening this period.</td></tr>
+</tbody></table></div>
+<p>The old shared .MSG page and its shared-folder choice are gone. Settings you chose separately for each network stay as they were. Unused settings and settings that used the old shared folder are Off. SFX does not take over the shared folder or turn scanning on for you.</p>
+</section>
+
+<section id="setup"><h2>Set Up a Network</h2>
+<p>The nine-step setup keeps one draft until you finish. Start with FidoNet, fsxNet or Other and replace the proposed facts with your own. New setup proposes Enable this network after saving, Receive and Send On, and no AreaFix request. Cancel Setup discards the unsaved setup while preserving saved networks and mail.</p>
+<ol>
+<li><strong>Network and message group:</strong> enter the name, assigned address and existing or new group. Setup begins with FidoNet and a FidoNet group name. Matching an existing group preserves its settings.</li>
+<li><strong>Your hub connection:</strong> supply the hub name, address, host and port (initially 24554), or choose to add it later. Session, packet, AreaFix and TIC passwords are separate. A new setup hub is enabled for incoming and outgoing mail, contacts when mail is queued, and has its timer off.</li>
+<li><strong>Choose message echoes:</strong> load a local list or explicit HTTP/HTTPS URL, or add tags manually. A caller name is optional only when the tag itself fits the 64-byte local name limit. On Windows, new list entries in this guided step start unchecked; the separate Import Echo List page starts usable entries checked. Linux setup uses that separate import review. Check the selected count before proceeding.</li>
+<li><strong>Caller access:</strong> select an echo and set its caller-facing name and Access, Read and Post levels. New levels are 10, range 1–999. Apply to All copies the levels; caller names remain individual.</li>
+<li><strong>Echo exchange:</strong> choose Receive and Send for the selected hub. Prepare an AreaFix subscription request starts Off and only prepares it. Queueing later needs an enabled network and hub, the separate AreaFix password, at least one selected echo, and Receive permission.</li>
+<li><strong>NetMail and contact policy:</strong> review the chosen hub. Contact when outgoing mail is queued starts On for a new setup hub. The optional timer starts Off; if enabled, its proposed 30 minutes can be changed to 1–65535.</li>
+<li><strong>Names, colors and Origin:</strong> review each echo or explicitly apply choices to all. New echoes require Real Name for FidoNet, otherwise Off; outgoing ANSI and pipe colors start Off. Review the Origin rather than assuming a preset is your final text.</li>
+<li><strong>Optional features and message limits:</strong> .MSG scanning starts Off and the nodelist path is blank. New FTN echoes keep 500 messages with unlimited age. Change the selected echo or explicitly apply to all.</li>
+<li><strong>Review and Save:</strong> inspect the hub, group, each echo's limits and permissions, optional features and Enable choice. Save Network saves without generating a subscription request. Save &amp; Queue AreaFix Request is the separate action that saves and queues the prepared request. Queueing is not proof that the hub received or accepted it.</li>
+</ol>
+<p>Review Network Setup lets you review an existing network. On Linux, differing saved Receive/Send permissions remain until you deliberately change those choices; changing either applies both visible choices across the setup's message echoes. Use full settings for larger or more specialized configurations. Linux setup and bulk-option selections are limited to 4,096 echoes; local conferences still share the BBS-wide 999-conference capacity.</p>
+</section>
+
+<section id="connections"><h2>Connections and passwords</h2>
+<p>A connection is a particular system in one network. Its network and its own Enabled choice must both allow activity. New ordinary connections start disabled, with blank identity/host fields, incoming and outgoing use, port 24554, a 30-minute timer, and Contact when mail is ready Off. Guided hub setup changes those last choices as described above.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Setting</th><th>Value and effect</th></tr></thead><tbody>
+<tr><td>Connection code / name</td><td>Linux ordinary Add requires a unique code within the network, using the same 1–48-character rules as network codes. Windows/setup generate it. Name is required, up to 96 UTF-8 bytes.</td></tr>
+<tr><td>Remote FTN address / Allowed additional remote addresses</td><td>Primary address plus up to 32 unique aliases, using the network address format and 96-byte limit. Required and validated for an active connection. These are the remote system's addresses, not your own.</td></tr>
+<tr><td>Connection use / direction</td><td>Incoming only, Outgoing only, or Incoming and outgoing. Choose the directions agreed with the other Sysop.</td></tr>
+<tr><td>Outgoing host / Port</td><td>Host name or IP, up to 253 ASCII characters. Port 1–65535. Windows blank port or Linux 0 requests nodelist resolution; missing host/port needs a configured nodelist for an active outgoing connection. Incoming-only connections do not need an outgoing endpoint.</td></tr>
+<tr><td>Enabled</td><td>Off for ordinary Add. Enable only after identity, credentials and echo access are ready.</td></tr>
+<tr><td>Contact when outgoing mail is queued</td><td>Off for ordinary Add. On requests contact for eligible queued mail. Hold mail keeps its separate policy.</td></tr>
+<tr><td>Poll interval in minutes</td><td>0–65535; 0 disables the timer. Ordinary Add starts at 30. This is separate from contact-on-mail and Poll Now.</td></tr>
+<tr><td>Use verified TLS</td><td>Off initially. Enable only for a remote endpoint configured for TLS. SFX verifies the remote TLS identity.</td></tr>
+<tr><td>TLS server name</td><td>Optional, up to 253 ASCII characters; blank uses the outgoing host. Set the name expected by the remote certificate when it differs from the connection address.</td></tr>
+<tr><td>Additional trusted CA file</td><td>Optional path up to 1,024 UTF-8 bytes; blank uses built-in trust. The file is read on the BBS computer.</td></tr>
+<tr><td>Allow legacy plain authentication</td><td>Off initially. A separate per-connection compatibility choice; enable only when required by the remote system's agreed authentication.</td></tr>
+<tr><td>AreaFix management</td><td>Windows ordinary Add and new setup hubs use the separate-password default: Off without an AreaFix password, On when one is present. Linux ordinary Add and new setup hubs explicitly start Disabled. Existing explicit Disabled stays disabled when passwords change. Enabled requires the separate AreaFix password and still requires permission for each managed message echo.</td></tr>
+<tr><td>Request missing echoes / Upstream provider</td><td>Off and None initially. To request missing echoes, select a different outgoing connection in the same network with its own AreaFix password. This does not give every downlink unrestricted echo access.</td></tr>
+</tbody></table></div>
+<h3 id="direct-netmail">Direct NetMail without a session password</h3>
+<p>Native BinkP on Windows and Linux can receive direct local NetMail when no session password is expected. For an unconfigured sender, <strong>Allow direct local NetMail from unconfigured systems</strong> must be on. The packet must name a unique enabled local recipient. A successful no-password connection does not verify the sender or grant message-echo, relay or queued-mail pickup rights.</p>
+<p>If a connection has a saved session password, that password still has to pass its normal checks. An unreadable saved password is a failure, not permission to receive anonymously. Packet passwords and AreaFix passwords keep their separate purposes and permissions below.</p>
+<h3>Four separate passwords</h3>
+<p>Session protects the BinkP session; Packet protects message packets; AreaFix authorizes echo-management requests; TIC protects file-echo control files. All start unset. Packet passwords allow at most 8 printable ASCII characters; the other three allow 128. Spaces count. Use the values agreed with the remote Sysop.</p>
+<p>Leave an untouched saved password alone to preserve it. Enter a replacement to change it, or explicitly choose Remove current / Remove this saved password. Clearing a displayed password field is not a reliable substitute for that remove action. SFX protects saved credentials; a “cannot read” status is not evidence that the saved value is blank. After a failed or interrupted browser edit, re-enter any intended replacement and check the save result.</p>
+</section>
+
+<section id="echoes"><h2>Message echoes</h2>
+<p>Add or edit Message Echoes inside the network. A mapping connects an FTN tag to a local conference, or passes it through without local storage. New FTN echoes use different retention defaults from ordinary new local conferences.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Setting</th><th>Allowed value and purpose</th><th>New-entry value</th></tr></thead><tbody>
+<tr><td>Echo tag</td><td>1–128 printable ASCII characters; no spaces or <code>/ \ : @ * ?</code>. Tags are matched without case and normalized to uppercase. A tag already mapped to a saved local conference is fixed; add another mapping for a different tag.</td><td>Windows proposes NEW.ECHO; Linux blank.</td></tr>
+<tr><td>Description</td><td>Optional UTF-8 text, up to 512 bytes.</td><td>Blank.</td></tr>
+<tr><td>Store messages in a local conference</td><td>On stores locally. Off is pass-through and requires no local conference mapping.</td><td>On.</td></tr>
+<tr><td>Message group / Local conference</td><td>Select where to create a new conference, or explicitly choose an existing conference. Linux's destination group is in Network Settings. Existing group restrictions also apply to callers.</td><td>Create a new local conference.</td></tr>
+<tr><td>Local conference name</td><td>1–64 printable ASCII characters, without leading or trailing spaces, when creating or renaming the local conference. A new mapping can use the tag when it fits; longer tags need an explicit shorter caller-facing name.</td><td>Tag where proposed; review before saving.</td></tr>
+<tr><td>Access / Read / Post level</td><td>Each 1–999. Access controls entry; Read and Post add their respective requirements.</td><td>10 / 10 / 10.</td></tr>
+<tr><td>Require Real Name on outgoing messages</td><td>Use the caller's real name for outgoing posts in this echo.</td><td>On for a network named FidoNet; otherwise Off.</td></tr>
+<tr><td>Enable pipe colors</td><td>Allow pipe-color presentation in this public echo. Existing local-conference changes must be applied as described below.</td><td>Off.</td></tr>
+<tr><td>Allow ANSI in outgoing posts</td><td>Off or On for SFX-authored outgoing posts. Keep existing / legacy choice preserves an older mapping's policy.</td><td>Off for new echoes.</td></tr>
+<tr><td>Maximum messages</td><td>1–999999999 or Unlimited. Windows accepts blank or Unlimited; Linux blank means Unlimited.</td><td>500.</td></tr>
+<tr><td>Maximum age in days</td><td>1–65535 or Unlimited. Windows also accepts 0 for Unlimited; Linux uses blank.</td><td>Unlimited.</td></tr>
+<tr><td>Update existing conference name / permissions / retention</td><td>Linux exposes explicit choices: update name; update permissions and pipe colors; and leave retention unchanged, update count, update age, or update both. Leave them off/unchanged to preserve the mapped conference. Windows detects changes and asks you to review applicable existing-conference updates.</td><td>No forced existing-conference update.</td></tr>
+</tbody></table></div>
+<p>Saving message limits does not purge messages immediately; <a href="maintenance-recovery.html#scheduled-jobs">message retention</a> applies them later. Linking an existing conference is not permission to overwrite its name, access or retention without the corresponding reviewed update.</p>
+<p>Normal new-echo setup can add Receive and Send permissions for the default hub, or for the sole enabled connection when there is no default hub. Existing explicit permission rows are preserved. With several possible connections and no chosen hub, review <a href="#permissions">Connection Echo Permissions</a> yourself.</p>
+</section>
+
+<section id="import"><h2>Import an EchoList</h2>
+<p>Open Import Echo List from Message Echoes. Choose a local .NA text file on the BBS computer or an explicit HTTP/HTTPS URL, then Load List. Opening the page does not fetch, import or subscribe. On Windows, Skip for now leaves you free to finish without an import.</p>
+<p>A list is at most 4 MiB, 50,000 lines and 4,096 bytes per line. Each usable line is an echo tag followed by its optional description; blank lines and lines starting with <code>#</code> or <code>;</code> are ignored. Invalid and duplicate lines are reported. Choose UTF-8 / ASCII or DOS CP437 to match the file. The Windows guided setup automatically falls back to CP437 for a non-UTF-8 list; the separate import page and Linux expose the encoding choice.</p>
+<p>Linux accepts a full file path or a path relative to the BBS root. Its load field permits 4,096 bytes, but the saved network file-path field is limited to 1,024; choose a source that fits the saved setting. Windows offers Browse; its guided setup resolves relative files from the BBS root. Use Browse or a full path on the ordinary Windows import page. HTTP/HTTPS URLs have the 2,048-byte limit described above. A failed or cancelled load preserves the prior reviewed list and draft.</p>
+<ol><li>Review rejected lines and the usable count. The separate import page starts usable entries selected; Clear All and choose only the echoes you want. Find filters the display, so check the total selected count across pages.</li><li>Set new-conference Access, Read and Post levels, initially 10, each 1–999. Windows offers Set Requirements for Checked Entries; Linux uses the displayed levels for the selected import. Existing saved conference requirements remain.</li><li>Leave Update selected existing names and descriptions Off to preserve them. Turning it on updates text only for selected existing mappings. Entries missing from the list are not deleted.</li><li>Review the destination group and counts of new, unchanged and text-updated echoes. Existing mappings across incompatible groups, conflicting local names or insufficient free conference slots must be corrected before importing. There are at most 999 local conferences across the BBS; an over-capacity import is refused as a whole.</li><li>On Windows, the ordinary Review / Apply Selected action saves the confirmed import; inside setup it retains it in the setup draft. On Linux, Apply to Draft still requires Save FTN Settings. No import action automatically queues an AreaFix subscription.</li></ol>
+<p>New imported local echoes start with 500 messages, unlimited age, outgoing ANSI and pipe colors Off, and the FidoNet real-name choice described above. A tag longer than 64 bytes needs a shorter local name in the normal echo editor. If the save is uncertain, use Check Save Result rather than importing again.</p>
+</section>
+
+<section id="clone"><h2>Clone Options</h2>
+<p>Use Clone Options in Message Echoes or the final setup review to apply selected values across named echoes in this network. It does not duplicate messages or create another network.</p>
+<p>All five copy switches start unchecked: Message count, Age limit, Access, Read and Post. Proposed values are 500, Unlimited, 10, 10 and 10. Check only the fields you intend to change, then select targets, use Preview, and Apply to Draft. All Echoes in this Network selects targets across pages; Clear Targets removes that selection. Linux accepts at most 4,096 selected targets per operation.</p>
+<p>Use the same count, age and security-level ranges as the echo editor. Unchecked fields, names, colors, real-name policy, subscriptions and message contents stay unchanged. Apply to Draft is not the final save. Save the reviewed FTN draft afterward; changed limits are used by later message retention.</p>
+</section>
+
+<section id="files"><h2>File echoes</h2>
+<p>Create the destination under <a href="files-transfers.html#groups-areas">Files &gt; Groups &amp; Areas</a> first, then Add File Echo inside the network. Enter the file echo tag (the same 1–128-character rules as message tags), an optional description up to 512 UTF-8 bytes, and an existing ordinary local file area. A new entry has no destination selected. Private upload/review areas are not ordinary file-echo destinations.</p>
+<p>Give the appropriate connection explicit file-echo Receive and Send permissions. TIC import requires an authorized configured link. If no TIC password is set, the received file still needs authenticated receipt from that same link. Save the mapping and permissions, then inspect BinkP status or Held Mail if a file does not arrive. Remove Mapping preserves the local area and its files.</p>
+</section>
+
+<section id="permissions"><h2>Connection echo permissions</h2>
+<p>Open Echo Access Exceptions / Connection Echo Permissions for the connection. Select named message or file echoes, then choose Receive, Send and, for message echoes only, AreaFix management. Apply to Selected on Windows or Apply to Draft on Linux changes the selected rows in the draft; finish with the normal save.</p>
+<p>Receive permits mail from that link into the named echo. Send permits distribution to that link. AreaFix management lets the link add or drop its own Send subscription using its separate AreaFix password; it does not change Receive permission. Clearing management prevents those remote changes. Secure Operation remains On.</p>
+<p>An echo without a permission row grants no access. The selection controls start unchecked; inspect each row's current permissions before applying a batch. Selecting a connection, adding a password or enabling AreaFix does not itself grant every echo. Normal hub setup can create the explicitly listed Receive/Send rows described above. File echoes cannot have AreaFix management.</p>
+</section>
+
+<section id="routing"><h2>Routing and polling</h2>
+<p>Choose a Default NetMail hub when NetMail should go through your hub unless a specific route or configured direct connection applies. None is the new-network default. A selected default must be an outgoing connection in this network and must be enabled when the network is enabled.</p>
+<p>Add Route takes one exact Destination FTN address, an outgoing Send via connection in this network, and a Mail policy: Normal (new-route default), Hold or Crash. The address uses the format above; it is not a wildcard pattern. Review the actual destination and connection before saving.</p>
+<p>Normal follows ordinary dispatch. Hold is excluded from automatic outgoing batches and contact-on-mail readiness. Crash marks the route's outgoing mail with the Crash flavor; it is not a promise of immediate delivery. Connection availability, authentication and retry state still matter. Poll interval and Contact when mail is ready are separate controls on each connection. Poll Now is a runtime action, not a saved schedule.</p>
+<p>If mail does not move, check the network and connection Enabled choices, connection direction, endpoint, current passwords, route/default hub, echo permissions and the BinkP or Held Mail reason. Do not repeatedly import the same echo list to fix a connection failure.</p>
+</section>
+
+<section id="originals"><h2>Keep processed originals</h2>
+<p>Each new network starts with Keep processed incoming originals On and 30 days. Days accepts 0–65535, with 0 meaning Forever. Turning Keep Off affects future successful processing; it does not immediately remove all existing retained originals.</p>
+<p>When a shorter period would shorten protection for existing processed originals, Save opens a review. It shows each affected network, originals due now, those expiring later, those previously kept Forever, and the new expiry-date range in the BBS time zone. Confirm only after reviewing those counts. Cancel leaves the saved settings and protection dates unchanged and keeps your edits unsaved.</p>
+<p>The confirmed save applies the exact reviewed originals and the other settings together. Later arrivals are not silently added to that review. Originals still needed for processing, forwarding or recovery remain held. Imported messages and published files remain; their own retention and file-area settings are separate.</p>
+</section>
+
+<section id="history-recovery"><h2>Message ID history recovery</h2>
+<p>A saved message-ID history hold is separate from an individual item in Held Mail. A healthy complete-folder move or coherent older restore is not, by itself, a reason to keep FTN disabled. Keep other copies using the same FTN addresses stopped and follow the normal copy/restore result.</p>
+<p>If SFX specifically reports that message ID history needs recovery, stop the BBS and any independently launched BinkD, then use <a href="maintenance-recovery.html#ftn-history">Recover FTN History in Backup &amp; Restore</a>. The guided action verifies required queued files, preserves existing messages/IDs and known completed work, and leaves separate item holds unchanged. It does not require an empty queue or repair missing/changed originals.</p></section>
+<section id="held"><h2>Held Mail</h2>
+<p>Held Mail reads saved mail state, separately from an unpublished FTN settings draft. Use the network, exact reason and Find filters, then Find / Reload. Select an original and open Details. An unavailable list is not an empty queue.</p>
+<p>Details show the original, sender/network/connection where recorded, current reason and the last reviewed retry. For message packets, choose the specific constituent message to inspect its From, original To, destination and intended echo. For TIC files, inspect the claimed From, echo, payload, publication stage and retained forwarding plan.</p>
+<ol><li>Correct the relevant saved connection password, echo mapping, permission or destination first. Reload Details after the correction.</li><li>For an unresolved local private recipient, choose the specific uncommitted message, search active local callers and explicitly select the intended account. Review and save that recipient choice. The original To and packet bytes remain unchanged; already committed messages cannot be reassigned.</li><li>Use Reprocess Original as a separate reviewed action. It checks the current credentials, permissions, mapping, retained original and any recipient decision again. Already committed messages are not delivered twice.</li><li>Reload Details to read the result. A queued retry is not successful processing. With the BBS stopped, a reviewed retry waits for the next enabled start. Changed/missing files, an absent original forwarding plan or a disabled mailer can still prevent processing.</li></ol>
+<p>For an interrupted TIC publication, reprocessing reviews that exact original and its recovery/forwarding plan; it cannot manufacture a missing plan or repair changed payload bytes. Do not delete the original to clear the display. If an action result is unconfirmed, choose Check Action Result to reconcile the same action before attempting another one.</p>
+</section>
+<div class="related"><h2>Related topics</h2><a href="messages-mail.html">Messages and local conferences</a><a href="files-transfers.html">File areas and transfers</a><a href="maintenance-recovery.html">Maintain, back up and recover</a></div>
+</article>
+ <footer>Spitfire-X BBS <span aria-hidden="true">/</span> Sysop documentation <a href="#main">Back to top</a></footer>
+</main>
+
+</body>
+</html>

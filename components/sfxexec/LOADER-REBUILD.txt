@@ -1,0 +1,38 @@
+LOADER DIAGNOSTIC REBUILD - supersedes the r2 component recipe for this candidate
+
+Use a fresh source root and build labels. Complete r2 baseline component source
+is retained at components/sfxexec/baseline-r2 in the source package (canonical
+workspace evidence keeps baseline-source separately). No owner log/screenshot/
+profile is required to build. The short packaged path supports MAX_PATH hosts.
+  python components/sfxexec/scripts/loader_patch.py
+recreates the loader diagnostic launcher from that exact source. It does not
+regenerate/rebuild the core driver or touch accepted SFX sources.
+
+1. Reuse the hash-identical r2 SFXEXEC.DLL. Corresponding driver/XPDEV source is
+   included; if rebuilding it, use r2's documented MSVC recipe and compare actual
+   output rather than assuming byte identity. Target core SHA256:
+   D36589BDE11134B7F6019C32667B639BC465CA39CD39E22FEB6E053A2996A3F3
+2. Build only the small private diagnostic:
+   python components/sfxexec/scripts/build_loader_probe.py <fresh-label>
+   MSVC14.44.35207/SDK10.0.26100.0, x86 /Gz /arch:IA32 /GS-; link /NOENTRY,
+   /NODEFAULTLIB,6.01,NX,ASLR. There is no CRT or static NTVDM import. Explicitly
+   bounded request/report code replaces CRT formatting; no DllMain executes.
+3. Privately provide MSVC1.52c/DOS CRT/legacy Windows headers and Microsoft
+   isvbop.h as r2 REBUILD describes; no tool/media files are shipped.
+   python components/sfxexec/scripts/compile_dos.py <fresh-label>
+   This uses the verified private compiler-only DOSBox-X aid from r2. No game
+   emulator/runtime installation or native NTVDM success is inferred. The new
+   sfx_load.h has only byte-array wire fields; compile-asserted1152bytes.
+4. Build host after exact core, launcher and diagnostic hashes are fixed:
+   python components/sfxexec/scripts/build_host.py <label> <core> <launcher> <probe>
+5. Focused non-native qualification:
+   python components/sfxexec/scripts/qualify_loader.py <label> <core> <probe>
+   python components/sfxexec/scripts/qualify_host_loader.py <label> <host-build-dir> <core> <launcher> <probe>
+   Uses private synthetic Win32/fake NTVDM fixtures, fresh files and owned
+   loopback only. Fake NTVDM/harness/negative images never enter runtime BIN.
+
+Package script records exact final source/images, the unchanged core's inherited
+qualification and new checks separately. Proprietary tool/header/media files
+and raw owner evidence are excluded. Original GPL/LGPL notices and source rights
+remain. Original r2 REBUILD/scripts are history/reference, not an instruction to
+overwrite this loader revision by rerunning derive/refine/credits/harden alone.

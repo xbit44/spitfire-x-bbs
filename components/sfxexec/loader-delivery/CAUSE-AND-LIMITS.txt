@@ -1,0 +1,46 @@
+R2 LOADER FAILURE / R4 DIAGNOSTIC DISPOSITION - 2026-10-24
+
+CONFIRMED FROM EXACT PACKAGED SOURCE / OWNER EVIDENCE
+The three owner BIN hashes match released r2. The observed Error1 is the AX
+failure result from RegisterModule BOP, documented as DLL not found by original
+Microsoft DDK isvbop.h. It is NOT Win32 GetLastError1. The missing startup
+report follows this failure before core pairing, VDD_OPEN and game spawn.
+Failed-startup return to the same Door menu was owner-observed for that attempt.
+No successful game/dropfile acceptance or coexistence result follows from it.
+
+LOCAL DIAGNOSIS
+Compared r2 C source and emitted Microsoft16-bit assembly with the pinned
+upstream: DS:SI filename, DS:BX dispatch name, null ES:DI initialization and
+carry/AX handling retain upstream's NT/Vista convention. No proven pointer or
+calling-convention defect is established. The diagnostic records bounded DS:SI
+readback, segment values, attempted full path, BOP AX and later pair/open stages.
+Core image is PE32 x86 with exact cdecl exports; NTVDM imports depend on the
+actual native NTVDM executable. Its other direct imports use Windows system
+libraries; the static CRT has no redistributable DLL dependency. These checks
+do not establish native loadability or prove a need for System32 placement.
+
+The new private SFXLDR.DLL avoids the core's CRT/static NTVDM import dependencies
+and has no entry-point code. On BOP failure only, the launcher attempts this
+exact private full-path diagnostic. Where obtainable inside the VDM it records
+LoadLibraryExA(full_path,flags0)'s immediate Win32 result, file-presence error,
+actual module/process paths and missing core NTVDM exports. A successful ordinary
+Win32 load, mocked register fixture or diagnostic load does not mean the core
+registered with BOP. The failed branch always returns without starting the game.
+If the probe also fails BOP loading, Win32 detail is explicitly unavailable.
+
+NO ESTABLISHED NATIVE CAUSE / NO VERIFIED FIX CLAIM
+This package improves observability and D-layout/path handling and is labelled
+DIAGNOSTIC. The approved fallback deliverable is one short owner-controlled
+SF Guess attempt, with its log, to finish diagnosis. It is not a demand for
+open-ended production troubleshooting. No bare-name search, unpinned component,
+blind System32 copy or weakened identity check is offered. Any later justified
+SFX-only system placement requires a separate exact path/hash/conflict/rollback
+plan for DR/owner review before placement; no such placement is authorized here.
+
+SCOPE RETAINED
+Core DLL/session ABI and bytes unchanged. Private node/session IPC and host
+bounded I/O/VDM job lifecycle remain. New files are external loader diagnostic
+source plus focused helper/tests/recipes; SFX application libraries are not
+linked or rebuilt. No full Setup/UI/schema/new local engine, node-manager,
+global/per-Door INI/YieldInterval, production access/Sync mutation, cleanup,
+backup, publication, Master completion or queued starter-category inclusion.

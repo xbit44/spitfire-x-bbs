@@ -1,0 +1,40 @@
+SYSTEM32 COMPONENT REBUILD - CURRENT 20261024-r2
+Older REBUILD/LOADER-REBUILD and delivery folders are retained history. This
+recipe and system32-delivery instructions govern this candidate. No system
+placement occurs during rebuilding. Use fresh scratch roots/labels.
+
+1. Core DLL is exact r2 D36589BDE11134B7F6019C32667B639BC465CA39CD39E22FEB6E053A2996A3F3.
+   Full original/derived core and XPDEV source/notices are included. To rebuild
+   independently use REBUILD.txt/build.py with licensed Microsoft tools. Do not
+   assert byte equality without checking; historical dates/paths may differ.
+2. Current launcher source is supplied directly. To reproduce only this patch:
+      python components/sfxexec/scripts/system32_patch.py
+   reads included components/sfxexec/baseline-r4; canonical workspace uses the
+   retained evidence baseline. No need to rerun older derive/refine scripts.
+   Original r2 baseline is also retained; private diagnostic code remains source
+   history only. No SFXLDR runtime image is part of this candidate.
+3. Privately provide licensed MSVC1.52c tools/CRT/headers and original isvbop.h
+   at the paths in REBUILD.txt; no tools/media are distributed. Use the already
+   documented verified DOSBox-X compiler-only host (not a native runtime test).
+      python components/sfxexec/scripts/compile_dos.py <fresh-label>
+   CL8.00c, Link5.60.339; /AS /Gs /Fc /Fm, genuine DOS MZ/BOP. sfx_gate.h is a
+   launcher-only header; original VDD0..19, additions20/21 and core source exact.
+4. Build independent host after exact core and launcher hashes are fixed:
+      python components/sfxexec/scripts/build_host.py <fresh-label> <core> <launcher>
+   Process-local vcvars32, MSVC14.44.35207/SDK10.0.26100.0, /MT /arch:IA32,
+   x86 subsystem6.01, no new post-Win7 direct API. Runtime hash unchanged.
+5. Focused qualification:
+      python components/sfxexec/scripts/qualify_system32.py <fresh-label> <host-build> <core> <launcher>
+   Runs ordinary Win32 helper/module and actual core/launcher-gate tests with
+   synthetic NTVDM import/register/IRQ mapping. Two processes use actual Node1
+   with separate sessions. No native DOS/BOP/game/coexistence proof.
+   tests/placement_commands_tests.ps1 extracts the exact manual document blocks
+   into new build/sfxexec-system32-placement-* fixtures only. No real System32.
+6. inspect_system32.py verifies exact compile/source/image/core preservation,
+   ABI/import floor, historical media, frozen830 and queued R246 edits. Package
+   recipe package_system32.py records explicit build labels and includes full
+   current+r2+r4 source in BOTH archives. Use new labels/media for another build.
+
+External source retains original GPL/LGPL notices. Independent host links no GPL
+driver or SFX product library. Native Win7/Win10 loading/coexistence remains
+pending until owner observation; current API floor is not a native pass.

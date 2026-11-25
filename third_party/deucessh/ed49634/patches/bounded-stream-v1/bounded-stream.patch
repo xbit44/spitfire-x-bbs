@@ -1,0 +1,232 @@
+--- a/ssh-conn.c
++++ b/ssh-conn.c
+@@ -2,6 +2,7 @@
+ 
+ #include <stdlib.h>
+ #include <string.h>
++#include <windows.h> /* SFX Windows-only monotonic bounded receive profile */
+ 
+ #include "deucessh-conn.h"
+ #include "ssh-internal.h"
+@@ -1097,6 +1098,7 @@
+ 	ch->exit_code_received = false;
+ 	atomic_store(&ch->closing, false);
+ 	atomic_init(&ch->terminate_woken, false);
++	atomic_init(&ch->receive_abort, false);
+ 	atomic_init(&ch->dispatch_state, DSSH_CHANNEL_DISPATCH_IDLE);
+ 	atomic_init(&ch->tx_refs, 0);
+ 
+@@ -1191,7 +1193,8 @@
+ 
+ 	if (outstanding < ch->window_max / 2) {
+ 		add = ch->window_max - outstanding;
+-		if (ch->chan_type == DSSH_CHAN_SESSION) {
++		if (ch->chan_type == DSSH_CHAN_SESSION &&
++		    !ch->bounded_receive) {
+ 			size_t buf_free = bytebuf_free_space(&ch->buf.stdout_buf);
+ 			size_t err_free = bytebuf_free_space(&ch->buf.stderr_buf);
+ 			if (err_free < buf_free)
+@@ -1474,8 +1477,13 @@
+ 	bool bypass = ch->accept_pre_window_data
+ 	    && !atomic_load_explicit(&ch->setup_complete, memory_order_acquire);
+ 
+-	if (!bypass && dlen > ch->local_window)
++	if (!bypass && dlen > ch->local_window) {
++		if (ch->bounded_receive) {
++			if (release_channel_locked(sess, ch) < 0) return DSSH_ERROR_TERMINATED;
++			return DSSH_ERROR_TOOLONG;
++		}
+ 		dlen = ch->local_window;
++	}
+ 
+ 	dssh_chan_zc_cb cb  = ch->zc_cb;
+ 	void           *cbd = ch->zc_cbdata;
+@@ -1487,6 +1495,10 @@
+ 	in_zc_rx          = false;
+ 	if (dispatch_lock_channel(sess, ch) < 0)
+ 		return DSSH_ERROR_TERMINATED;
++	if (ch->bounded_receive && sess->terminate) {
++		if (release_channel_locked(sess, ch) < 0) return DSSH_ERROR_TERMINATED;
++		return DSSH_ERROR_TERMINATED;
++	}
+ 	if (atomic_load(&ch->closing)) {
+ 		if (dispatch_unlock_channel(sess, ch) < 0)
+ 			return DSSH_ERROR_TERMINATED;
+@@ -1552,8 +1564,13 @@
+ 	bool bypass = ch->accept_pre_window_data
+ 	    && !atomic_load_explicit(&ch->setup_complete, memory_order_acquire);
+ 
+-	if (!bypass && dlen > ch->local_window)
++	if (!bypass && dlen > ch->local_window) {
++		if (ch->bounded_receive) {
++			if (release_channel_locked(sess, ch) < 0) return DSSH_ERROR_TERMINATED;
++			return DSSH_ERROR_TOOLONG;
++		}
+ 		dlen = ch->local_window;
++	}
+ 
+ 	dssh_chan_zc_cb cb  = ch->zc_cb;
+ 	void           *cbd = ch->zc_cbdata;
+@@ -1566,6 +1583,10 @@
+ 	in_zc_rx          = false;
+ 	if (dispatch_lock_channel(sess, ch) < 0)
+ 		return DSSH_ERROR_TERMINATED;
++	if (ch->bounded_receive && sess->terminate) {
++		if (release_channel_locked(sess, ch) < 0) return DSSH_ERROR_TERMINATED;
++		return DSSH_ERROR_TERMINATED;
++	}
+ 	if (atomic_load(&ch->closing)) {
+ 		if (dispatch_unlock_channel(sess, ch) < 0)
+ 			return DSSH_ERROR_TERMINATED;
+@@ -2568,6 +2589,7 @@
+ 	ch->remote_id    = inc->peer_channel;
+ 	atomic_init(&ch->remote_window, inc->peer_window);
+ 	atomic_init(&ch->terminate_woken, false);
++	atomic_init(&ch->receive_abort, false);
+ 	atomic_init(&ch->dispatch_state, DSSH_CHANNEL_DISPATCH_IDLE);
+ 	atomic_init(&ch->tx_refs, 0);
+ 	ch->remote_max_packet = inc->peer_max_packet;
+@@ -2781,10 +2803,47 @@
+ 	dssh_thrd_check(sess, mtx_lock(&ch->buf_mtx));
+ 
+ 	struct dssh_bytebuf *bb      = (stream == 0) ? &ch->buf.stdout_buf : &ch->buf.stderr_buf;
+-	size_t               written = bytebuf_write(bb, data, len);
++	size_t written = 0;
++	/* The dispatch pin and current RX packet remain owned while waiting.
++	 * Only buf_mtx is held and timedwait releases it. No additional packet
++	 * or plaintext allocation is permitted; TCP supplies backpressure. */
++	if (ch->bounded_receive) {
++		const ULONGLONG until = GetTickCount64() + 5000;
++		while (written < len && !sess->terminate && !atomic_load(&ch->closing)
++		    && !atomic_load(&ch->receive_abort)) {
++			if (GetTickCount64() >= until) break;
++			if (ch->receive_allowed != NULL) {
++				if (dssh_thrd_check_unlock(sess, mtx_unlock(&ch->buf_mtx)) != thrd_success)
++					return 0;
++				bool allowed = ch->receive_allowed(ch->receive_allowed_data);
++				if (dssh_thrd_check(sess, mtx_lock(&ch->buf_mtx)) != thrd_success)
++					return 0;
++				if (!allowed || atomic_load(&ch->receive_abort) || sess->terminate) break;
++			}
++			size_t n = bytebuf_write(bb, data + written, len - written);
++			written += n;
++			dssh_thrd_check_locked(sess, cnd_broadcast(&ch->poll_cnd));
++			if (written == len) break;
++			ch->receive_waiting = true;
++			struct timespec deadline;
++			dssh_deadline_from_ms(&deadline, 100);
++			int wait = cnd_timedwait(&ch->poll_cnd, &ch->buf_mtx, &deadline);
++			ch->receive_waiting = false;
++			if (wait != thrd_success && wait != thrd_timedout) {
++				dssh_thrd_check_locked(sess, wait); break;
++			}
++		}
++	} else {
++		written = bytebuf_write(bb, data, len);
++	}
+ 
+ 	dssh_thrd_check_locked(sess, cnd_broadcast(&ch->poll_cnd));
+-	dssh_thrd_check_unlock(sess, mtx_unlock(&ch->buf_mtx));
++	if (dssh_thrd_check_unlock(sess, mtx_unlock(&ch->buf_mtx)) != thrd_success)
++		return 0;
++	/* A partial packet is fatal, never silently discarded or credited.
++	 * Complete all termination callbacks/wakeups at this lock-free boundary. */
++	if (ch->bounded_receive && written != len)
++		session_set_terminate(sess);
+ 
+ 	uint32_t ret = (uint32_t)written;
+ 
+@@ -3106,6 +3165,7 @@
+ 		return (int64_t)avail;
+ 	}
+ 	size_t n              = bytebuf_read(bb, buf, bufsz, 0);
++	if (n) dssh_thrd_check_locked(sess, cnd_broadcast(&ch->poll_cnd));
+ 	/* Disambiguate empty-buffer from EOF: return 0 only when EOF
+ 	 * has actually arrived (peer EOF/CLOSE) or the session has
+ 	 * terminated; otherwise NOMORE means "nothing right now, not
+@@ -3290,6 +3350,16 @@
+ 	if (in_zc_rx)
+ 		return DSSH_ERROR_INVALID;
+ 	struct dssh_session_s *sess = ch->sess;
++	if (ch->bounded_receive) {
++		/* Release a full-ring demux before TX/close can wait on rekey.
++		 * shutwr remains an outgoing half-close and does not set this flag. */
++		atomic_store(&ch->receive_abort, true);
++		if (dssh_thrd_check(sess, mtx_lock(&ch->buf_mtx)) != thrd_success)
++			return DSSH_ERROR_TERMINATED;
++		dssh_thrd_check_locked(sess, cnd_broadcast(&ch->poll_cnd));
++		if (dssh_thrd_check_unlock(sess, mtx_unlock(&ch->buf_mtx)) != thrd_success)
++			return DSSH_ERROR_TERMINATED;
++	}
+ 	if (exit_code >= 0 && exit_code <= UINT32_MAX) {
+ 		uint32_t ec = (uint32_t)exit_code;
+ 		dssh_conn_send_exit_status(sess, ch, ec);
+@@ -3990,6 +4060,11 @@
+ 		bool terminal_want_reply = false;
+ 
+ 		res = chan_accept_setup_loop(sess, ch, cbs, &p, &result, &terminal_want_reply);
++		if (res >= 0 && result.bounded_receive &&
++		    (result.zc_cb != NULL || result.max_window != 16777216U)) {
++			res = DSSH_ERROR_INVALID;
++			session_set_terminate(sess);
++		}
+ 		if (res < 0) {
+ 			dssh_chan_params_free(&p);
+ 
+@@ -4038,12 +4113,15 @@
+ 			free(ch);
+ 			return NULL;
+ 		}
++		ch->bounded_receive    = result.bounded_receive;
++		ch->receive_allowed    = result.receive_allowed;
++		ch->receive_allowed_data = result.receive_allowed_data;
+ 		ch->window_max         = winsz;
+ 		ch->chan_type          = DSSH_CHAN_SESSION;
+ 		ch->exit_code          = 0;
+ 		ch->exit_code_received = false;
+ 		if (ch->io_model == DSSH_IO_STREAM) {
+-			res = bytebuf_init(&ch->buf.stdout_buf, winsz);
++			res = bytebuf_init(&ch->buf.stdout_buf, ch->bounded_receive ? 65536U : winsz);
+ 			if (res < 0) {
+ 				ch->chan_type = 0;
+ 				ch->setup_mode = false;
+@@ -4060,7 +4138,7 @@
+ 				free(ch);
+ 				return NULL;
+ 			}
+-			res = bytebuf_init(&ch->buf.stderr_buf, winsz);
++			res = bytebuf_init(&ch->buf.stderr_buf, ch->bounded_receive ? 65536U : winsz);
+ 			if (res < 0) {
+ 				bytebuf_free(&ch->buf.stdout_buf);
+ 				ch->chan_type = 0;
+--- a/deucessh-conn.h
++++ b/deucessh-conn.h
+@@ -196,6 +196,14 @@
+ 
+ 	/* 4-byte */
+ 	uint32_t max_window; /* 0 = default */
++	/* Explicit SFX bounded stream profile: 16 MiB advertised credit, two
++	 * fixed 64 KiB rings, and at most five seconds occupying one RX packet.
++	 * Server stream mode only. Zero preserves the original policy.
++	 * The nonblocking guard runs without library locks; its context must
++	 * outlive the session. It must not call back into the library. */
++	bool bounded_receive;
++	bool (*receive_allowed)(void *);
++	void *receive_allowed_data;
+ };
+ 
+ /* ---- New dssh_chan_* API ---- */
+--- a/ssh-internal.h
++++ b/ssh-internal.h
+@@ -308,6 +308,11 @@
+ 	cnd_t       poll_cnd;
+ 	atomic_bool closing; /* set by close functions before cleanup */
+ 	atomic_bool terminate_woken;
++	atomic_bool receive_abort;
++	bool bounded_receive;
++	bool receive_waiting; /* protected by buf_mtx; a current RX packet is pinned */
++	bool (*receive_allowed)(void *);
++	void *receive_allowed_data;
+ 	/* Keeps embedded TX slots alive while a transport owner drains them
+ 	 * without channel_mtx held. */
+ 	atomic_uint tx_refs;

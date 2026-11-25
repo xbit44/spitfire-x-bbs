@@ -1,0 +1,128 @@
+#include "../support/include/sfx/test/linux_layout_fixture.hpp"
+// Real engine workers/listeners + TCP/portable credentials/Linux/SQLite. The receipt is a
+// host-created isolated capability fixture, not an installed/registry claim.
+#include "linux_ftn_engine.hpp"
+#include "linux_bink_log.hpp"
+#include "linux_rlogin.hpp"
+#include "sfx/platform/linux/ftn_secrets.hpp"
+#include "sfx/platform/linux/ftn_native_toss.hpp"
+#include "sfx/adapters/storage/sqlite_storage.hpp"
+#include "sfx/test/storage_fakes.hpp"
+#include "sqlite_internal.hpp"
+#include "sqlite_statement.hpp"
+#include <iostream>
+#include <stdexcept>
+#include <algorithm>
+#include <ctime>
+#include <sys/stat.h>
+#include "sfx/platform/linux/portable_key_store.hpp"
+#include "sfx/platform/linux/portable_file_bindings.hpp"
+#include "sfx/application/message_session.hpp"
+#include "sfx/application/message_presentation.hpp"
+#include "sfx/test/terminal_stream_fake.hpp"
+namespace app=sfx::application;
+namespace native=sfx::platform::linux_host;
+
+namespace runtime=sfx::apps::runtime;
+namespace {
+unsigned checks{};
+void check(bool yes,const char* reason){++checks;if(!yes)throw std::runtime_error(reason);}
+app::Identifier128 id(unsigned n){app::Identifier128 out;out.bytes[0]=0x75;out.bytes[14]=static_cast<std::uint8_t>(n>>8);out.bytes[15]=static_cast<std::uint8_t>(n);return out;}
+void seed(const std::filesystem::path& file){
+    namespace internal=sfx::adapters::storage::internal;
+    internal::SqliteConnection db(file,SQLITE_OPEN_READWRITE,std::chrono::milliseconds(100),false);
+    db.exec("INSERT INTO sfx_accounts(account_id,display_name,name_key,security_level,account_state,revision,purge_allowed,created_utc_seconds,modified_utc_seconds) VALUES(1,'Sysop','sysop',999,'active',1,1,1700000000,1700000000),(2,'Alice','alice',10,'active',1,1,1700000000,1700000000),(3,'Bob','bob',10,'active',1,1,1700000000,1700000000)","isolated synthetic caller actors");
+    db.exec("INSERT INTO sfx_account_statistics(account_id) SELECT account_id FROM sfx_accounts;INSERT INTO sfx_account_profiles(account_id) SELECT account_id FROM sfx_accounts;INSERT INTO sfx_account_name_reservations SELECT name_key,account_id,1,display_name,1700000000,NULL FROM sfx_accounts;UPDATE sfx_security_policy SET published_revision=revision,published_policy_hash=policy_hash;UPDATE sfx_installation_state SET staged_sysop_account_id=1,setup_state='complete',completed_utc_seconds=1700000000","complete isolated fixture");
+    for(unsigned n=1;n<=3;++n){internal::SqliteStatement q(db.get(),"INSERT INTO sfx_account_sessions VALUES(?1,?2,?2,1700000000,0,1700000000,NULL,NULL,?1)","synthetic caller sessions, no login acceptance");q.bind(1,id(n));q.bind(2,static_cast<std::int64_t>(n));q.step();}
+}
+class NativeClock final:public app::IClock{
+public:
+    std::int64_t unix_seconds()const noexcept override{return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();}
+    std::uint64_t monotonic_millis()const noexcept override{return static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());}
+} fixture_clock;
+std::filesystem::path lookup_helper;
+void sleep_ms(unsigned value){std::this_thread::sleep_for(std::chrono::milliseconds(value));}
+void make_directory(const std::filesystem::path& path){check(mkdir(path.c_str(),0700)==0,"new private engine directory");}
+std::shared_ptr<native::LinuxFilePayloadBindings> make_board(const std::filesystem::path& root,bool ftn){
+    make_directory(root);for(const auto* role:{"config","data","work","logs","bin"})make_directory(root/role);
+    if(ftn)make_directory(root/"ftn");
+    {auto config=native::open_owned_directory(root/"config");const std::string first="SFX_LINUX_FIRST_RUN=1\n";native::publish_private_file(config.get(),"first-run.v1",{first.begin(),first.end()},false);}
+    check(bool((sfx::test::mark_provisioned_linux_fixture(root),native::initialize_fresh_portable_board_key(root))),"native engine portable board key");
+    std::filesystem::copy_file(lookup_helper,root/"bin/sfxhostlookup");check(chmod((root/"bin/sfxhostlookup").c_str(),0700)==0,"private pinned DNS helper fixture");
+    return native::LinuxFilePayloadBindings::initialize_fresh(root);
+}
+template<class F>void await(F predicate,const char* reason){const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(15);while(!predicate()&&std::chrono::steady_clock::now()<deadline)sleep_ms(20);check(predicate(),reason);}
+struct Fixture {
+    std::filesystem::path root;native::FtnInstallation receipt;app::FtnConfiguration config;
+    sfx::test::FakeStoragePathPolicy paths;std::unique_ptr<sfx::adapters::storage::SqliteStorage> db;
+    std::shared_ptr<app::EventSoundStream> sounds{std::make_shared<app::EventSoundStream>(id(60100))};
+    std::unique_ptr<runtime::LinuxFtnEngine> engine;
+    Fixture(const std::filesystem::path& path,unsigned node,unsigned peer,bool capable=true,bool external=false):root(path){
+        receipt.root=root;receipt.bindings=make_board(root,capable);
+        sfx::adapters::storage::SqliteStorageSettings settings;settings.layout_profile=sfx::adapters::storage::SqliteStorageLayoutProfile::linux_lowercase_v1;settings.data_directory=root/L"data";settings.utc_now=[]{return static_cast<std::int64_t>(std::time(nullptr));};db=std::make_unique<sfx::adapters::storage::SqliteStorage>(settings,paths);check(db->start().succeeded(),"actual engine managed store starts");check(db->shutdown().succeeded(),"stop isolated store for synthetic callers");seed(root/L"data"/L"sfx.db");check(db->start().succeeded(),"seeded actual store starts");config=*db->ftn_configuration({true,{}}).value;
+        app::FtnNetwork network;network.code="TEST";network.name="Engine Test";network.address="2:100/"+std::to_string(node)+"@test";network.enabled=true;config.networks.push_back(network);
+        app::FtnLink link;link.network="TEST";link.code="PEER";link.name="Loopback Peer";link.address="2:100/"+std::to_string(peer)+"@test";link.host="127.0.0.1";link.enabled=true;link.poll_minutes=0;
+        if(!external){auto secret=native::protect_ftn_secret(root.u8string(),"TEST","PEER",native::FtnCredentialKind::session,"fixture-session-key");check(bool(secret),"actual installation-bound engine portable credentials credential");link.credentials.session=*secret;}config.links.push_back(link);config.settings.bind_address="127.0.0.1";if(external)config.settings.mode=app::FtnMailerMode::external_binkd;
+        save(1);engine=std::make_unique<runtime::LinuxFtnEngine>(receipt,*db,*db,id(60000),fixture_clock,sounds);apply();
+    }
+    ~Fixture(){if(engine)engine->stop();if(db)db->shutdown();}
+    void save(unsigned operation){check(bool(db->change_ftn_configuration({true,{}},id(operation).bytes,config)),"engine current policy saved");config=*db->ftn_configuration({true,{}}).value;}
+    void apply(){auto isolated=config;isolated.settings.port=0;engine->configure(std::move(isolated));}
+    void ready(){try{await([&]{const auto state=engine->snapshot();return state.classic_listening&&state.active_revision==config.revision;},"actual classic engine listener activates on ephemeral loopback");}
+        catch(...){const auto state=engine->snapshot();std::cerr<<"READY "<<root.filename()<<" wanted="<<config.revision<<" saved="<<state.saved_revision<<" active="<<state.active_revision<<" diagnostic="<<state.diagnostic<<" classic="<<state.classic_error<<" processing="<<state.processing_error<<'\n';throw;}}
+    void queue(unsigned number,std::string_view content,std::string name={}){app::FtnOutboundJob job;job.id=id(number);job.operation=id(number);job.network="TEST";job.link="PEER";job.kind=app::FtnOutboundKind::payload;job.file={name.empty()?std::to_string(number)+".bin":name,content.size(),1700000000+number};auto output=native::FilePayloadDirectory::private_store(root/L"ftn"/L"outbound"/L"test",receipt.bindings);{auto file=output.create(native::ftn_native_artifact_name(job.id),content.size());file.append(reinterpret_cast<const std::uint8_t*>(content.data()),content.size());job.digest=file.identity().sha256;}check(db->queue_ftn_jobs({true,{}},config.revision,{job}).succeeded(),"actual engine immutable outbound file and DB job agree");}
+};
+std::size_t active(const runtime::LinuxFtnSnapshot& snapshot){return static_cast<std::size_t>(std::count_if(snapshot.sessions.begin(),snapshot.sessions.end(),[](const auto& s){return s.active;}));}
+}
+int main(int argc,char** argv){try {
+    check(argc==3,"new isolated engine fixture and pinned resolver helper required");lookup_helper=std::filesystem::absolute(argv[2]);const auto root=std::filesystem::absolute(argv[1]);check(!std::filesystem::exists(root),"preserve previous engine fixtures");std::filesystem::create_directories(root.parent_path());make_directory(root);
+    #include "linux_rc8_bink_log_checks.inc"
+    Fixture old(root/L"OldReceipt",7,8,false);
+    await([&]{return old.engine->snapshot().diagnostic=="ftn_needs_normal_setup_update";},"old capability is FTN-specific inactive");check(!std::filesystem::exists(old.root/L"ftn")&&bool(old.db->ftn_configuration({true,{}})),"old installation retains unrelated storage/config without manufactured FTN root");check(!old.engine->poll("TEST","PEER"),"old installation cannot activate via poll");
+    Fixture server(root/L"Server",1,2),client(root/L"Client",2,1);server.ready();client.ready();
+    app::SoundPollRequest consumer{id(60010),id(60100),0,true};app::EventSoundConfiguration silent;auto before=server.sounds->poll(consumer,silent,fixture_clock.monotonic_millis());consumer.after=before.through;consumer.fresh_desktop_start=false;
+    client.config.links.front().port=server.engine->snapshot().classic_port;client.save(2);client.apply();client.ready();
+    check(!client.engine->poll("TEST","PEER",false,client.config.revision-1)&&!client.engine->scan(client.config.revision-1),"reviewed poll and scan reject stale revision under FTN worker lock");
+    check(client.engine->snapshot().sessions.empty(),"stale review creates no session");
+    server.queue(100,"server queue bytes");client.queue(101,"client queue bytes");check(client.engine->poll("TEST","PEER",false,client.config.revision),"current reviewed Poll dispatches configured loopback link");
+    await([&]{const auto s=server.engine->snapshot(),c=client.engine->snapshot();return std::any_of(s.sessions.begin(),s.sessions.end(),[](const auto& v){return v.transfer.completed&&v.transfer.received_files==1&&v.transfer.sent_files==1;})&&std::any_of(c.sessions.begin(),c.sessions.end(),[](const auto& v){return v.transfer.completed&&v.transfer.received_files==1&&v.transfer.sent_files==1;});},"real engine bidirectional BinkP session delivers both exact GOT jobs");
+    #include "linux_ftn_engine_activity_checks.inc"
+    const auto sound=server.sounds->poll(consumer,silent,fixture_clock.monotonic_millis());check(std::count_if(sound.events.begin(),sound.events.end(),[](const auto& e){return e.event==app::SoundEvent::inbound_binkp;})==1,"one actual inbound BinkP typed event through accepted sound stream");
+    {const auto queues=server.db->ftn_queue_page({true,{}},0);check(queues&&queues.value->outbound[3]==1&&queues.value->ingress[1]==1&&queues.value->rows.size()==1,"real queue totals distinguish received custody and remote GOT delivery");check(!server.db->ftn_queue_page({},0),"caller lacks owner queue metadata access");const auto sessions=server.engine->snapshot().sessions;check(std::any_of(sessions.begin(),sessions.end(),[](const auto& s){return s.transfer.completed&&!s.transfer.receive.name.empty()&&s.transfer.receive.position==s.transfer.receive.size&&!s.transfer.send.name.empty();}),"native session observes actual file names and final offsets");check(server.engine->scan(),"explicit scan accepted by active sole processor");}
+    check(server.db->pending_ftn_ingress({true,{}},64).value->size()==1&&client.db->pending_ftn_ingress({true,{}},64).value->size()==1,"received custody remains durable for actual toss owner");
+    check(client.engine->pause_for_backup(),"backup obtains joined FTN writer hold");check(active(client.engine->snapshot())==0&&!client.engine->snapshot().classic_listening,"backup hold closes listeners and joins sessions");client.apply();sleep_ms(150);check(!client.engine->snapshot().classic_listening&&!client.engine->poll("TEST","PEER"),"save or manual poll cannot bypass backup hold");client.engine->resume_after_backup();client.ready();
+    app::FtnMessageEcho echo;echo.network="TEST";echo.tag="ENGINE.TEST";echo.description="Engine packet processing";server.config.message_echoes.push_back(echo);server.config.permissions.push_back({"TEST","PEER","ENGINE.TEST",false,true,false,false});server.save(3);server.apply();server.ready();
+    client.config.links.front().port=server.engine->snapshot().classic_port;client.save(4);client.apply();client.ready();
+    for(unsigned i=110;i<130;++i)client.queue(i,"payload awaiting a future TIC partner");
+    app::FtnPacket packet;packet.header.origin=*app::parse_ftn_address("2:100/2@test");packet.header.destination=*app::parse_ftn_address("2:100/1@test");packet.header.year=2026;packet.header.month=10;packet.header.day=29;
+    app::FtnPackedMessage message;message.origin_net=message.destination_net=100;message.origin_node=2;message.destination_node=1;message.date="29 Oct 26  12:00:00";message.from="Remote Engine";message.to="All";message.subject="Real session packet";message.text="AREA:ENGINE.TEST\r\1MSGID: 2:100/2 engine123\r\1CHRS: CP437 2\rEngine import body\r";packet.messages.push_back(message);const auto encoded=app::encode_ftn_packet(packet);check(encoded.has_value(),"bounded actual packet fixture");client.queue(200,*encoded,"engine.pkt");
+    check(client.engine->poll("TEST","PEER"),"real session carries deferred files and later packet");
+    await([&]{const auto state=server.engine->snapshot();return state.processed_receipts==1&&state.imported_messages==1;},"joined actual engine processor imports authenticated packet beyond deferred receipt page");
+    check(server.db->pending_ftn_ingress({true,{}},64).value->size()==21,"only packet completes; unmatched payloads remain in durable custody");
+    check(server.engine->pause_for_backup()&&!server.engine->snapshot().processing,"backup hold joins packet processor before granting custody");server.engine->resume_after_backup();server.ready();
+    auto broken=server.config;broken.settings.port=0;broken.settings.tls_listener_enabled=true;broken.settings.tls_certificate=(root/L"absent.pem").u8string();broken.settings.tls_private_key=broken.settings.tls_certificate;server.engine->configure(broken);
+    await([&]{const auto state=server.engine->snapshot();return state.classic_listening&&!state.tls_error.empty();},"failed explicit TLS listener leaves independently valid classic listening with truthful error");
+    const auto live=[] {return true;};std::vector<std::unique_ptr<native::FtnNativeChannel>> idle;auto dial=client.config.links.front();dial.port=server.engine->snapshot().classic_port;
+    for(unsigned i=0;i<5;++i)idle.push_back(native::FtnNativeChannel::connect_ipv4({127,0,0,1},dial.port,dial,live));
+    await([&]{return active(server.engine->snapshot())==4;},"four idle real inbound sockets occupy bounded worker slots");sleep_ms(150);check(active(server.engine->snapshot())==4,"fifth inbound socket never creates a fifth session worker");
+    auto disabled=server.config;disabled.settings.mode=app::FtnMailerMode::disabled;server.engine->configure(disabled);
+    await([&]{const auto state=server.engine->snapshot();return !state.classic_listening&&active(state)==0&&state.diagnostic=="ftn_disabled_mail_retained";},"Disabled cancels and joins actual idle sessions without waiting for peer timeout");idle.clear();check(server.db->pending_ftn_ingress({true,{}},64).value->size()==21,"Disabled preserves received mail and receipts");
+    auto external=disabled;external.settings.mode=app::FtnMailerMode::external_binkd;server.engine->configure(external);await([&]{return server.engine->snapshot().diagnostic=="ftn_external_processing_active";},"External processor activates without Native listeners");
+    server.apply();server.ready();client.config.links.front().port=server.engine->snapshot().classic_port;client.save(10);client.apply();client.ready();
+    const app::MessageActor bob{id(3),3,1,1},alice{id(2),2,1,1};app::MessageTarget target;target.kind=app::MessageKind::private_ftn;target.remote=app::MessageRemoteTarget{"TEST","2:100/2@test","2:100/1@test","Alice"};const auto context=client.db->begin_message(bob,target,{});check(bool(context),"actual caller compose context for Runtime scanner");const auto authored=client.db->commit_message({bob,id(950),*context.value,"End to end NetMail","Actual local source through scan and BinkP\n"});check(bool(authored),"actual caller commits private source intent");
+    await([&]{return client.engine->snapshot().scanned_messages==1;},"sole Runtime processor publishes actual local NetMail artifact");check(client.db->open_message(bob,authored.value->id).value->header.remote_delivery=="Queued","scanning alone retains truthful queued sender history");check(client.engine->poll("TEST","PEER"),"poll sends scanner artifact over actual configured local BinkP");
+    await([&]{return client.db->open_message(bob,authored.value->id).value->header.remote_delivery=="Sent to link"&&server.engine->snapshot().imported_messages==2;},"matched real GOT updates sender while receiving engine imports private message");
+    app::MessageQueryOptions options;options.mode=app::MessageQueryMode::inbox;const auto inbox=server.db->begin_message_query(alice,options);check(bool(inbox),"recipient private inbox context");const auto headers=server.db->query_message_headers(alice,*inbox.value,{},20);check(headers&&headers.value->entries.size()==1,"only exact recipient receives the actual private FTN message");const auto incoming=server.db->open_message(alice,headers.value->entries.front().identity.id);check(incoming&&incoming.value->header.remote_author&&incoming.value->header.remote_author->name=="Bob"&&incoming.value->body.canonical_lf.find("Actual local source through scan and BinkP")!=std::string::npos,"remote provenance and original private content survive full native engine flow");check(!server.db->open_message(bob,headers.value->entries.front().identity.id),"same-named remote sender cannot grant local Bob recipient access");
+    #include "../integration/ftn_caller_name_checks.inc"
+    server.config.settings.port=server.engine->snapshot().classic_port;server.config.links.front().areafix_enabled=true;server.config.links.front().credentials.areafix=*native::protect_ftn_secret(server.root.u8string(),"TEST","PEER",native::FtnCredentialKind::areafix,"engine-area-key");server.config.permissions.front().manage=true;server.save(20);server.engine->configure(server.config);server.ready();client.config.links.front().port=server.engine->snapshot().classic_port;client.save(20);client.apply();client.ready();
+    auto control_packet=packet;control_packet.messages.clear();auto control_message=message;control_message.to="AreaFix";control_message.from="Bob";control_message.subject="engine-area-key";control_message.text="\1MSGID: 2:100/2 engine-area-control\r\1CHRS: CP437 2\r+ENGINE.TEST\r%STATUS\r";control_packet.messages.push_back(control_message);const auto control_wire=app::encode_ftn_packet(control_packet);check(bool(control_wire),"actual engine AreaFix packet fixture");client.queue(960,*control_wire,"areafix.pkt");const auto prior_revision=server.config.revision;check(client.engine->poll("TEST","PEER"),"actual loopback BinkP carries AreaFix request");await([&]{const auto saved=server.db->ftn_configuration({true,{}});const auto state=server.engine->snapshot();return saved&&saved.value->revision>prior_revision&&state.active_revision==saved.value->revision&&state.classic_listening&&app::ftn_echo_permission(*saved.value,"TEST","PEER","ENGINE.TEST",false,false);},"sole engine applies AreaFix and reloads committed permission revision without external configure callback");server.config=*server.db->ftn_configuration({true,{}}).value;await([&]{return server.engine->snapshot().scanned_messages>=1&&server.db->pending_ftn_control({true,{}},{},16).value->empty();},"reloaded processor publishes durable response as actual packet");server.engine->configure(disabled);sleep_ms(100);check(server.engine->snapshot().active_revision==server.config.revision&&server.engine->snapshot().classic_listening,"late older configuration callback cannot undo newer remote/owner publication");check(client.engine->poll("TEST","PEER"),"actual client session picks up AreaFix response");await([&]{return client.engine->snapshot().imported_messages>=1;},"generated response crosses real BinkP and enters native recipient store");const auto result_query=client.db->begin_message_query(bob,options);check(bool(result_query),"requester's private response inbox");const auto result_headers=client.db->query_message_headers(bob,*result_query.value,{},20);{sfx::adapters::storage::internal::SqliteConnection wire(client.root/L"data/sfx.db",SQLITE_OPEN_READONLY,std::chrono::milliseconds(100),false);sfx::adapters::storage::internal::SqliteStatement tz(wire.get(),"SELECT wire_text FROM sfx_ftn_message_metadata WHERE message_id IN (SELECT message_id FROM sfx_local_messages WHERE CAST(subject AS TEXT)='AreaFix results')","inspect actual generated control after BinkP delivery");check(tz.row(),"AreaFix response retains exact wire metadata");const auto value=tz.blob(0);const std::string body(reinterpret_cast<const char*>(value.data()),value.size());check(body.find("\1TZUTC: 0000\r")!=std::string::npos,"generated AreaFix response UTC field crosses actual BinkP");}check(result_headers&&std::any_of(result_headers.value->entries.begin(),result_headers.value->entries.end(),[](const auto& h){return h.remote_author&&h.remote_author->name=="AreaFix";}),"AreaFix system author retained as remote provenance in requester's private inbox");
+    #include "linux_ftn_engine_tic_checks.inc"
+    #include "linux_ftn_engine_held_checks.inc"
+    #include "linux_ftn_engine_stored_checks.inc"
+    #include "linux_ftn_engine_retention_checks.inc"
+    check(server.db->preserve_ftn_serial_history({true,{}},{}).succeeded(),"synthetic offline-publication port persists unknown-history hold");server.apply();await([&]{const auto state=server.engine->snapshot();return state.serial_recovery_required&&!state.classic_listening&&state.diagnostic=="ftn_message_id_history_needs_recovery";},"Runtime presents persistent FTN-only recovery status and stops its worker");check(!server.engine->poll("TEST","PEER"),"manual Poll cannot bypass FTN recovery hold");
+    server.engine->stop();client.engine->stop();check(active(server.engine->snapshot())==0&&!server.engine->snapshot().classic_listening,"explicit shutdown joins every engine session before store close");
+    #include "linux_ftn_engine_auth_diagnostic_checks.inc"
+    // Linux resolver children are bounded and reaped per query.
+    std::cout<<"PASS "<<checks<<" actual native engine lifecycle/TCP/BinkP/Linux/SQLite/sound/backup-hold checks; synthetic host receipt, no installed/independent-peer/external/hub acceptance\n";return 0;
+}catch(const std::exception& error){std::cerr<<"FAIL "<<checks<<": "<<error.what()<<'\n';return 1;}}

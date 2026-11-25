@@ -1,0 +1,3721 @@
+{
+  "format": 1,
+  "version": "1.0.0b1",
+  "platform": "linux-amd64",
+  "layout_schema": "linux-lowercase-v1",
+  "purpose": "Normative installed payload aliases and exact case exceptions for fresh Linux installations. Source names are logical input slots, not a requirement to create an uppercase staging tree. Source repository and standalone upstream names remain unchanged. This map plus component build instructions does not claim exact reproduction of a private test ZIP or a final build from empty dependencies.",
+  "roots": {
+    "Bin": "bin",
+    "Web": "web",
+    "Docs": "docs",
+    "Display": "display",
+    "Doors": "doors",
+    "BotGate": "botgate",
+    "Config": "config",
+    "Data": "data",
+    "Files": "files",
+    "FTN": "ftn",
+    "Logs": "logs",
+    "Backup": "backup",
+    "Work": "work",
+    "Node": "node",
+    "Management": "management",
+    "Games": "games",
+    "Service": "service"
+  },
+  "file_area_defaults": [
+    "files/general",
+    "files/uploads",
+    "files/uploadtosysop"
+  ],
+  "fixed_core": {
+    "Config/SFX.conf": "config/sfx.conf",
+    "Data/SFX.DB": "data/sfx.db",
+    "Logs/CALLERS.LOG": "logs/callers.log",
+    "Logs/HEYSYSOP.LOG": "logs/heysysop.log",
+    "Logs/SFXRuntime.log": "logs/sfxruntime.log"
+  },
+  "outputs": {
+    "SFXRuntime": "sfxruntime",
+    "SFXWeb": "sfxweb",
+    "SFXHostLookup": "sfxhostlookup",
+    "SFXBinkD": "sfxbinkd",
+    "SFXFileTransfer": "sfxfiletransfer",
+    "SFXQWKTransfer": "sfxqwktransfer"
+  },
+  "launchers": [
+    "spitfire-x",
+    "prepare-sfx"
+  ],
+  "marker": {
+    "native": "config/linux-layout.v1",
+    "canonical_archive": "Config/linux-layout.v1",
+    "exact_text": "SFX-LINUX-LAYOUT-1\nlinux-lowercase-v1\n",
+    "receipt_field": "layout_schema",
+    "receipt_value": "linux-lowercase-v1",
+    "portable_schema_not_installation_identity": true
+  },
+  "payload_aliases": [
+    {
+      "source": "Bin/SFXRuntime",
+      "target": "bin/sfxruntime",
+      "mode": "0700",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Bin/SFXWeb",
+      "target": "bin/sfxweb",
+      "mode": "0700",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Bin/SFXHostLookup",
+      "target": "bin/sfxhostlookup",
+      "mode": "0700",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Bin/SFXBinkD",
+      "target": "bin/sfxbinkd",
+      "mode": "0700",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Bin/Tools/SFXFileTransfer",
+      "target": "bin/tools/sfxfiletransfer",
+      "mode": "0700",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Bin/Tools/SFXQWKTransfer",
+      "target": "bin/tools/sfxqwktransfer",
+      "mode": "0700",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Spitfire-X",
+      "target": "spitfire-x",
+      "mode": "0755",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Prepare-SFX",
+      "target": "prepare-sfx",
+      "mode": "0755",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Bin/Tools/prepare_linux_dos.py",
+      "target": "bin/tools/prepare_linux_dos.py",
+      "mode": "0700",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Bin/Tools/linux_dos_pop22_amd64.json",
+      "target": "bin/tools/linux_dos_pop22_amd64.json",
+      "mode": "0600",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/LINUX_DOS_DOORS.txt",
+      "target": "docs/linux_dos_doors.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Web/index.html",
+      "target": "web/index.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Web/app.js",
+      "target": "web/app.js",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Web/app.css",
+      "target": "web/app.css",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Bin/tzdata/africa",
+      "target": "bin/tzdata/africa",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "canonical-iana-resource"
+    },
+    {
+      "source": "Bin/tzdata/antarctica",
+      "target": "bin/tzdata/antarctica",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "canonical-iana-resource"
+    },
+    {
+      "source": "Bin/tzdata/asia",
+      "target": "bin/tzdata/asia",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "canonical-iana-resource"
+    },
+    {
+      "source": "Bin/tzdata/australasia",
+      "target": "bin/tzdata/australasia",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "canonical-iana-resource"
+    },
+    {
+      "source": "Bin/tzdata/backward",
+      "target": "bin/tzdata/backward",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "canonical-iana-resource"
+    },
+    {
+      "source": "Bin/tzdata/etcetera",
+      "target": "bin/tzdata/etcetera",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "canonical-iana-resource"
+    },
+    {
+      "source": "Bin/tzdata/europe",
+      "target": "bin/tzdata/europe",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "canonical-iana-resource"
+    },
+    {
+      "source": "Bin/tzdata/leapseconds",
+      "target": "bin/tzdata/leapseconds",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "canonical-iana-resource"
+    },
+    {
+      "source": "Bin/tzdata/LICENSE",
+      "target": "bin/tzdata/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "canonical-iana-resource"
+    },
+    {
+      "source": "Bin/tzdata/northamerica",
+      "target": "bin/tzdata/northamerica",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "canonical-iana-resource"
+    },
+    {
+      "source": "Bin/tzdata/southamerica",
+      "target": "bin/tzdata/southamerica",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "canonical-iana-resource"
+    },
+    {
+      "source": "Bin/tzdata/version",
+      "target": "bin/tzdata/version",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "canonical-iana-resource"
+    },
+    {
+      "source": "Display/batch.ans",
+      "target": "display/batch.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/batch.asc",
+      "target": "display/batch.asc",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/bg-prelog.ans",
+      "target": "display/bg-prelog.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/bullet1.ans",
+      "target": "display/bullet1.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/bullet1.asc",
+      "target": "display/bullet1.asc",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/bullet2.asc",
+      "target": "display/bullet2.asc",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/bulletin.ans",
+      "target": "display/bulletin.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/bulletin.asc",
+      "target": "display/bulletin.asc",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/chat-emote.txt",
+      "target": "display/chat-emote.txt",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/chat.ans",
+      "target": "display/chat.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/chat.asc",
+      "target": "display/chat.asc",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/file.ans",
+      "target": "display/file.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/file.asc",
+      "target": "display/file.asc",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/main.ans",
+      "target": "display/main.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/main.asc",
+      "target": "display/main.asc",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/main999.ans",
+      "target": "display/main999.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/main999.asc",
+      "target": "display/main999.asc",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/msg.ans",
+      "target": "display/msg.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/msg.asc",
+      "target": "display/msg.asc",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/qwk.ans",
+      "target": "display/qwk.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/qwk.asc",
+      "target": "display/qwk.asc",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/spitfire-x.ans",
+      "target": "display/spitfire-x.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/sysop.ans",
+      "target": "display/sysop.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/sysop.asc",
+      "target": "display/sysop.asc",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/your.ans",
+      "target": "display/your.ans",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Display/your.asc",
+      "target": "display/your.asc",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/assets/search-index.js",
+      "target": "docs/sysop/assets/search-index.js",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/assets/search.js",
+      "target": "docs/sysop/assets/search.js",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/assets/sysop.css",
+      "target": "docs/sysop/assets/sysop.css",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/callers-chat.html",
+      "target": "docs/sysop/callers-chat.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/custom-display-checks.html",
+      "target": "docs/sysop/custom-display-checks.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/customization-reference.html",
+      "target": "docs/sysop/customization-reference.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/daily-operation.html",
+      "target": "docs/sysop/daily-operation.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/doors.html",
+      "target": "docs/sysop/doors.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/external-binkd-profile.html",
+      "target": "docs/sysop/external-binkd-profile.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/external-binkd.html",
+      "target": "docs/sysop/external-binkd.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/files-transfers.html",
+      "target": "docs/sysop/files-transfers.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/ftn-networks.html",
+      "target": "docs/sysop/ftn-networks.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/get-ready.html",
+      "target": "docs/sysop/get-ready.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/images/sfx-about-approved.png",
+      "target": "docs/sysop/images/sfx-about-approved.png",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/linux-controls.html",
+      "target": "docs/sysop/linux-controls.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/linux-prerequisites.html",
+      "target": "docs/sysop/linux-prerequisites.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/maintenance-recovery.html",
+      "target": "docs/sysop/maintenance-recovery.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/messages-mail.html",
+      "target": "docs/sysop/messages-mail.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/search.html",
+      "target": "docs/sysop/search.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/thanks-to.html",
+      "target": "docs/sysop/thanks-to.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/updates-help.html",
+      "target": "docs/sysop/updates-help.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Sysop/wiki.html",
+      "target": "docs/sysop/wiki.html",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "README.txt",
+      "target": "readme.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/SFX-LICENSE.txt",
+      "target": "docs/thirdparty/sfx-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/licenses/SFXEXEC/COPYING",
+      "target": "docs/thirdparty/licenses/sfxexec/copying",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/licenses/SFXEXEC/COPYING.LIB",
+      "target": "docs/thirdparty/licenses/sfxexec/copying.lib",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/CLDR-LICENSE.txt",
+      "target": "docs/thirdparty/notices/cldr-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/DeuceSSH-LIBCRUX-NOTICE.txt",
+      "target": "docs/thirdparty/notices/deucessh-libcrux-notice.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/DeuceSSH-LICENSE.md",
+      "target": "docs/thirdparty/notices/deucessh-license.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/DeuceSSH-PROVENANCE.md",
+      "target": "docs/thirdparty/notices/deucessh-provenance.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/General-File-Helper-NOTICES.md",
+      "target": "docs/thirdparty/notices/general-file-helper-notices.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/Mozilla-CA-LICENSE.txt",
+      "target": "docs/thirdparty/notices/mozilla-ca-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/Mozilla-CA-PROVENANCE.md",
+      "target": "docs/thirdparty/notices/mozilla-ca-provenance.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/OpenSSL-LICENSE.txt",
+      "target": "docs/thirdparty/notices/openssl-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/OpenSSL-TLS-PROVENANCE.md",
+      "target": "docs/thirdparty/notices/openssl-tls-provenance.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/SFXEXEC-NOTICE.txt",
+      "target": "docs/thirdparty/notices/sfxexec-notice.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/SQLite-LICENSE.md",
+      "target": "docs/thirdparty/notices/sqlite-license.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/SecLists-LICENSE.txt",
+      "target": "docs/thirdparty/notices/seclists-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/SecLists-PROVENANCE.md",
+      "target": "docs/thirdparty/notices/seclists-provenance.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/Unicode-CaseFolding-LICENSE.txt",
+      "target": "docs/thirdparty/notices/unicode-casefolding-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/cpp-httplib-LICENSE.txt",
+      "target": "docs/thirdparty/notices/cpp-httplib-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/curl-LICENSE.txt",
+      "target": "docs/thirdparty/notices/curl-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/curl-PROVENANCE.md",
+      "target": "docs/thirdparty/notices/curl-provenance.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/date-LICENSE.txt",
+      "target": "docs/thirdparty/notices/date-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/libarchive-LICENSE.txt",
+      "target": "docs/thirdparty/notices/libarchive-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/libarchive-PROVENANCE.md",
+      "target": "docs/thirdparty/notices/libarchive-provenance.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/libsodium-LICENSE.txt",
+      "target": "docs/thirdparty/notices/libsodium-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/nlohmann-json-LICENSE.MIT",
+      "target": "docs/thirdparty/notices/nlohmann-json-license.mit",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/tzdata-LICENSE.txt",
+      "target": "docs/thirdparty/notices/tzdata-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/zlib-LICENSE.txt",
+      "target": "docs/thirdparty/notices/zlib-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/zlib-PROVENANCE.md",
+      "target": "docs/thirdparty/notices/zlib-provenance.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/THIRD_PARTY.txt",
+      "target": "docs/thirdparty/third_party.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/Moebius-CP437-NOTICE.txt",
+      "target": "docs/thirdparty/notices/moebius-cp437-notice.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/Moebius-LICENSE.txt",
+      "target": "docs/thirdparty/notices/moebius-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/ThirdParty/notices/Moebius-UPSTREAM-README.md",
+      "target": "docs/thirdparty/notices/moebius-upstream-readme.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Bin/ClamAV/clamscan",
+      "target": "bin/clamav/clamscan",
+      "mode": "0700",
+      "policy": "always",
+      "case_exception": "qualified-vendor-runtime"
+    },
+    {
+      "source": "Bin/ClamAV/freshclam",
+      "target": "bin/clamav/freshclam",
+      "mode": "0700",
+      "policy": "always",
+      "case_exception": "qualified-vendor-runtime"
+    },
+    {
+      "source": "Bin/ClamAV/sigtool",
+      "target": "bin/clamav/sigtool",
+      "mode": "0700",
+      "policy": "always",
+      "case_exception": "qualified-vendor-runtime"
+    },
+    {
+      "source": "Bin/ClamAV/libclamav.so.12",
+      "target": "bin/clamav/libclamav.so.12",
+      "mode": "0600",
+      "policy": "always",
+      "case_exception": "qualified-vendor-runtime"
+    },
+    {
+      "source": "Bin/ClamAV/libclammspack.so.0",
+      "target": "bin/clamav/libclammspack.so.0",
+      "mode": "0600",
+      "policy": "always",
+      "case_exception": "qualified-vendor-runtime"
+    },
+    {
+      "source": "Bin/ClamAV/libclamunrar.so.12",
+      "target": "bin/clamav/libclamunrar.so.12",
+      "mode": "0600",
+      "policy": "always",
+      "case_exception": "qualified-vendor-runtime"
+    },
+    {
+      "source": "Bin/ClamAV/libclamunrar_iface.so",
+      "target": "bin/clamav/libclamunrar_iface.so",
+      "mode": "0600",
+      "policy": "always",
+      "case_exception": "qualified-vendor-runtime"
+    },
+    {
+      "source": "Bin/ClamAV/libfreshclam.so.3",
+      "target": "bin/clamav/libfreshclam.so.3",
+      "mode": "0600",
+      "policy": "always",
+      "case_exception": "qualified-vendor-runtime"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING.txt",
+      "target": "docs/thirdparty/clamav/COPYING.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/libclammspack/COPYING.LIB",
+      "target": "docs/thirdparty/clamav/libclammspack/COPYING.LIB",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/unit_tests/input/COPYING",
+      "target": "docs/thirdparty/clamav/unit_tests/input/COPYING",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/clamonacc/c-thread-pool/LICENSE",
+      "target": "docs/thirdparty/clamav/clamonacc/c-thread-pool/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/libclamunrar/license.txt",
+      "target": "docs/thirdparty/clamav/libclamunrar/license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/Cargo.lock",
+      "target": "docs/thirdparty/clamav/Cargo.lock",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/INSTALL.md",
+      "target": "docs/thirdparty/clamav/INSTALL.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/README.md",
+      "target": "docs/thirdparty/clamav/README.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_i686_msvc/license-apache-2.0",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_i686_msvc/license-apache-2.0",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_i686_msvc/license-mit",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_i686_msvc/license-mit",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/adler2/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/adler2/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/adler2/LICENSE-0BSD",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/adler2/LICENSE-0BSD",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/adler2/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/adler2/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_i686_gnu/license-apache-2.0",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_i686_gnu/license-apache-2.0",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_i686_gnu/license-mit",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_i686_gnu/license-mit",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/ravif/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/ravif/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/crossbeam-epoch/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/crossbeam-epoch/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/crossbeam-epoch/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/crossbeam-epoch/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/home/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/home/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/home/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/home/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/shlex/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/shlex/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/shlex/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/shlex/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/moxcms/LICENSE.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/moxcms/LICENSE.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/moxcms/LICENSE-APACHE.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/moxcms/LICENSE-APACHE.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/num-bigint/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/num-bigint/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/num-bigint/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/num-bigint/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/num-complex/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/num-complex/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/num-complex/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/num-complex/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/errno/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/errno/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/errno/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/errno/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/libc/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/libc/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/libc/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/libc/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/aho-corasick/COPYING",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/aho-corasick/COPYING",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/aho-corasick/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/aho-corasick/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/cfg-if/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/cfg-if/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/cfg-if/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/cfg-if/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/ppv-lite86/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/ppv-lite86/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/ppv-lite86/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/ppv-lite86/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/regex-syntax/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/regex-syntax/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/regex-syntax/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/regex-syntax/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/regex-syntax/src/unicode_tables/LICENSE-UNICODE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/regex-syntax/src/unicode_tables/LICENSE-UNICODE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/num-traits/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/num-traits/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/num-traits/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/num-traits/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/toml/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/toml/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/toml/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/toml/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/image-webp/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/image-webp/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/image-webp/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/image-webp/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/pxfm/LICENSE.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/pxfm/LICENSE.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/pxfm/LICENSE-APACHE.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/pxfm/LICENSE-APACHE.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wasm-bindgen-macro/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wasm-bindgen-macro/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wasm-bindgen-macro/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wasm-bindgen-macro/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/either/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/either/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/either/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/either/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bytemuck/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bytemuck/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bytemuck/LICENSE-ZLIB",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bytemuck/LICENSE-ZLIB",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bytemuck/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bytemuck/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rustdct/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rustdct/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rustdct/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rustdct/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/lazycell/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/lazycell/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/lazycell/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/lazycell/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/crossbeam-utils/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/crossbeam-utils/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/crossbeam-utils/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/crossbeam-utils/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bumpalo/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bumpalo/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bumpalo/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bumpalo/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/itertools-0.10.5/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/itertools-0.10.5/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/itertools-0.10.5/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/itertools-0.10.5/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/sha2/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/sha2/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/sha2/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/sha2/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/arrayvec/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/arrayvec/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/arrayvec/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/arrayvec/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/num-rational/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/num-rational/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/num-rational/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/num-rational/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/unicode-ident/LICENSE-UNICODE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/unicode-ident/LICENSE-UNICODE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/unicode-ident/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/unicode-ident/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/unicode-ident/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/unicode-ident/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rustfft/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rustfft/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rustfft/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rustfft/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/hex/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/hex/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/hex/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/hex/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/itoa/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/itoa/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/itoa/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/itoa/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/quick-error/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/quick-error/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/quick-error/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/quick-error/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/av1-grain/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/av1-grain/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bytes/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bytes/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/chrono/LICENSE.txt",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/chrono/LICENSE.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows-core/license-apache-2.0",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows-core/license-apache-2.0",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows-core/license-mit",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows-core/license-mit",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/core-foundation-sys/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/core-foundation-sys/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/core-foundation-sys/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/core-foundation-sys/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/quote/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/quote/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/quote/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/quote/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/ryu/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/ryu/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/ryu/LICENSE-BOOST",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/ryu/LICENSE-BOOST",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/exr/LICENSE.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/exr/LICENSE.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/iana-time-zone-haiku/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/iana-time-zone-haiku/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/iana-time-zone-haiku/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/iana-time-zone-haiku/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/byteorder/COPYING",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/byteorder/COPYING",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/byteorder/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/byteorder/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wasm-bindgen-shared/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wasm-bindgen-shared/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wasm-bindgen-shared/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wasm-bindgen-shared/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/minimal-lexical/LICENSE.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/minimal-lexical/LICENSE.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/minimal-lexical/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/minimal-lexical/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/minimal-lexical/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/minimal-lexical/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_x86_64_msvc/license-apache-2.0",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_x86_64_msvc/license-apache-2.0",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_x86_64_msvc/license-mit",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_x86_64_msvc/license-mit",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/v_frame/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/v_frame/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/qoi/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/qoi/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/qoi/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/qoi/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rayon/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rayon/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rayon/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rayon/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/digest/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/digest/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/digest/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/digest/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/once_cell/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/once_cell/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/once_cell/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/once_cell/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bit_field/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bit_field/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bit_field/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bit_field/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/smallvec/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/smallvec/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/smallvec/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/smallvec/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/hashbrown/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/hashbrown/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/hashbrown/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/hashbrown/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/base64/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/base64/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/base64/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/base64/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/syn-1.0.109/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/syn-1.0.109/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/syn-1.0.109/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/syn-1.0.109/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/built/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/built/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/transpose/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/transpose/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/transpose/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/transpose/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/byteorder-lite/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/byteorder-lite/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bitstream-io/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bitstream-io/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bitstream-io/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bitstream-io/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/arbitrary/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/arbitrary/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/arbitrary/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/arbitrary/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/getrandom/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/getrandom/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/getrandom/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/getrandom/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/cbindgen/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/cbindgen/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/peeking_take_while/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/peeking_take_while/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/peeking_take_while/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/peeking_take_while/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wasm-bindgen-macro-support/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wasm-bindgen-macro-support/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wasm-bindgen-macro-support/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wasm-bindgen-macro-support/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/zune-jpeg/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/zune-jpeg/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/zune-jpeg/LICENSE-ZLIB",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/zune-jpeg/LICENSE-ZLIB",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/zune-jpeg/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/zune-jpeg/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/y4m/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/y4m/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/js-sys/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/js-sys/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/js-sys/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/js-sys/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wasm-bindgen/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wasm-bindgen/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wasm-bindgen/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wasm-bindgen/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/half/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/half/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/typenum/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/typenum/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/typenum/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/typenum/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/typenum/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/typenum/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bzip2-rs/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bzip2-rs/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bzip2-rs/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bzip2-rs/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rgb/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rgb/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/avif-serialize/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/avif-serialize/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/onenote_parser/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/onenote_parser/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/heck/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/heck/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/heck/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/heck/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/libloading/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/libloading/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/fastrand/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/fastrand/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/fastrand/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/fastrand/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/regex/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/regex/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/regex/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/regex/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/iana-time-zone/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/iana-time-zone/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/iana-time-zone/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/iana-time-zone/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/core2/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/core2/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/core2/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/core2/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/png/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/png/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/png/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/png/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/image/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/image/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/image/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/image/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/proc-macro2/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/proc-macro2/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/proc-macro2/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/proc-macro2/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/aligned/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/aligned/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/aligned/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/aligned/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_aarch64_msvc/license-apache-2.0",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_aarch64_msvc/license-apache-2.0",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_aarch64_msvc/license-mit",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_aarch64_msvc/license-mit",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/weezl/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/weezl/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/weezl/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/weezl/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/generic-array/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/generic-array/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/pastey/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/pastey/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/pastey/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/pastey/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/anyhow/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/anyhow/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/anyhow/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/anyhow/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/arg_enum_proc_macro/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/arg_enum_proc_macro/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/crypto-common/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/crypto-common/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/crypto-common/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/crypto-common/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/cpufeatures/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/cpufeatures/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/cpufeatures/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/cpufeatures/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/thiserror-impl/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/thiserror-impl/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/thiserror-impl/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/thiserror-impl/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/linux-raw-sys/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/linux-raw-sys/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/linux-raw-sys/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/linux-raw-sys/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/linux-raw-sys/COPYRIGHT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/linux-raw-sys/COPYRIGHT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/linux-raw-sys/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/linux-raw-sys/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/syn/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/syn/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/syn/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/syn/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/clang-sys/LICENSE.txt",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/clang-sys/LICENSE.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/maybe-rayon/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/maybe-rayon/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/as-slice/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/as-slice/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/as-slice/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/as-slice/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/lebe/LICENSE-BSD-3-Clause",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/lebe/LICENSE-BSD-3-Clause",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_i686_gnullvm/license-apache-2.0",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_i686_gnullvm/license-apache-2.0",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_i686_gnullvm/license-mit",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_i686_gnullvm/license-mit",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/delharc/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/delharc/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/delharc/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/delharc/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/regex-automata/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/regex-automata/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/regex-automata/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/regex-automata/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows-targets/license-apache-2.0",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows-targets/license-apache-2.0",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows-targets/license-mit",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows-targets/license-mit",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bindgen/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bindgen/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/strength_reduce/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/strength_reduce/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/strength_reduce/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/strength_reduce/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/zune-core/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/zune-core/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/zune-core/LICENSE-ZLIB",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/zune-core/LICENSE-ZLIB",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/zune-core/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/zune-core/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/new_debug_unreachable/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/new_debug_unreachable/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/lazy_static/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/lazy_static/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/lazy_static/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/lazy_static/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/android_system_properties/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/android_system_properties/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/android_system_properties/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/android_system_properties/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/num-derive/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/num-derive/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/num-derive/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/num-derive/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/noop_proc_macro/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/noop_proc_macro/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/itertools/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/itertools/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/itertools/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/itertools/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/tempfile/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/tempfile/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/tempfile/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/tempfile/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/interpolate_name/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/interpolate_name/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/loop9/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/loop9/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rustc-hash/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rustc-hash/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rustc-hash/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rustc-hash/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/equator-macro/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/equator-macro/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/sha1/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/sha1/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/sha1/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/sha1/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/widestring/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/widestring/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wasm-bindgen-backend/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wasm-bindgen-backend/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wasm-bindgen-backend/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wasm-bindgen-backend/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rand_chacha/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rand_chacha/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rand_chacha/COPYRIGHT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rand_chacha/COPYRIGHT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rand_chacha/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rand_chacha/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/serde_derive/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/serde_derive/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/serde_derive/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/serde_derive/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/version_check/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/version_check/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/version_check/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/version_check/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/unicode-segmentation/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/unicode-segmentation/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/unicode-segmentation/COPYRIGHT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/unicode-segmentation/COPYRIGHT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/unicode-segmentation/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/unicode-segmentation/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rav1e/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rav1e/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/block-buffer/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/block-buffer/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/block-buffer/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/block-buffer/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/crc32fast/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/crc32fast/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/crc32fast/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/crc32fast/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/av-scenechange/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/av-scenechange/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/hex-literal/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/hex-literal/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/hex-literal/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/hex-literal/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/log/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/log/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/log/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/log/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/thiserror-1.0.59/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/thiserror-1.0.59/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/thiserror-1.0.59/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/thiserror-1.0.59/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/nom/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/nom/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bitflags/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bitflags/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bitflags/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bitflags/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/glob/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/glob/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/glob/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/glob/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/crossbeam-deque/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/crossbeam-deque/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/crossbeam-deque/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/crossbeam-deque/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/primal-check/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/primal-check/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/primal-check/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/primal-check/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows-sys/license-apache-2.0",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows-sys/license-apache-2.0",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows-sys/license-mit",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows-sys/license-mit",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/indexmap/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/indexmap/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/indexmap/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/indexmap/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_aarch64_gnullvm/license-apache-2.0",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_aarch64_gnullvm/license-apache-2.0",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_aarch64_gnullvm/license-mit",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_aarch64_gnullvm/license-mit",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/cc/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/cc/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/cc/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/cc/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/libfuzzer-sys/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/libfuzzer-sys/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/libfuzzer-sys/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/libfuzzer-sys/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bitflags-1.3.2/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bitflags-1.3.2/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/bitflags-1.3.2/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/bitflags-1.3.2/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rand/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rand/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rand/COPYRIGHT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rand/COPYRIGHT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rand/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rand/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/flate2/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/flate2/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/flate2/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/flate2/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/simd-adler32/LICENSE.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/simd-adler32/LICENSE.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/enum-primitive-derive/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/enum-primitive-derive/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rustix/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rustix/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rustix/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rustix/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rustix/COPYRIGHT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rustix/COPYRIGHT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rustix/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rustix/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/nom-7.1.3/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/nom-7.1.3/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/fdeflate/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/fdeflate/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/fdeflate/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/fdeflate/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/thiserror/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/thiserror/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/thiserror/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/thiserror/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/miniz_oxide/LICENSE-MIT.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/miniz_oxide/LICENSE-MIT.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/miniz_oxide/LICENSE-ZLIB.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/miniz_oxide/LICENSE-ZLIB.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/miniz_oxide/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/miniz_oxide/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/miniz_oxide/LICENSE-APACHE.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/miniz_oxide/LICENSE-APACHE.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/serde_json/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/serde_json/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/serde_json/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/serde_json/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/aligned-vec/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/aligned-vec/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_x86_64_gnu/license-apache-2.0",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_x86_64_gnu/license-apache-2.0",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_x86_64_gnu/license-mit",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_x86_64_gnu/license-mit",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/zerocopy-derive/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/zerocopy-derive/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/zerocopy-derive/LICENSE-BSD",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/zerocopy-derive/LICENSE-BSD",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/zerocopy-derive/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/zerocopy-derive/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/uuid/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/uuid/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/uuid/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/uuid/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_x86_64_gnullvm/license-apache-2.0",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_x86_64_gnullvm/license-apache-2.0",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/windows_x86_64_gnullvm/license-mit",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/windows_x86_64_gnullvm/license-mit",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/thiserror-impl-1.0.59/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/thiserror-impl-1.0.59/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/thiserror-impl-1.0.59/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/thiserror-impl-1.0.59/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/stable_deref_trait/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/stable_deref_trait/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/stable_deref_trait/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/stable_deref_trait/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wit-bindgen/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wit-bindgen/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wit-bindgen/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wit-bindgen/LICENSE-Apache-2.0_WITH_LLVM-exception",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/wit-bindgen/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/wit-bindgen/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rand_core/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rand_core/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rand_core/COPYRIGHT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rand_core/COPYRIGHT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rand_core/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rand_core/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/serde/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/serde/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/serde/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/serde/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/color_quant/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/color_quant/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/prettyplease/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/prettyplease/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/prettyplease/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/prettyplease/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/which/LICENSE.txt",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/which/LICENSE.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/zerocopy/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/zerocopy/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/zerocopy/LICENSE-BSD",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/zerocopy/LICENSE-BSD",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/zerocopy/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/zerocopy/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/autocfg/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/autocfg/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/autocfg/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/autocfg/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/num-integer/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/num-integer/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/num-integer/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/num-integer/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/equator/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/equator/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/imgref/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/imgref/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/imgref/LICENSE-CC0",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/imgref/LICENSE-CC0",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/tinyvec/LICENSE-MIT.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/tinyvec/LICENSE-MIT.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/tinyvec/LICENSE-ZLIB.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/tinyvec/LICENSE-ZLIB.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/tinyvec/LICENSE-APACHE.md",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/tinyvec/LICENSE-APACHE.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/jobserver/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/jobserver/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/jobserver/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/jobserver/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/paste/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/paste/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/paste/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/paste/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/tiff/LICENSE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/tiff/LICENSE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/tiff/tests/COPYRIGHT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/tiff/tests/COPYRIGHT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/memchr/COPYING",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/memchr/COPYING",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/memchr/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/memchr/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/encoding_rs/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/encoding_rs/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/encoding_rs/LICENSE-WHATWG",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/encoding_rs/LICENSE-WHATWG",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/encoding_rs/COPYRIGHT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/encoding_rs/COPYRIGHT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/encoding_rs/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/encoding_rs/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/android-tzdata/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/android-tzdata/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/android-tzdata/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/android-tzdata/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/gif/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/gif/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/gif/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/gif/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/cexpr/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/cexpr/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/cexpr/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/cexpr/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rayon-core/LICENSE-APACHE",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rayon-core/LICENSE-APACHE",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/.cargo/vendor/rayon-core/LICENSE-MIT",
+      "target": "docs/thirdparty/clamav/.cargo/vendor/rayon-core/LICENSE-MIT",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING/COPYING.LGPL",
+      "target": "docs/thirdparty/clamav/COPYING/COPYING.LGPL",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING/COPYING.regex",
+      "target": "docs/thirdparty/clamav/COPYING/COPYING.regex",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING/COPYING.file",
+      "target": "docs/thirdparty/clamav/COPYING/COPYING.file",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING/COPYING.YARA",
+      "target": "docs/thirdparty/clamav/COPYING/COPYING.YARA",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING/COPYING.llvm",
+      "target": "docs/thirdparty/clamav/COPYING/COPYING.llvm",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING/COPYING.zlib",
+      "target": "docs/thirdparty/clamav/COPYING/COPYING.zlib",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING/COPYING.getopt",
+      "target": "docs/thirdparty/clamav/COPYING/COPYING.getopt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING/COPYING.bzip2",
+      "target": "docs/thirdparty/clamav/COPYING/COPYING.bzip2",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING/COPYING.curl",
+      "target": "docs/thirdparty/clamav/COPYING/COPYING.curl",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING/COPYING.lzma",
+      "target": "docs/thirdparty/clamav/COPYING/COPYING.lzma",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING/COPYING.unrar",
+      "target": "docs/thirdparty/clamav/COPYING/COPYING.unrar",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/COPYING/COPYING.pcre",
+      "target": "docs/thirdparty/clamav/COPYING/COPYING.pcre",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Docs/ThirdParty/ClamAV/UPSTREAM.json",
+      "target": "docs/thirdparty/clamav/UPSTREAM.json",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": "original-upstream-license-tree"
+    },
+    {
+      "source": "Doors/SFXGuess32/sfxguess32",
+      "target": "doors/sfxguess32/sfxguess32",
+      "mode": "0755",
+      "policy": "fresh",
+      "case_exception": "qualified-game-required-relative-assets"
+    },
+    {
+      "source": "Docs/Doors/SFXGuess32/sysop.txt",
+      "target": "docs/doors/sfxguess32/sysop.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/SFXGuess32/file_id.diz",
+      "target": "docs/doors/sfxguess32/file_id.diz",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/SFXGuess32/THIRD_PARTY.txt",
+      "target": "docs/doors/sfxguess32/third_party.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/SFXGuess32/LICENSE",
+      "target": "docs/doors/sfxguess32/license",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/LICENSE",
+      "target": "docs/doors/newswire-x-rss/license",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/QUALIFICATION.txt",
+      "target": "docs/doors/newswire-x-rss/qualification.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Doors/NewsWire-X-RSS/config/cacert.pem",
+      "target": "doors/newswire-x-rss/config/cacert.pem",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": "qualified-game-assets"
+    },
+    {
+      "source": "Doors/NewsWire-X-RSS/config/newsfeeds.json",
+      "target": "doors/newswire-x-rss/config/newsfeeds.json",
+      "mode": "0644",
+      "policy": "fresh",
+      "case_exception": "qualified-game-assets"
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/file_id.diz",
+      "target": "docs/doors/newswire-x-rss/file_id.diz",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Doors/NewsWire-X-RSS/newswire-x-rss",
+      "target": "doors/newswire-x-rss/newswire-x-rss",
+      "mode": "0755",
+      "policy": "fresh",
+      "case_exception": "qualified-game-assets"
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/notices/DEPENDENCIES.txt",
+      "target": "docs/doors/newswire-x-rss/notices/dependencies.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/notices/Lexbor-NOTICE.txt",
+      "target": "docs/doors/newswire-x-rss/notices/lexbor-notice.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/notices/Lexbor.txt",
+      "target": "docs/doors/newswire-x-rss/notices/lexbor.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/notices/Linux-runtime.txt",
+      "target": "docs/doors/newswire-x-rss/notices/linux-runtime.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/notices/MbedTLS.txt",
+      "target": "docs/doors/newswire-x-rss/notices/mbedtls.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/notices/Mozilla-CA-LICENSE.txt",
+      "target": "docs/doors/newswire-x-rss/notices/mozilla-ca-license.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/notices/Mozilla-CA-PROVENANCE.md",
+      "target": "docs/doors/newswire-x-rss/notices/mozilla-ca-provenance.md",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/notices/curl.txt",
+      "target": "docs/doors/newswire-x-rss/notices/curl.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/notices/nlohmann-json.txt",
+      "target": "docs/doors/newswire-x-rss/notices/nlohmann-json.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/notices/pugixml.txt",
+      "target": "docs/doors/newswire-x-rss/notices/pugixml.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/notices/zlib.txt",
+      "target": "docs/doors/newswire-x-rss/notices/zlib.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    },
+    {
+      "source": "Docs/Doors/NewsWire-X-RSS/sysop.txt",
+      "target": "docs/doors/newswire-x-rss/sysop.txt",
+      "mode": "0644",
+      "policy": "always",
+      "case_exception": null
+    }
+  ],
+  "additional_payload": [
+    {
+      "target": "config/linux-layout.v1",
+      "policy": "fresh",
+      "mode": "0600",
+      "content": "SFX-LINUX-LAYOUT-1\nlinux-lowercase-v1\n"
+    }
+  ],
+  "source_overrides": [
+    {
+      "source_slot": "Docs/Doors/NewsWire-X-RSS/sysop.txt",
+      "source_file": "distribution/linux/door-help/newswire-x-rss/sysop.txt",
+      "target": "docs/doors/newswire-x-rss/sysop.txt"
+    },
+    {
+      "source_slot": "Docs/Doors/SFXGuess32/sysop.txt",
+      "source_file": "distribution/linux/door-help/sfxguess32/sysop.txt",
+      "target": "docs/doors/sfxguess32/sysop.txt"
+    }
+  ],
+  "assembly_inputs": {
+    "programs": "Build the six unchanged CMake target IDs in outputs; use their actual lowercase output filenames. Rebuild dependency instructions are in BUILDING.txt.",
+    "launchers": {
+      "Spitfire-X": "distribution/linux/Spitfire-X",
+      "Prepare-SFX": "distribution/linux/Prepare-SFX"
+    },
+    "README.txt": "distribution/linux/README.txt (ASCII delivery copy uses CRLF)",
+    "Web/*": "src/apps/linux_web/*",
+    "Display/*": "distribution/Display/*",
+    "Docs/Sysop/*": "docs/sysop/*",
+    "Docs/ThirdParty/*": "distribution/ThirdParty/manifest.json; use distribution/linux/THIRD_PARTY.txt for the Linux summary",
+    "Bin/tzdata/*": "third_party/tzdata/2026f/data/*; preserve exact IANA relative names",
+    "Bin/Tools/prepare_linux_dos.py": "scripts/prepare_linux_dos.py",
+    "Bin/Tools/linux_dos_pop22_amd64.json": "scripts/linux_dos_pop22_amd64.json",
+    "Docs/LINUX_DOS_DOORS.txt": "docs/LINUX_DOS_DOORS.txt",
+    "Bin/ClamAV/*": "Use the qualified ClamAV version and original source/license inputs described by distribution/linux/THIRD_PARTY.txt; preserve required upstream relative names.",
+    "Doors/* and Docs/Doors/*": "Matching standalone component sources/instructions/notices are retained in FullSource ComponentSource and DoorSource; build programs from those sources and retain required runtime-relative assets. Apply only the exact listed installed aliases and the two admitted integration guide overrides.",
+    "config/linux-layout.v1": "distribution/linux/linux-layout.v1; exact marker, fresh-only policy, no other configuration seed"
+  },
+  "rules": [
+    "All SFX-owned installed target components are lowercase ASCII. Only exact rows with a case_exception retain required vendor, IANA or game-relative spelling.",
+    "The owner-selected installation prefix, external configured paths, arbitrary owner files and required DOS names are not renamed.",
+    "Canonical archive member names stay unchanged; the runtime PhysicalLayout mapping in the corresponding source maps them to the fresh native layout.",
+    "The installer package-manifest format is 1, platform linux-amd64, current version, and top-level layout_schema linux-lowercase-v1. Every actual file row binds target path, byte size, SHA-256, mode and always/fresh policy. Compute those values from the current qualified bytes; stale compiled sizes/hashes are not normative map data.",
+    "Include the current distribution/linux/install.py and legacy-docs-rc12.json beside package-manifest.json and payload/. Fresh payload contains the exact schema marker; existing unknown/uppercase installations are not automatically migrated."
+  ],
+  "owned_lazy_leaves": {
+    "temporary caller lock": "node/<number>/sfxdoor.lck (or the exact selected startup/temporary drop directory)",
+    "private emulator adapter": "node/<number>/dosemu-<lowercase nonce>/dosemu.conf",
+    "prepared runtime receipt": "bin/dosemu/sfx-runtime.json",
+    "preparation staging": "bin/.dosemu-prepare-<lowercase generated suffix>",
+    "external profile publication": "ftn/external/<network>/profile[.tmp]",
+    "external run publication": "ftn/external/runs/<lowercase run token>/manifest[.tmp]",
+    "service plan": "service/sfx-<lowercase digest>.service",
+    "SFX-generated DOS boot": "node/<number>/dosemu-<lowercase nonce>/sfxrun.bat; guest -E argument C:\\sfxrun.bat"
+  },
+  "runtime_boundaries": [
+    "Lowercase only filesystem components owned/generated by SFX. Original IDs, canonical journal/archive namespaces and receive/publication wire records remain unchanged.",
+    "Marker is the exact portable linux-lowercase-v1 schema, not an installation ID. Old/mixed/unmarked established state refuses; no migration is offered.",
+    "Arbitrary owner paths, file payload basenames, existing artwork, required game/DOS names, qualified IANA and upstream ClamAV notice islands retain exact spelling.",
+    "FTN profile temp remains ftn/external/temp; its directory structure is unchanged."
+  ],
+  "required_case_precision": "The SFX-generated boot batch is not a required-case game/protocol filename and is lowercase. Required game/drop/wire/QWK/REP/control/content names remain unchanged; no arbitrary data basename normalization."
+}

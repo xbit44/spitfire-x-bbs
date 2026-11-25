@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>Update SFX and solve problems | Spitfire-X Sysop Wiki</title>
+ <link rel="stylesheet" href="assets/sysop.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to article</a>
+<aside class="sidebar" aria-label="Wiki navigation">
+ <img class="sidebar-logo" src="images/sfx-about-approved.png" width="1254" height="1254" alt="Spitfire-X BBS bison logo">
+ <a class="brand" href="wiki.html">SPITFIRE-X<span>BBS / SYSOP WIKI</span></a>
+ <form action="search.html" method="get" role="search">
+  <label for="wiki-query">Search this wiki</label>
+  <div class="search-field"><input id="wiki-query" name="q" type="search" maxlength="160" placeholder="Search articles" autocomplete="off"><button type="submit" aria-label="Search">Go</button></div>
+ </form>
+ <nav aria-label="Topics"><p class="nav-heading">CONTENTS</p><a href="wiki.html">Wiki home</a><a href="get-ready.html">Get ready</a>
+<a href="linux-controls.html">Linux browser controls</a>
+<a href="daily-operation.html">Daily operation</a>
+<a href="callers-chat.html">Callers &amp; chat</a>
+<a href="messages-mail.html">Messages &amp; mail</a>
+<a href="files-transfers.html">Files &amp; transfers</a>
+<a href="doors.html">Doors</a>
+<a href="ftn-networks.html">FTN networks</a>
+<a href="maintenance-recovery.html">Maintenance &amp; recovery</a>
+<a href="updates-help.html" aria-current="page">Updates &amp; troubleshooting</a>
+<a href="customization-reference.html">Customization &amp; Displays</a>
+<a href="thanks-to.html">Thanks to</a>
+</nav>
+ <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
+</aside>
+<main id="main" tabindex="-1">
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">Sysop wiki</span></div>
+ <article data-search="article"><h1>Update SFX and solve problems</h1>
+<p class="lead">Install a matching update, repair program files and keep your board data.</p>
+<h2>In this guide</h2><ul class="article-links"><li><a href="#manual-updates">Manual beta updates</a></li><li><a href="#windows-update">Windows update or repair</a></li><li><a href="#version">Check the version</a></li><li><a href="#trouble">Find a problem</a></li><li><a href="#report">Report a problem</a></li><li><a href="#windows-uninstall">Windows uninstall and same-path fresh install</a></li><li><a href="#windows-prepare">Windows moved/restored board</a></li><li><a href="#localhost">Localhost, ports and SyncTERM</a></li></ul>
+<section id="manual-updates"><h2>Manual beta updates</h2>
+<p>Beta updates are manual. Use the matching Windows or Linux download supplied with the release and read its notes. SFX does not check for or install application updates automatically. Check the supplied archive SHA-256 before using it.</p>
+<p>Keep a usable backup of the stopped board before an update. Read <a href="maintenance-recovery.html#backups">backup and verification</a>. Keep any required backup companions together. Program repair, Core Restore and restoring missing file contents are different operations.</p>
+<p>Linux uses a single <code>.tar.gz</code> download. For an existing lowercase board, follow <a href="linux-controls.html#update">Upgrade an existing lowercase board</a>. Use the installed stop-management command and the new package's installer with <code>--upgrade</code>; closing the browser alone does not close management.</p></section>
+<section id="windows-update"><h2>Windows: update or repair</h2>
+<ol><li>Read the new release notes. Extract the matching Windows package to a separate staging folder. These test programs are unsigned; use the supplied checksum and trusted source to identify the package.</li>
+<li>Stop the BBS and let callers and active work finish. Close Control Panel, SFXConfig and File Manager. In Service mode, stop the BBS service through the existing controls first; closing Control Panel alone leaves that service running.</li>
+<li>Run the new <code>SFX-BBS-Setup.exe</code> normally. Choose your <strong>existing SFX installation folder</strong>. A new empty folder is a fresh installation, not an update of your board. For an update, keep <strong>Remove SFX programs (keep BBS data and backups)</strong> and <strong>Also permanently remove the entire BBS folder</strong> unchecked.</li>
+<li>Choose <strong>Review / Continue</strong>. Review the existing-folder maintenance plan and the backup choice. Setup offers to create and verify a mutable-board-data backup in <code>Backup\Upgrades</code>. Choose it unless you are relying on another usable backup. The review describes what Setup will create and verify; wait for the final result before treating the new backup as verified. Setup's protected program recovery is separate and remains mandatory; it is not a full-system snapshot.</li>
+<li>Follow the actual result. Normal maintenance updates or repairs the recognized program files while retaining board data, settings, credentials and hosting mode. Do not delete retained work or repeatedly run Setup if it reports an incomplete recovery. Keep the reported paths and diagnostic.</li>
+<li>Open the installed controls, check the version and read any preparation or recovery request. Review settings before starting callers. Setup maintenance leaves the BBS stopped; start it deliberately when ready.</li></ol>
+<p>While <strong>Checking installation...</strong> is shown, the moving mark and <strong>Checking time</strong> report activity and elapsed checking time. Choosing <strong>Close</strong> requests a stop; Setup waits for the current read to finish before closing.</p>
+<p>During installation, read the named stage and its file or byte counts. Those counts apply to that stage. <strong>Total since confirmation</strong> shows elapsed time since you confirmed the plan. Wait for the final result. If you did not select a shortcut, the completion message gives the installed Control Panel path.</p>
+<p>Use matching Setup repair when a missing or unverified installed component directs you there. Repair is not a way to replace your caller database or undo a saved setting. Windows asks for administrator approval only for protected installation steps. Check a refused result rather than changing permissions or copying an arbitrary executable over the installation.</p></section>
+<section id="windows-uninstall"><h2>Windows: remove programs or the whole board</h2>
+<p>Choose the entry for the intended board in Windows' app-removal list, or open <code>Uninstall Spitfire-X BBS.lnk</code> in that installation's folder. Depending on Windows, the app list is called Installed Apps, Apps &amp; features or Programs and Features. These routes use Setup's engine; check the exact selected installation folder before continuing.</p>
+<p>The default is <strong>Remove SFX programs (keep BBS data and backups)</strong>. It removes that selected installation's recognized programs and related selected-installation registration/shortcuts while retaining its board data and backups. Other boards and shared dependencies are not selected by this choice. Use the normal stop/close controls first and follow any busy or verification refusal; do not force removal around active work.</p>
+<p><strong>Also permanently remove the entire BBS folder</strong> is a separate, initially unchecked choice with an explicit selected-folder confirmation. It can remove the board's data, backups and custom content as well as programs. Review a usable separate backup and the exact folder before confirming. A checkbox or started operation is not proof that removal completed; read the final result.</p>
+<h3>Fresh install again at the same path</h3>
+<p>Default program removal leaves an existing, nonempty board folder. For a fresh board at that same path, finish removal and close the installation, move the <strong>entire retained folder</strong> aside intact, then reopen matching Setup for the original path. Do not delete a few settings or merge old/new fragments to make a retained board appear fresh. To keep using the original board, use update/repair instead of a fresh installation.</p>
+<h3>Missing or deleted installation folder</h3>
+<p>Missing-folder recovery asks you to confirm that the folder was intentionally deleted and that its original volume is present. Confirm only when those conditions are true. A moved/renamed board, offline drive, access failure or possible restored copy is not evidence of intentional deletion. Keep its data and registration for review, rather than removing records merely because one path is unavailable.</p>
+</section>
+<section id="windows-prepare"><h2>Windows: moved, copied or restored board</h2>
+<p>Keep the complete board together and read the reported folder/path diagnostic. When SFX offers <strong>Prepare</strong>, its dialog identifies the exact folder and describes local access/registration after the move, copy or restore. Review that folder and the proposed action before continuing. Use the reported preparation/recovery route, with matching Setup repair where directed; do not hand-edit registrations or discard identity/data files to bypass a refusal.</p>
+<p>Preparation is not the new-board First-Run Setup and is not a general repair for every verification, IPC or configuration-read failure. Preserve uncertain or incomplete work and the original diagnostic. Other boards and shared dependencies remain outside the selected installation's action.</p>
+<p>If Windows 10 or 11 reports a ClamAV receipt problem after Prepare SFX, use the <a href="files-transfers.html#clamav-prepare-repair">prepared-board ClamAV repair steps</a>. Check the exact folder, then verify both the scanner and its definitions before relying on upload scans.</p>
+</section>
+<section id="version"><h2>Check the release version</h2>
+<p>This test release is <strong>1.0.0b1</strong> on both Windows and Linux. Check About or the displayed program version against the package notes. SFX keeps one shared release version, even when a change affects only one platform or a file such as FILE_ID.DIZ. Matching version numbers do not mean identical platform changes.</p>
+<p>The root <code>README.txt</code> on Windows or <code>readme.txt</code> on Linux is the short starting guide. Keep the corresponding help folders with the installation: Windows uses <code>Docs/Sysop</code>, <code>Docs/Doors</code> and <code>Docs/ThirdParty</code>; Linux uses <code>docs/sysop</code>, <code>docs/doors</code> and <code>docs/thirdparty</code>. The Wiki can be read and searched offline. Complete helper source and other source companions are separate from the small runtime download; use the matching source-availability list supplied with that release.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Folder</th><th>What to read there</th></tr></thead><tbody>
+<tr><td>Windows: <code>Docs/Sysop</code>; Linux: <code>docs/sysop</code></td><td>This offline Wiki and its search files.</td></tr>
+<tr><td>Windows: <code>Docs/Doors</code>; Linux: <code>docs/doors</code></td><td>Supplied Door guides, licenses and notices. Door programs and configuration stay in their program folders under <code>Doors</code> on Windows or <code>doors</code> on Linux.</td></tr>
+<tr><td>Windows: <code>Docs/ThirdParty</code>; Linux: <code>docs/thirdparty</code></td><td>SFX license, software credits, original component notices and source information.</td></tr>
+</tbody></table></div>
+<p>A normal update can add missing default guides without moving your Door programs, replacing their configuration or deleting old custom documentation. Keep a copy of guides you have edited.</p>
+<p>Windows Setup keeps internal stock-document records to recognize files it may refresh. Leave these records in place, including an older tracking file you may find under Docs. Use normal Setup update or repair; do not delete tracking files to force a refresh. Keep a separate copy of your own edited documentation.</p></section>
+<section id="trouble"><h2>Find a problem</h2>
+<p>On Windows, a Control Panel that is still starting is not proof that callers or FTN mail can connect. Read <a href="daily-operation.html#windows-startup">Windows startup</a>, then check the actual BBS and listener status. Keep the startup diagnostic if required checks fail.</p>
+
+<p>Start with the result shown by Setup or the page you used. If callers cannot connect, check whether the BBS and the intended Telnet/SSH listener are running and whether the configured address and port are available. If a setting was saved but is not active, read Applied, Pending or Restart required before saving it again.</p>
+<p>Read Events, Live Logs and the matching files in the board's <code>Logs</code> folder on Windows or <code>logs</code> folder on Linux. Windows uses <code>SFXRuntime.log</code>/<code>HEYSYSOP.LOG</code>; Linux uses <code>sfxruntime.log</code>/<code>heysysop.log</code> for operating events/Sysop attention. For stopped-board checks and retained recovery work, use <a href="maintenance-recovery.html#health">BBS Health Check</a>. It reports findings and next steps; it does not repair or clear them.</p>
+<p>If a save or operation has an unknown outcome, use its offered status/review action first. Preserve failed or uncertain work and the original diagnostic. Do not assume that closing a window cancelled a running operation.</p></section>
+<section id="localhost"><h2>Localhost, ports and SyncTERM</h2>
+<p>For a caller test on the BBS computer, set the terminal entry's host to <code>127.0.0.1</code> and select the correct protocol and saved caller port. Fresh examples are Telnet <code>2323</code> and SFX SSH <code>2222</code>; an existing board may use different values. These are not browser-management or operating-system SSH ports.</p>
+<p>If localhost fails, an IPv6 resolution can differ from SFX's configured IPv4 listener. Try the explicit IPv4 address before changing unrelated settings. Check BBS/listener status and read the reported bind or startup error. From another computer, use the BBS computer's reachable IPv4 address instead of that client's loopback address. See the complete <a href="get-ready.html#local-caller-test">caller connection examples</a>.</p>
+</section>
+<section id="report"><h2>Report a problem</h2><p>When asking for help, include your SFX version and Windows or Linux version, what you did, what you expected and what happened. A useful log message or screenshot helps. Leave out passwords and private information.</p></section>
+<div class="related"><h2>Related topics</h2><a href="maintenance-recovery.html">Maintain, back up and recover</a><a href="customization-reference.html">Customization &amp; Displays</a></div></article>
+ <footer>Spitfire-X BBS <span aria-hidden="true">/</span> Sysop documentation <a href="#main">Back to top</a></footer>
+</main>
+
+</body>
+</html>

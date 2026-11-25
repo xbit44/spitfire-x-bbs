@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>Maintain, back up and recover | Spitfire-X Sysop Wiki</title>
+ <link rel="stylesheet" href="assets/sysop.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to article</a>
+<aside class="sidebar" aria-label="Wiki navigation">
+ <img class="sidebar-logo" src="images/sfx-about-approved.png" width="1254" height="1254" alt="Spitfire-X BBS bison logo">
+ <a class="brand" href="wiki.html">SPITFIRE-X<span>BBS / SYSOP WIKI</span></a>
+ <form action="search.html" method="get" role="search">
+  <label for="wiki-query">Search this wiki</label>
+  <div class="search-field"><input id="wiki-query" name="q" type="search" maxlength="160" placeholder="Search articles" autocomplete="off"><button type="submit" aria-label="Search">Go</button></div>
+ </form>
+ <nav aria-label="Topics"><p class="nav-heading">CONTENTS</p><a href="wiki.html">Wiki home</a><a href="get-ready.html">Get ready</a>
+<a href="linux-controls.html">Linux browser controls</a>
+<a href="daily-operation.html">Daily operation</a>
+<a href="callers-chat.html">Callers &amp; chat</a>
+<a href="messages-mail.html">Messages &amp; mail</a>
+<a href="files-transfers.html">Files &amp; transfers</a>
+<a href="doors.html">Doors</a>
+<a href="ftn-networks.html">FTN networks</a>
+<a href="maintenance-recovery.html" aria-current="page">Maintenance &amp; recovery</a>
+<a href="updates-help.html">Updates &amp; troubleshooting</a>
+<a href="customization-reference.html">Customization &amp; Displays</a>
+<a href="thanks-to.html">Thanks to</a>
+</nav>
+ <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
+</aside>
+<main id="main" tabindex="-1">
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">Sysop wiki</span></div>
+ <article data-search="article"><h1>Maintain, back up and recover</h1><p class="lead">Choose when built-in jobs run, keep verified backups and review recovery before changing a stopped board.</p>
+<h2>In this guide</h2>
+<ul class="article-links"><li><a href="#scheduled-jobs">Scheduled Jobs</a></li><li><a href="#backup-settings">Backup folder and retention</a></li><li><a href="#backups">Create and verify a backup</a></li><li><a href="#core-restore">Restore core data</a></li><li><a href="#ftn-history">Recover FTN message ID history</a></li><li><a href="#file-contents">Restore missing file contents</a></li><li><a href="#compaction">Compact a stopped database</a></li><li><a href="#health">BBS Health Check</a></li></ul>
+<section id="scheduled-jobs"><h2>Scheduled Jobs</h2>
+<p>Open <strong>Tools &amp; Maintenance &gt; Scheduled Jobs</strong> to edit External Events. Choose <strong>New Event</strong>, enter a name, the full program or script path on the BBS host, and the working folder. Leave <strong>Arguments</strong> blank when the command takes none. Use the <strong>Months</strong>, <strong>Days of month</strong>, and <strong>Days of week</strong> pickers to choose <strong>Any</strong> or specific entries. Choose a timing mode before saving.</p>
+<p>New events start enabled. To suspend a saved event, clear <strong>Enabled</strong> and save. The saved schedule stays available when you enable it again, and any active run can finish.</p>
+<p>All three calendar filters must match. A fixed time runs once on each matching day. For runs per day, 24 runs means the top of each hour. Create separate events for different exact times. <strong>Next scheduled run</strong> uses the <a href="get-ready.html#regional-time">BBS time zone</a>. A skipped clock time in spring has no run and a repeated time in fall runs once.</p>
+<p>For Door maintenance, select <strong>Take all nodes offline for this event</strong> and enter how long to wait for callers and Doors to finish. <strong>End calls at the scheduled time</strong> caps calling time at the event's deadline. Caller admission resumes after the command exits or if the wait limit is reached before the command starts. Write your script so it waits for the work it starts. Windows batch files can call other programs from the same script.</p>
+<p>Use the two startup choices to run on each BBS start or to catch up once on a missed run. External Events run under the BBS Runtime account. On Windows in Desktop mode, a console event starts minimized on the taskbar under its event name. Restore the window if the script needs input. The Windows <strong>Events</strong> tab shows active event names and elapsed time. Review start, finish, and exit code in <a href="daily-operation.html">Events or Live Logs</a>. Failures, skipped runs and optional long-run warnings appear in HeySysop.</p>
+<h3>Built-in jobs</h3>
+<p>Open <strong>Tools &amp; Maintenance &gt; Backup &amp; Restore</strong> for the built-in schedules. In Linux SFXConfig, choose <strong>Open Backup Settings</strong>. Select Backup, Message Retention or Message Integrity before changing its schedule.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Job</th><th>Fresh schedule</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>Backup</td><td>Disabled; daily at 02:00 when enabled.</td><td>Create a managed backup using the saved folder and backup-retention setting.</td></tr>
+<tr><td>Message Retention</td><td>Enabled; daily at 00:00.</td><td>Apply public echo count/age limits and unread private-inbox age. Review <a href="messages-mail.html#retention">message retention</a> before reducing limits.</td></tr>
+<tr><td>Message Integrity</td><td>Enabled; Sunday at 00:30.</td><td>Check the message store and report findings. This does not repair data or run retention.</td></tr>
+</tbody></table></div>
+<p>For each job, <strong>Enabled</strong> is On or Off, <strong>Hour</strong> is 0–23 and <strong>Minute</strong> is 0–59. Message Integrity also has a <strong>Day of week</strong> selector, Sunday through Saturday. Backup and Message Retention run daily and have no weekday choice. Existing saved schedules survive updates; the fresh defaults above do not replace your choices.</p>
+<p>Choose <strong>Save Schedule</strong> on Windows or Save for the selected Linux job. Saving recalculates future scheduling without starting a job or restarting the BBS. Missed runs are skipped after a restart; jobs do not overlap or retry automatically. Check the displayed next eligible run after changing time or the BBS time zone.</p>
+<p><strong>Run Now</strong> is a separate action. Message Retention and Message Integrity require the BBS to be running; Run Now does not start it or disconnect callers. A queued result is not a completed result. Read the job's status, history and <a href="daily-operation.html">Events or logs</a>. If the request's outcome is unknown, inspect that run before clicking again.</p>
+<p>Message jobs report committed batches, public messages removed, unread recipient entries expired and applicable integrity holds. Partial, failed and interrupted results remain distinct. Earlier batches may already have committed. A fresh complete clean integrity check can release applicable holds; it does not automatically retry retention.</p>
+</section>
+<section id="backup-settings"><h2>Backup folder and retention</h2>
+<p>These settings are under the built-in <strong>Backup</strong> schedule in <strong>Backup &amp; Restore</strong> and apply to manual and scheduled backups.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Setting</th><th>Allowed value and default</th><th>When it applies</th></tr></thead><tbody>
+<tr><td>Backup destination</td><td>Blank uses <code>Backup/Scheduled</code> on Windows or <code>backup/scheduled</code> on Linux, beneath this SFX installation. Otherwise use an absolute local folder on the BBS computer, at most 2,048 UTF-8 bytes. For example, <code>D:\SFXBackups</code> on Windows or <code>/home/bbs/sfx-backups</code> on Linux.</td><td>Future backups use the saved destination. A running backup keeps its original folder. Existing archives are not moved.</td></tr>
+<tr><td>Verified managed archives retained</td><td>1–365; fresh default 10. This is the number of verified managed backup archives to retain, not days. Zero and Unlimited are not accepted.</td><td>Stop the BBS and finish active jobs before changing it. Saving the number does not itself delete archives.</td></tr>
+</tbody></table></div>
+<p>The destination must pass the BBS account's access and privacy checks. Linux custom folders must be private and owned by that account. Do not enter a relative folder, a drive root, a network share or a trailing separator. Linux paths cannot contain empty, <code>.</code> or <code>..</code> components. Windows paths use a drive letter and backslashes; wildcard characters, reserved device names, <code>BIN</code> components, tildes and components ending in a space or dot are refused. A rejected folder is not silently replaced with another destination.</p>
+<p>On Windows, <strong>Browse...</strong> helps select the destination. On Linux, enter the path on the Linux server, even when you are using a Windows browser. If a copied board still has a path from another computer, correct it deliberately and check the next backup's actual destination. Saved destination and retention values survive normal updates.</p>
+</section>
+<section id="backups"><h2>Create and verify a backup</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Choose the archive and recovery task, then follow its inspection, review and confirmation controls. This page has no ordinary settings save that performs a restore. Read the actual scope and stopped-board requirements. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>Open <strong>Backup &amp; Restore</strong>. On Windows, choose <strong>Run Backup Now</strong>. A running BBS owns the requested backup, so closing Configuration does not cancel it; follow Events for the outcome. The stopped-board path reports its completed archive and verification result directly. Linux also offers the Backup job's Run Now control.</p>
+<p>A core backup and a file-library content backup have different purposes. Core Restore does not restore protected programs or live file-library contents. File-area contents are included only for areas configured with <a href="files-transfers.html#groups-areas">Back up contents</a>; that setting starts Off. An older or core-only restore point may contain no file-area contents.</p>
+<p>On Windows, select a restore point and choose <strong>Verify</strong>; <strong>Refresh</strong> reloads the inventory. Check the displayed status and details, not just the archive name. Preserve managed backup markers and any required companion archives together. On Linux, keep the <code>.sfx-owned</code> marker; an incremental restore point may depend on earlier archives. An arbitrary ZIP copied into the backup folder is not a verified managed restore point.</p>
+
+<p>New built-in manual/scheduled backups record the creating SFX version on both Windows and Linux. Existing archives retain their original metadata.</p>
+<h3 id="linux-backup-snapshots">Linux backup snapshots</h3>
+<p>For a built-in manual or scheduled Linux backup, SFX briefly coordinates the database and its caller, Sysop-attention and Runtime journals. It finishes any caller entry already being published or refuses the capture. During that pause it makes checked copies of the database and the existing active and managed rotated files in the live <code>logs/callers.log</code>, <code>logs/heysysop.log</code> and <code>logs/sfxruntime.log</code> families.</p>
+<p>The journal writers resume before compression starts. The archive uses those captured copies; later journal entries and rotations belong to the running board. Other included files keep their normal change-detection checks. This is not a whole-computer snapshot or a guarantee for files changed independently of SFX. Use the <a href="#offline-folder-backup">whole stopped-folder backup</a> procedure for a separate complete-folder copy.</p>
+<p>New Linux manual and scheduled backups record the version of SFX creating them: <strong>1.0.0b1</strong> in this build. Older archives keep their original recorded metadata. A version label does not replace archive verification.</p>
+<h3 id="backup-failure-details">Read a failed backup result</h3>
+<p>Read the complete result in Events and the logs. Archive streaming errors identify the member being processed and what failed; details can include expected and read byte counts or the archive writer's diagnostic. A changed source, a source read/hash failure and an archive write failure are different findings. Keep the detail exactly as reported.</p>
+<p>A failed or cancelled capture can leave private work under <code>Work</code> on Windows or <code>work</code> on Linux for review. Preserve the reported paths and logs. Retained work is not a verified restore point; do not delete it, remove ownership markers or bypass checks to make another attempt proceed. Read actual status before retrying an uncertain operation.</p>
+<p>A result explicitly saying <strong>Verified archive retained</strong> with <strong>retention incomplete</strong> means the archive was verified but the old-backup cleanup did not finish. Keep that verified archive and resolve the reported retention problem.</p>
+
+<h3 id="offline-folder-backup">Back up the whole stopped folder</h3>
+<p>Use your ordinary backup or copy program to save the whole SFX folder with the BBS stopped.</p>
+<ol>
+<li>Let callers and active jobs finish, then stop the BBS and close the SFX programs. In Windows Service mode, stop the BBS service; closing Control Panel alone leaves it running. Stop any independently launched BinkD before copying the FTN files.</li>
+<li>Run the backup program with an account authorized to read the SFX folder. If you read through a network share or mapped drive, check which account the program uses.</li>
+<li>Include hidden files, nested folders and retained recovery folders. File areas, Door folders or backup folders outside the SFX folder need separate backup coverage.</li>
+<li>Save the backup outside the SFX folder. Read the program's result. Skipped or denied files mean the backup is incomplete.</li>
+<li>Try a restore into a new, separate folder. Compare the restored file list and file contents with the original, including hidden and nested files. Keep the working board untouched.</li>
+</ol>
+<p>Keep the restored copy stopped while you check it and follow SFX's normal copied-board preparation. Keep every other copy using the same FTN addresses stopped before starting the replacement. Read the <a href="#ftn-history">FTN copy and recovery precautions</a>.</p>
+<p>A mapped drive used by your other backup program does not change SFX's built-in <a href="#backup-settings">Backup destination</a> rules. That setting still requires a local folder on the BBS computer.</p>
+
+<h3 id="backup-access">If access is refused</h3>
+<p>Keep the exact path and error from the backup log. Check the account used by the program and its read access through the share and to the files. Preserve custom permissions and retained recovery folders. Resolve the refused access before treating the backup as complete.</p>
+
+<h3>Windows permissions correction</h3>
+<p>The correction makes a normal Windows upgrade recheck retained recovery folders that SFX recognizes and establish read access for the board's Windows owner account. Existing ownership and custom permissions are preserved. This does not change unrelated folders or replace intentionally restricted access.</p>
+</section>
+<section id="core-restore"><h2>Restore core data</h2>
+<p>Fresh beta.11 Linux uses lowercase live paths, while the backup format retains canonical member names such as <code>Config/SFX.conf</code>, <code>Data/SFX.DB</code> and the standard journal/control names. SFX maps those known names during verified capture/restore; do not rename ZIP members. Linux Core Restore requires the matching <code>Config/linux-layout.v1</code> schema marker in the archive. Older uppercase-layout archives without it are refused before staging; this is not a migration tool. Keep their original board and recovery tools separate.</p>
+<p>Stop the BBS and finish active work first. On Windows, close Control Panel and keep Configuration open; select and verify the desired backup, then choose <strong>Restore Core...</strong>. SFX verifies the selected point and creates a verified pre-restore backup before replacing core owner data. Read the final result and any retained recovery paths.</p>
+<p>On Linux, use <strong>Inspect Backup...</strong>, enter the managed archive path on the Linux computer and review the exact core to replace. Final confirmation ends browser sessions. Reopen through the launcher and read the result; the BBS remains stopped. See <a href="linux-controls.html#health">Linux recovery controls</a> for the full sequence.</p>
+<p>The pre-restore safety backup records the version of SFX creating it on both Windows and Linux. In this test build that is <strong>1.0.0b1</strong>. The version is backup metadata, not a replacement for verification or a promise that an arbitrary older archive is compatible.</p>
+<p>Core Restore keeps live Files and durable intake separate. Do not assume a restored catalog means every payload is present. Follow any requested <a href="#ftn-history">FTN history recovery</a> or file preparation, then check the board before starting it. If a result says live state changed, rollback failed or verification is incomplete, preserve the reported previous/failed state and logs instead of repeatedly restoring.</p>
+</section>
+<section id="ftn-history"><h2>Recover FTN message ID history when asked</h2>
+<p>Use this action when SFX reports that <strong>message ID history needs recovery</strong>. A healthy complete-folder copy or a coherent older restore does not need this action merely because the computer changed or the backup is older. Use the normal copy/restore preparation first and read the actual result.</p>
+<p>History recovery preserves existing message IDs, queued file bytes and known completed states. Separate held mail stays held. It is not a repair for damaged or incomplete board data, and it does not make it safe to run two copies with the same FTN addresses.</p>
+<ol><li>Let callers and active work finish, then stop the BBS. On Windows, close Control Panel and open Configuration offline. In Service mode, stop the SFX service through its existing controls first. On Linux, keep the management app and browser controls open; the action closes the stopped board's database for maintenance itself.</li>
+<li>Stop any independently launched BinkD before doing history recovery. Keep every other copy using these FTN addresses stopped. SFX does not stop that separate mailer for you.</li>
+<li>Open <strong>Tools &amp; Maintenance &gt; Backup &amp; Restore</strong> and choose <strong>Recover FTN History...</strong>. On Linux, wait for verification, then choose <strong>Review FTN History Recovery...</strong> when offered.</li>
+<li>Review <strong>Current UTC seconds</strong>, verified pending outbound/incoming file counts and the separate held-item counts. The queue does not have to be empty. Read the one-copy confirmation:
+<blockquote><p>This restored BBS will replace the previous copy. Any other copy using these FTN addresses is stopped.</p></blockquote>
+Choose <strong>Yes</strong> on Windows or <strong>Recover FTN History</strong> in the Linux review only when that statement is true.</li>
+<li>Read the actual result. <strong>FTN recovery complete. You can start the BBS.</strong> leaves the BBS stopped. Review any separate unresolved findings before deliberately starting it. If SFX says the history is healthy and recovery is not required, there is no history hold to clear.</li></ol>
+<h3>Cancel or check an uncertain result</h3>
+<p>Declining the confirmation changes no history state. In the Linux browser, Cancel in the review dialog leaves the preview available; use <strong>Cancel Maintenance</strong> to cancel that pending preview. Its review expires after five minutes. Once you have confirmed recovery, closing the browser or asking to cancel is not a way to undo a committed result. Use <strong>Refresh Maintenance Status</strong> to read what happened before trying another action.</p>
+<h3>A committed recovery with a pending report</h3>
+<p>SFX writes a text report under <code>Logs/FTN-Recovery-&lt;operation&gt;.log</code> on Windows or <code>logs/ftn-recovery-&lt;operation&gt;.log</code> on Linux. If it reports <strong>committed</strong> but says the Logs report is pending, the recovery was already saved. With the BBS stopped, use <strong>Recover FTN History...</strong> again to retry that report export. It uses the saved recovery result; it does not repeat history recovery or clear another hold. If another history hold has appeared, SFX requires a new review and confirmation. Keep the original diagnostic if the report still cannot be written.</p>
+<p>If verification refuses recovery, preserve the board, queued files and reported work. Missing or changed required files, invalid history or other integrity findings need their own review. Do not delete files or markers to force the action through. Use <a href="#health">BBS Health Check</a> and the exact diagnostic to find the next step. Recovery does not clear unrelated <a href="ftn-networks.html#held">Held Mail</a> or guarantee delivery by another board.</p></section>
+<section id="file-contents"><h2>Restore missing file contents</h2>
+<ol><li>With the BBS stopped, choose <strong>Restore Contents...</strong> on Windows or <strong>Inspect File Contents...</strong> on Linux.</li><li>Select a verified restore point and explicitly select the wanted file areas. No area is selected automatically. A point without selected-area content cannot supply those files.</li><li>Review every current destination and the counts of missing files, identical files and conflicts. This preview does not restore files.</li><li>Confirm the separate restore action only after checking those destinations. It creates missing files, leaves identical files alone and skips conflicting existing files. It does not overwrite or delete existing files, change core settings or replace catalog identities.</li><li>Read the actual restored, identical and conflict counts. Use File Manager Inspect/Reconcile or the offered copied-file preparation before serving restored files.</li></ol>
+<p>Cancellation during selection or preview leaves the files unchanged. An incomplete execution needs review of the actual counts; do not assume every selected file was restored. See <a href="linux-controls.html#copy">preparing a copied or moved Linux board</a> when restoring onto another computer.</p>
+</section>
+<p>For Windows installation/path preparation after a move or restore, use the exact selected-folder <a href="updates-help.html#windows-prepare">Prepare guidance</a>. A missing folder is not automatically a deleted board; <a href="updates-help.html#windows-uninstall">uninstall and missing-folder recovery</a> have separate confirmation and data-retention rules.</p>
+<section id="compaction"><h2>Compact a stopped database</h2>
+<p><strong>Compact Stopped Database...</strong> is separate from message retention. It physically compacts the database while preserving logical contents and IDs; file size need not shrink. Stop the BBS first. The operation requires a verified prerequisite backup and refuses to proceed if that backup fails.</p>
+<p>Read both the physical-commit and logical-verification results. Cancellation or an error after a physical commit is not the same as no change. Preserve the reported backup and recovery data if verification is unconfirmed. Compaction is not repair, secure erasure or an automatic nightly job.</p>
+<p>In the Linux browser controls, closing the browser does not cancel compaction. Use <strong>Refresh Compaction Status</strong> to read the result, or <strong>Cancel Compaction</strong> to request cancellation. If <strong>Review Unconfirmed Request...</strong> appears, check the backup folder, preserved work and logs before acknowledging that review. The acknowledgement clears the browser warning; it does not repeat, cancel or mark the earlier operation successful.</p>
+</section>
+<section id="health"><h2>BBS Health Check</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Use the report controls after the stated stopped-board and idle checks. Opening this page runs nothing; the health report does not repair data or bypass recovery guards. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>With the BBS stopped, open <strong>Tools &amp; Maintenance &gt; BBS Health Check</strong> and choose <strong>Run BBS Health Check</strong>. This check reports problems and next steps; it does not repair or delete data. A dated text report is written to this board's <code>Logs</code> folder on Windows or <code>logs</code> folder on Linux when access permits.</p>
+<p>Read every finding. <strong>Could not check</strong> is not a pass, and a saved report does not mean the board is healthy. On Windows, <strong>Cancel Check</strong> stops further checking while retaining findings already collected. If the report could not be saved, use the displayed findings and resolve the stated access or missing-file issue.</p>
+<p>For a copied Linux board, <strong>Prepare for This Computer</strong> is a separate action when offered. It prepares the owned installation or copied-file records; it does not start the BBS or automatically repair an interrupted restore or compaction. Follow the <a href="linux-controls.html#copy">copy and preparation steps</a>.</p>
+</section>
+<div class="related"><h2>Related topics</h2><a href="ftn-networks.html">Connect to FTN networks</a><a href="updates-help.html">Update SFX and solve problems</a></div></article>
+ <footer>Spitfire-X BBS <span aria-hidden="true">/</span> Sysop documentation <a href="#main">Back to top</a></footer>
+</main>
+
+</body>
+</html>

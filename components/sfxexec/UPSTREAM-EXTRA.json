@@ -1,0 +1,30 @@
+{
+  "commit": "97fab8d84a68882d1ceff0bed7cc05497f4d5973",
+  "files": [
+    {
+      "path": "src/sbbs3/sbbsexec.vcxproj",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/sbbs3/sbbsexec.vcxproj",
+      "sha256": "1883469A3912D5735EC6F8DC56E0064AE674369F6CF893B40C1D17325D315A44"
+    },
+    {
+      "path": "src/sbbs3/makevdd.bat",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/sbbs3/makevdd.bat",
+      "sha256": "FB518DA679CEDC3F5610234AE8303390CF72ADBBD3653392B9DF0B11D514D757"
+    },
+    {
+      "path": "src/sbbs3/dosxtrn/make.bat",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/sbbs3/dosxtrn/make.bat",
+      "sha256": "0A08C428105246B4869F1EB3D156BAF7AFD20CB2664802A19FA95EA8965FF193"
+    },
+    {
+      "path": "src/sbbs3/dosxtrn/c.bat",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/sbbs3/dosxtrn/c.bat",
+      "sha256": "FA8D1E9EF80BCE30AC7C83AE45201ED47D2ED3C7BC5FF3678CDDE2A7455AE8D6"
+    },
+    {
+      "path": "src/sbbs3/dosxtrn/dosxtrn.def",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/sbbs3/dosxtrn/dosxtrn.def",
+      "sha256": "8BAC7C584B89564871C2EA785D3191E6B44D7A5D08A78C66C5DB4C0A2CBCAFD6"
+    }
+  ]
+}

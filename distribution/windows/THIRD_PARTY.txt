@@ -1,0 +1,52 @@
+SPITFIRE-X BBS WINDOWS SOFTWARE CREDITS AND SOURCE
+
+This is the 1.0.0b1 RC2 Windows test build. The Windows programs are
+unsigned. Check the supplied archive SHA-256 before running Setup.
+
+Original SFX source is under the MIT license in SFX-LICENSE.txt beside this
+file. Original third-party notices accompany the included components
+under Docs/ThirdParty. Their original terms apply; this short guide does not
+replace those terms or put third-party work under SFX's license.
+
+The matching full SFX source companion is:
+
+  SFX-1.0.0b1-rc2-Full-Source-20261124-r1.zip
+
+Tools/sexyz.exe, Tools/SFXFileTransfer.exe and Tools/SFXQWKTransfer.exe
+are separate GPL-2.0-or-later programs based on SEXYZ by Rob Swindell and
+contributors. They do not link with SFX libraries. Keep their original
+licenses, credits and change notes with their corresponding source.
+The Full-Source archive above includes current SFXFileTransfer.exe source
+and required build inputs. The separate source companion specifically for
+SFXQWKTransfer.exe is:
+
+  SFX-1.0.0b1-rc2-Windows-Packet-Helper-Source-20261124-r1.zip
+
+Source companions are separate from the small runtime ZIP. Read the matching
+SOURCE_AVAILABILITY.txt supplied with the release for the actual archive
+names, component mapping and SHA-256 hashes. Use the source and build guide
+that match the delivered helper; a similar filename from another build is
+not a substitute.
+
+Docs/ThirdParty is a shared source and notice collection for Windows and
+Linux. A notice being present does not mean its component is used by both
+platforms. Windows core and shared-data notices cover DeuceSSH/libcrux,
+OpenSSL, libsodium, libarchive, zlib, curl, the Mozilla CA bundle, SecLists
+and Unicode 17 CaseFolding data. SQLite is public domain; its source notice
+is included.
+
+Linux core also uses cpp-httplib, nlohmann JSON, Howard Hinnant date,
+time-zone data and Unicode CLDR. Their original notices are retained in
+the shared collection. Read each component's original copyright and terms.
+Bundled Doors have their own dependencies and notices; a Door's JSON use
+is separate from Windows core.
+
+The Control Panel includes the unchanged Moebius CP437 bitmap font. Its
+matching original Apache-2.0 license, upstream credits and exact source
+provenance are in the Moebius notice files under Docs/ThirdParty/notices.
+
+Selected DOS Door support is adapted from Synchronet DOSXTRN and SBBSEXEC,
+using the SFX names SFXDOOR and SFXEXEC. Preserve their original notices.
+Door-specific credits and guides are in Docs/Doors and the Door's own
+program folder. NewsWire-X RSS uses its separate config/cacert.pem trust
+file. The original DOS games are not redistributed here.

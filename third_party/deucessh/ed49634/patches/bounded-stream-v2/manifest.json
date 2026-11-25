@@ -1,0 +1,26 @@
+[
+  {
+    "path": "ssh-conn.c",
+    "sha256": "27472a62d961714e33dd6431e3baad927eb2ede89c6b41f92dc6b5dfb4ee87f5",
+    "base_sha256": "8c2b5cf3f8dcd7c9d8c5f9c0b9f294e0344c34de607f5e82f3bd800f24f64b10"
+  },
+  {
+    "path": "deucessh-conn.h",
+    "sha256": "5c43bf9b580a17ef399428b71c87e9c954dc795cb41e5f5d49d4da18432167b1",
+    "base_sha256": "9362ca0e36252468c1b4b6ce419e6dc0cde7ed57b460592d51963e6358d33d5d"
+  },
+  {
+    "path": "ssh-internal.h",
+    "sha256": "b262522670fefa5d93a458b786cd9bf5333de9212a7ff5716081ce8fd7189774",
+    "base_sha256": "f204e97285bacaa4ae7dc7495d2d681ccfea4ec7a8471e2e817cca15168ac444"
+  },
+  {
+    "path": "ssh-trans.c",
+    "sha256": "3069be61751bd5d93fe1c979d4f69fb6d6370ac2c6d0a297bb6c7b78430b4059",
+    "base_sha256": "ae7e75ba3a6fb98010da5340abbe36011173375e732fa16600a871748795c856"
+  },
+  {
+    "path": "bounded-stream.patch",
+    "sha256": "d7d529f111c34a6e232598f852e8ae76025afcc0b8548623ce913067b721dd02"
+  }
+]

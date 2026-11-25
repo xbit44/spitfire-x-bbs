@@ -1,0 +1,53 @@
+#include <windows.h>
+#include "resource.h"
+#include "../product_version.h"
+
+IDI_SETUP ICON "sfx-installer-icon.ico"
+
+IDD_SETUP DIALOGEX 0, 0, 364, 280
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Spitfire-X BBS Setup"
+FONT 9, "Segoe UI"
+BEGIN
+    LTEXT "Install, update, repair or remove Spitfire-X BBS",-1,12,12,340,15
+    LTEXT "Unsigned beta. Verify the independently supplied archive SHA-256 before running Setup. Close SFX before maintenance.",-1,12,34,340,30
+    LTEXT "Installation folder (local fixed NTFS volume):",-1,12,70,330,12
+    COMBOBOX IDC_ROOT,12,85,277,110,CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON "Browse...",IDC_BROWSE,294,85,58,16
+    CONTROL "Start Menu shortcut",IDC_START_MENU,"BUTTON",BS_AUTOCHECKBOX | WS_TABSTOP,12,115,156,12
+    CONTROL "Desktop shortcut",IDC_DESKTOP,"BUTTON",BS_AUTOCHECKBOX | WS_TABSTOP,192,115,156,12
+    LTEXT "Choose Desktop or Windows Service later in SFXConfig > System > Runtime Behavior. Updates preserve the current mode.",-1,12,135,340,28
+    CONTROL "Remove SFX programs (keep BBS data and backups)",IDC_UNINSTALL,"BUTTON",BS_AUTOCHECKBOX | WS_TABSTOP,12,163,336,14
+    CONTROL "Also permanently remove the entire BBS folder",IDC_REMOVE_BOARD,"BUTTON",BS_AUTOCHECKBOX | WS_TABSTOP,24,180,328,14
+    LTEXT "Start Setup normally. Only the protected installation steps request administrator approval.",IDC_PROGRESS,12,199,340,42
+    DEFPUSHBUTTON "Review / Continue",IDOK,180,253,106,17
+    PUSHBUTTON "Close",IDCANCEL,294,253,58,17
+END
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION SFX_PRODUCT_VERSION_NUMERIC
+ PRODUCTVERSION SFX_PRODUCT_VERSION_NUMERIC
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0
+BEGIN
+ BLOCK "StringFileInfo"
+ BEGIN
+  BLOCK "040904b0"
+  BEGIN
+   VALUE "CompanyName", "Spitfire-X\0"
+   VALUE "FileDescription", "Spitfire-X BBS Setup\0"
+   VALUE "FileVersion", SFX_PRODUCT_VERSION_STRING
+   VALUE "InternalName", "SFX-BBS-Setup\0"
+   VALUE "OriginalFilename", "SFX-BBS-Setup.exe\0"
+   VALUE "ProductName", "Spitfire-X BBS\0"
+   VALUE "ProductVersion", SFX_PRODUCT_VERSION_PRODUCT_STRING
+  END
+ END
+ BLOCK "VarFileInfo"
+ BEGIN
+  VALUE "Translation", 0x0409, 1200
+ END
+END

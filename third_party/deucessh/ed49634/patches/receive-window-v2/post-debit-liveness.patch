@@ -1,0 +1,80 @@
+--- a/ssh-conn.c
++++ b/ssh-conn.c
+@@ -1172,16 +1172,14 @@
+  * Window replenishment -- called after reads drain buffer
+  * ================================================================ */
+ 
+-DSSH_TESTABLE int
+-maybe_replenish_window(struct dssh_session_s *sess, struct dssh_channel_s *ch)
+-{
+-	dssh_thrd_check(sess, mtx_lock(&ch->buf_mtx));
+-
++/* Caller holds buf_mtx. Recheck after both application reads and receive
++ * debits: a reader may drain the callback's bytes before the debit occurs. */
++static uint32_t
++queue_replenish_window_locked(struct dssh_channel_s *ch)
++{
+ 	/* No point replenishing if peer is done sending */
+-	if (ch->eof_received || ch->close_received) {
+-		dssh_thrd_check_unlock(sess, mtx_unlock(&ch->buf_mtx));
++	if (ch->eof_received || ch->close_received)
+ 		return 0;
+-	}
+ 
+ 	/* Replenish when advertised + queued credit drops below half the target.
+          * Cap by free buffer space so we never grant more window
+@@ -1207,7 +1205,14 @@
+ 		}
+ 		add = queue_window_adjust_locked(ch, add);
+ 	}
+-
++	return add;
++}
++
++DSSH_TESTABLE int
++maybe_replenish_window(struct dssh_session_s *sess, struct dssh_channel_s *ch)
++{
++	dssh_thrd_check(sess, mtx_lock(&ch->buf_mtx));
++	uint32_t add = queue_replenish_window_locked(ch);
+ 	dssh_thrd_check_unlock(sess, mtx_unlock(&ch->buf_mtx));
+ 
+ 	if (add > 0)
+@@ -1498,11 +1503,14 @@
+ 	else
+ 		ch->local_window = 0;
+ 
+-	/* ZC mode only: send WINDOW_ADJUST for consumed bytes.
+-	 * Stream mode uses maybe_replenish_window() after app reads. */
+-	if (ch->io_model == DSSH_IO_ZC && credit > 0) {
+-		credit = queue_window_adjust_locked(ch, credit);
+-
++	/* An app read can precede this debit. Recheck stream capacity now so
++	 * an emptied buffer cannot strand a compliant peer at zero credit. */
++	bool replenish_stream = ch->io_model == DSSH_IO_STREAM;
++	if (replenish_stream)
++		credit = queue_replenish_window_locked(ch);
++	if ((replenish_stream || ch->io_model == DSSH_IO_ZC) && credit > 0) {
++		if (!replenish_stream)
++			credit = queue_window_adjust_locked(ch, credit);
+ 		if (dispatch_unlock_channel(sess, ch) < 0)
+ 			return DSSH_ERROR_TERMINATED;
+ 		if (credit > 0)
+@@ -1574,11 +1582,13 @@
+ 	else
+ 		ch->local_window = 0;
+ 
+-	/* ZC mode only: send WINDOW_ADJUST for consumed bytes.
+-	 * Stream mode uses maybe_replenish_window() after app reads. */
+-	if (ch->io_model == DSSH_IO_ZC && credit > 0) {
+-		credit = queue_window_adjust_locked(ch, credit);
+-
++	/* Keep the same post-debit liveness guarantee for the stderr stream. */
++	bool replenish_stream = ch->io_model == DSSH_IO_STREAM;
++	if (replenish_stream)
++		credit = queue_replenish_window_locked(ch);
++	if ((replenish_stream || ch->io_model == DSSH_IO_ZC) && credit > 0) {
++		if (!replenish_stream)
++			credit = queue_window_adjust_locked(ch, credit);
+ 		if (dispatch_unlock_channel(sess, ch) < 0)
+ 			return DSSH_ERROR_TERMINATED;
+ 		if (credit > 0)

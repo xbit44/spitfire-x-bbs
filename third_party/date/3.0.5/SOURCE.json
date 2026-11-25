@@ -1,0 +1,38 @@
+{
+  "version": "3.0.5",
+  "url": "https://codeload.github.com/HowardHinnant/date/tar.gz/refs/tags/v3.0.5",
+  "archive_sha256": "ef786edc203daec76475825640b3af247bd08e31fc52217e5ce8f76107b4bb05",
+  "files": [
+    {
+      "path": "source/LICENSE.txt",
+      "bytes": 1637,
+      "sha256": "c90f6c00fb961170560299cbda28ca2d45804913aa8b2a9f36dbb8e0028d6930"
+    },
+    {
+      "path": "source/include/date/date.h",
+      "bytes": 242412,
+      "sha256": "8c295bc53964ec02fa99ef10816c190a4c34fdcbf1ce2dcc8e451a29932f9d2c"
+    },
+    {
+      "path": "source/include/date/tz.h",
+      "bytes": 85426,
+      "sha256": "4eea064c1e67351a81e5c5d3c8b50801a95c6a7fb0021b4833124838c91db324"
+    },
+    {
+      "path": "source/include/date/tz_private.h",
+      "bytes": 10674,
+      "sha256": "c84252b8e543feaaec328bfe9a256b8dc48f3eaac9d7d48a7864d81d2aa10101"
+    },
+    {
+      "path": "source/include/date/ios.h",
+      "bytes": 1609,
+      "sha256": "7368c4617ff954c0f135e27727118ca877cf46b81437a1b7b15419fbff17868b"
+    },
+    {
+      "path": "source/src/tz.cpp",
+      "bytes": 131910,
+      "sha256": "9e302779366fd2cb01a08cd079ff59433cdd0fc81a774bb7f2b9a73351511bb8"
+    }
+  ],
+  "purpose": "Linux IANA timezone adapter; system tzdata read only; no curl/download/update/global TZ mutation"
+}

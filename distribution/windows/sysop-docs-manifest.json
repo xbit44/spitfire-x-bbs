@@ -1,0 +1,96 @@
+{
+  "files": [
+    {
+      "path": "docs/sysop/assets/search-index.js",
+      "sha256": "BBA0DE51EC93274BF8133C76EE4152A842E32FA0D46BA9E2E36F2CBC70CA2D8B"
+    },
+    {
+      "path": "docs/sysop/assets/search.js",
+      "sha256": "15494144B7423F77150B48F4F28DB67B9694B7C9B493BFA2203E39C076376E63"
+    },
+    {
+      "path": "docs/sysop/assets/sysop.css",
+      "sha256": "E3038E09B383500F0FA054B8347DE5D8685C130E7DC4ECE06927897C0EA6D82E"
+    },
+    {
+      "path": "docs/sysop/callers-chat.html",
+      "sha256": "8E641321AAA78257C6EC1706E51925528E66178D1C08D54BEA86D1DEB5FB96D8"
+    },
+    {
+      "path": "docs/sysop/custom-display-checks.html",
+      "sha256": "18F0507B94E3CC12F7D5125832FA5D022A77338D2718E8C17C777D7181681B94"
+    },
+    {
+      "path": "docs/sysop/customization-reference.html",
+      "sha256": "B3F2B393B2ED910B7BF118331DD6748560EE731C2BE9B43340294D6F3A2F66F6"
+    },
+    {
+      "path": "docs/sysop/daily-operation.html",
+      "sha256": "AEEBB11238F6D4C7359C525C64ABF53DD00FEBBBF0037C6B9FE42614287F9063"
+    },
+    {
+      "path": "docs/sysop/doors.html",
+      "sha256": "FB62CF306E39EFE83F2BA1E4BBC506B112AEB88528F3E5556B01DD112124255F"
+    },
+    {
+      "path": "docs/sysop/external-binkd-profile.html",
+      "sha256": "5F7C70C9A9BF39DB22F4A6EBD6B8C4728DF1A3F15F7F9E18D097EAC48FB89FA4"
+    },
+    {
+      "path": "docs/sysop/external-binkd.html",
+      "sha256": "62CE8F5E03A9BA2BFBB7D7724F23F6D6D4E80A133D8E36C1DE8168D989E2CB54"
+    },
+    {
+      "path": "docs/sysop/files-transfers.html",
+      "sha256": "630D231E1EAC4B3E08318F63735218D29F9A806425A94693585FD0819F8B9A8E"
+    },
+    {
+      "path": "docs/sysop/ftn-networks.html",
+      "sha256": "1564E29D272E7CEDE5DE028FAD4B52216FECA7D96AF70AF71E7554C2118EA780"
+    },
+    {
+      "path": "docs/sysop/get-ready.html",
+      "sha256": "F862E61D6BB20EDA18FE13C3A07D6CEC7FD9D29B18AEBAE6FC0006BE8390A223"
+    },
+    {
+      "path": "docs/sysop/images/sfx-about-approved.png",
+      "sha256": "19AFE23E9D598EF058BE271F15783A6692FD74DEB3A6EA3E79E9C6A78130041C"
+    },
+    {
+      "path": "docs/sysop/linux-controls.html",
+      "sha256": "706B827826AA42AC2657D6C0FA24E0415378BF64C98618B01C644208532A11B7"
+    },
+    {
+      "path": "docs/sysop/linux-prerequisites.html",
+      "sha256": "3E029C558FB9A45ABA464AFABCE591E6383DAE3107CD4A86F36CE46F04CD9423"
+    },
+    {
+      "path": "docs/sysop/maintenance-recovery.html",
+      "sha256": "DBA30417D479E22D9AC0810DB1F54ADF14862B5AF441EB6D21EE8DB436619205"
+    },
+    {
+      "path": "docs/sysop/messages-mail.html",
+      "sha256": "4C74871980CEBD7A5908B968ACBA09CF2E12190EC7137CBD902E2678F9815F7E"
+    },
+    {
+      "path": "docs/sysop/search.html",
+      "sha256": "DBD669FE39AF659981B4E05363FB358F6733E41A0A8AD2EB404044BF32762F53"
+    },
+    {
+      "path": "docs/sysop/thanks-to.html",
+      "sha256": "761DB0847B75941AB60D1E71BFB99F41614525D7BAF535336524702CFE9E2466"
+    },
+    {
+      "path": "docs/sysop/updates-help.html",
+      "sha256": "1F6F1828386745E8CF5F87A255962700D32C12C14409D8730D72147F95006B2B"
+    },
+    {
+      "path": "docs/sysop/wiki.html",
+      "sha256": "D67195E9531C07CCF86F5827E04460F61DD8EC3F91D3D934661FC488EEE5CD4C"
+    },
+    {
+      "path": "distribution/windows/README.txt",
+      "sha256": "D42127BE3F669D17A7D35009597170E94375962E22099B67AB79DD6A39793D2A"
+    }
+  ]
+}

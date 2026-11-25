@@ -1,0 +1,66 @@
+// Actual installed shipping Panel + Config processes. No identity substitution.
+#define wWinMain retained_ftn_panel_entry
+#include "../../src/apps/control_panel/main.cpp"
+#undef wWinMain
+#include "../../src/apps/config_ui/ftn_editor_state.hpp"
+#include "sfx/platform/win32/offline_account_administration.hpp"
+#include <iostream>
+namespace {
+unsigned checks{};void check(bool b,const char* why){++checks;if(!b)throw std::runtime_error(why);}
+struct State {HWND window;win32::DesktopAppearance& appearance;};
+std::wstring foreign_text(HWND h){wchar_t value[8192]{};SendMessageW(h,WM_GETTEXT,8192,reinterpret_cast<LPARAM>(value));return value;}
+bool set_foreign_text(HWND h,const wchar_t* value){return SendMessageW(h,WM_SETTEXT,0,reinterpret_cast<LPARAM>(value))&&foreign_text(h)==value;}
+HWND process_window(DWORD pid,const wchar_t* cls){struct Find{DWORD pid;const wchar_t* cls;HWND result{};} find{pid,cls};EnumWindows([](HWND h,LPARAM raw)->BOOL{auto& f=*reinterpret_cast<Find*>(raw);DWORD p{};GetWindowThreadProcessId(h,&p);wchar_t name[80]{};GetClassNameW(h,name,80);if(p==f.pid&&std::wstring(name)==f.cls){f.result=h;return FALSE;}return TRUE;},reinterpret_cast<LPARAM>(&find));return find.result;}
+bool config_page_ready(HWND control){for(auto parent=GetParent(control);parent;parent=GetParent(parent)){wchar_t name[80]{};GetClassNameW(parent,name,80);if(std::wstring(name)==L"SFXConfigScrollablePage"&&!IsWindowEnabled(parent))return false;}return true;}
+HWND visible_control(HWND root,int id){std::pair<int,HWND> result{id,nullptr};EnumChildWindows(root,[](HWND h,LPARAM raw)->BOOL{auto& r=*reinterpret_cast<std::pair<int,HWND>*>(raw);if(GetDlgCtrlID(h)==r.first&&IsWindowVisible(h)&&config_page_ready(h)){r.second=h;return FALSE;}return TRUE;},reinterpret_cast<LPARAM>(&result));return result.second;}
+HWND wait_window(DWORD pid,const wchar_t* cls){HWND h{};const auto end=GetTickCount64()+20000;while(!h&&GetTickCount64()<end){h=process_window(pid,cls);Sleep(10);}check(h!=nullptr,"owned shipping process window");return h;}
+struct Product {win32::installation::Handle process;DWORD pid{};HWND window{};};
+Product launch(const std::filesystem::path& exe,const wchar_t* args){auto command=L"\""+exe.native()+L"\" "+args;STARTUPINFOW startup{sizeof(startup)};PROCESS_INFORMATION p{};check(CreateProcessW(exe.c_str(),command.data(),nullptr,nullptr,FALSE,0,nullptr,exe.parent_path().c_str(),&startup,&p),"actual verified shipping process launched");CloseHandle(p.hThread);Product child;child.process.reset(p.hProcess);child.pid=p.dwProcessId;return child;}
+void close_panel(Product& p){if(!p.window)return;PostMessageW(p.window,WM_CLOSE,0,0);const auto end=GetTickCount64()+30000;while(WaitForSingleObject(p.process.get(),0)!=WAIT_OBJECT_0&&GetTickCount64()<end){const auto confirm=process_window(p.pid,L"#32770");if(confirm)SendMessageW(confirm,TDM_CLICK_BUTTON,100,0);Sleep(10);}check(WaitForSingleObject(p.process.get(),0)==WAIT_OBJECT_0,"normal shipping Panel/Runtime shutdown");p.window=nullptr;}
+}
+#include "native_png_capture.hpp"
+void render_foreign_png(HWND window,const std::filesystem::path& file){
+    RECT area{};GetClientRect(window,&area);const auto dc=GetDC(window);DoorPrintSurface surface(dc,area.right,area.bottom);ReleaseDC(window,dc);FillRect(surface.dc,&area,g_appearance.background_brush());check(PrintWindow(window,surface.dc,PW_CLIENTONLY)!=FALSE,"native cross-process PrintWindow");GdiFlush();
+    const auto* pixels=static_cast<const BYTE*>(surface.bits);unsigned different{};const auto background=g_appearance.palette().background;for(int y=0;y<surface.height;++y)for(int x=0;x<surface.width;++x){const auto* p=pixels+(static_cast<std::size_t>(y)*surface.width+x)*4;if(RGB(p[2],p[1],p[0])!=background)++different;}check(different>1000,"actual foreign-window render has content");
+    Gdiplus::GdiplusStartupInput startup;ULONG_PTR token{};check(Gdiplus::GdiplusStartup(&token,&startup,nullptr)==Gdiplus::Ok,"PNG encoder ready");{const CLSID png{0x557cf406,0x1a04,0x11d3,{0x9a,0x73,0x00,0x00,0xf8,0x1e,0xf3,0x2e}};Gdiplus::Bitmap image(surface.width,surface.height,surface.width*4,PixelFormat32bppRGB,static_cast<BYTE*>(surface.bits));check(image.Save(file.c_str(),&png,nullptr)==Gdiplus::Ok,"foreign capture saved as PNG");Gdiplus::Bitmap decoded(file.c_str());check(decoded.GetLastStatus()==Gdiplus::Ok&&decoded.GetWidth()==static_cast<UINT>(surface.width)&&decoded.GetHeight()==static_cast<UINT>(surface.height),"foreign PNG decodes to exact dimensions");Gdiplus::Rect rect(0,0,surface.width,surface.height);Gdiplus::BitmapData bitmap{};check(decoded.LockBits(&rect,Gdiplus::ImageLockModeRead,PixelFormat32bppRGB,&bitmap)==Gdiplus::Ok,"foreign PNG decoded pixels");bool equal=true;for(int y=0;y<surface.height&&equal;++y)for(int x=0;x<surface.width&&equal;++x)for(int c=0;c<3;++c)if(static_cast<const BYTE*>(bitmap.Scan0)[y*bitmap.Stride+x*4+c]!=pixels[(static_cast<std::size_t>(y)*surface.width+x)*4+c])equal=false;decoded.UnlockBits(&bitmap);check(equal,"foreign PNG lossless pixel equality");}Gdiplus::GdiplusShutdown(token);
+}
+bool visible_text_contains(HWND parent,const std::wstring& text){
+    struct Find{const std::wstring& text;bool found{};}find{text};
+    EnumChildWindows(parent,[](HWND h,LPARAM raw)->BOOL{auto& f=*reinterpret_cast<Find*>(raw);if(IsWindowVisible(h)&&foreign_text(h).find(f.text)!=std::wstring::npos){f.found=true;return FALSE;}return TRUE;},reinterpret_cast<LPARAM>(&find));return find.found;
+}
+int held_shipping_panel(const std::filesystem::path& output){
+    const auto root=win32::alpha_installation_root();
+    check(!win32::installation::elevated()&&root==std::filesystem::path(L"C:/Program Files/SFX-Section14-Test-20261030-r4"),"ordinary exact installed r4 held UI only");
+    check(!std::filesystem::exists(output),"fresh held PNG output only");std::filesystem::create_directories(output);
+    const auto before=win32::offline_ftn_configuration(root,win32::current_process_user_sid_string());check(before&&before.value,"saved installed held configuration reads");
+    for(unsigned pass=0;pass<2;++pass){Product panel;try{
+        panel=launch(root/L"Bin"/L"SFXControlPanel.exe",L"");panel.window=wait_window(panel.pid,kWindowClass);
+        const auto deadline=GetTickCount64()+20000;
+        while(foreign_text(GetDlgItem(panel.window,IDC_MAIN_SUBHEADING)).find(L"READY")==std::wstring::npos&&GetTickCount64()<deadline)Sleep(25);
+        check(foreign_text(GetDlgItem(panel.window,IDC_MAIN_SUBHEADING)).find(L"READY")!=std::wstring::npos,"actual unrelated local BBS Ready while FTN held");
+        const auto tab=GetDlgItem(panel.window,IDC_MAIN_TAB);SendMessageW(tab,WM_KEYDOWN,VK_RIGHT,0);check(TabCtrl_GetCurSel(tab)==1,"actual BinkP tab selected");
+        const std::wstring message=L"FTN stopped: message ID history needs recovery.";
+        const auto held_deadline=GetTickCount64()+15000;while(!visible_text_contains(panel.window,message)&&GetTickCount64()<held_deadline)Sleep(25);
+        check(visible_text_contains(panel.window,message),"actual shipping Panel presents persistent history hold");
+        const auto poll=visible_control(panel.window,BinkPConsole::Poll),scan=visible_control(panel.window,BinkPConsole::Scan),queues=visible_control(panel.window,BinkPConsole::Queues);
+        check(poll&&scan&&queues&&!IsWindowEnabled(poll)&&!IsWindowEnabled(scan)&&IsWindowEnabled(queues),"native held Poll and Scan disabled, queue inspection available");
+        render_foreign_png(panel.window,output/(pass?L"installed-held-panel-restarted.png":L"installed-held-panel.png"));
+        DWORD_PTR ignored{};check(SendMessageTimeoutW(queues,BM_CLICK,0,0,SMTO_ABORTIFHUNG,20000,&ignored)!=0,"actual held queues action responds");
+        const auto queue_deadline=GetTickCount64()+15000;while(!visible_text_contains(panel.window,L"FTN QUEUES / HELD MAIL")&&GetTickCount64()<queue_deadline)Sleep(25);
+        check(visible_text_contains(panel.window,L"FTN QUEUES / HELD MAIL"),"actual held queue snapshot visible");
+        render_foreign_png(panel.window,output/(pass?L"installed-held-queues-restarted.png":L"installed-held-queues.png"));
+        close_panel(panel);
+    }catch(...){try{close_panel(panel);}catch(...){}throw;}}
+    const auto after=win32::offline_ftn_configuration(root,win32::current_process_user_sid_string());
+    check(after&&after.value&&app::encode_ftn_configuration(*after.value)==app::encode_ftn_configuration(*before.value),"read-only actual held UI leaves configuration exact");
+    std::cout<<"PASS "<<checks<<" actual installed held Panel/queue/restart PNG checks; no hold clear or owner acceptance\n";return 0;
+}
+int main(int argc,char** argv){Product panel,config;try{
+    if(argc==3&&std::string(argv[1])=="--held")return held_shipping_panel(std::filesystem::absolute(argv[2]));
+    check(argc==2,"fresh PNG path required");const auto output=std::filesystem::absolute(argv[1]);check(!std::filesystem::exists(output),"preserve prior evidence");std::filesystem::create_directories(output);const auto root=win32::alpha_installation_root();check(root==std::filesystem::path(L"C:/Program Files/SFX-Section14-Test-20261030-r4"),"exact disposable install only");const auto owner=win32::current_process_user_sid_string();const auto original=win32::offline_ftn_configuration(root,owner);check(original&&original.value,"actual offline starting configuration");
+    panel=launch(root/L"Bin/SFXControlPanel.exe",L"");panel.window=wait_window(panel.pid,kWindowClass);const auto end=GetTickCount64()+20000;while(foreign_text(GetDlgItem(panel.window,IDC_MAIN_SUBHEADING)).find(L"READY")==std::wstring::npos&&GetTickCount64()<end)Sleep(25);check(foreign_text(GetDlgItem(panel.window,IDC_MAIN_SUBHEADING)).find(L"READY")!=std::wstring::npos,"actual installed Runtime running");const auto tab=GetDlgItem(panel.window,IDC_MAIN_TAB);SendMessageW(tab,WM_KEYDOWN,VK_RIGHT,0);check(TabCtrl_GetCurSel(tab)==1,"normal native tab key opens BinkP");Sleep(100);State panel_capture{panel.window,g_appearance};render_foreign_png(panel_capture.window,output/L"installed-panel-binkp.png");
+    config=launch(root/L"Bin/SFXConfig.exe",L"--ftn");config.window=wait_window(config.pid,L"SFXConfigWindow");const auto control=[&](int id){HWND h{};const auto deadline=GetTickCount64()+15000;while(!h&&GetTickCount64()<deadline){h=visible_control(config.window,id);Sleep(10);}check(h!=nullptr,("visible FTN control "+std::to_string(id)).c_str());return h;};const auto click=[&](int id){DWORD_PTR result{};check(SendMessageTimeoutW(control(id),BM_CLICK,0,0,SMTO_ABORTIFHUNG,20000,&result)!=0,"native action completes via protected owner relay");};
+    click(IDC_FTN_ADD);check(set_foreign_text(control(IDC_FTN_NAME),L"Installed UI Network"),"native network name entered");check(set_foreign_text(control(IDC_FTN_NETWORK_DESCRIPTION),L"Real shipping Config save/reopen"),"native description entered");check(set_foreign_text(control(IDC_FTN_ADDRESS),L"43:100/1@ui-network"),"synthetic assigned address entered");SendMessageW(control(IDC_FTN_ENABLED),BM_SETCHECK,BST_CHECKED,0);click(IDC_FTN_SAVE);State capture{config.window,g_appearance};render_foreign_png(capture.window,output/L"installed-config-saved.png");PostMessageW(config.window,WM_CLOSE,0,0);check(WaitForSingleObject(config.process.get(),20000)==WAIT_OBJECT_0,"normal shipping Config close");config.window=nullptr;DWORD code{};check(GetExitCodeProcess(config.process.get(),&code)&&!code,"shipping Config exit0");close_panel(panel);
+    const auto saved=win32::offline_ftn_configuration(root,owner);check(saved&&saved.value&&saved.value->revision==original.value->revision+1,"shipping Config save committed through actual Panel relay");const auto found=std::find_if(saved.value->networks.begin(),saved.value->networks.end(),[](const auto& n){return n.name=="Installed UI Network";});check(found!=saved.value->networks.end()&&found->enabled&&found->description=="Real shipping Config save/reopen","exact native values persisted");
+    panel=launch(root/L"Bin/SFXControlPanel.exe",L"");panel.window=wait_window(panel.pid,kWindowClass);Sleep(1200);config=launch(root/L"Bin/SFXConfig.exe",L"--ftn");config.window=wait_window(config.pid,L"SFXConfigWindow");Sleep(300);State reopen{config.window,g_appearance};render_foreign_png(reopen.window,output/L"installed-config-reopened.png");PostMessageW(config.window,WM_CLOSE,0,0);check(WaitForSingleObject(config.process.get(),20000)==WAIT_OBJECT_0,"shipping Config reopens and closes normally");config.window=nullptr;close_panel(panel);const auto after=win32::offline_ftn_configuration(root,owner);check(after&&after.value&&after.value->revision==saved.value->revision,"actual product restart preserves saved revision");std::cout<<"PASS "<<checks<<" installed actual shipping Panel/Config native Save/reopen/restart checks\n";return 0;
+}catch(const std::exception& e){std::cerr<<"FAIL "<<checks<<": "<<e.what()<<'\n';if(config.window){State capture{config.window,g_appearance};try{render_foreign_png(capture.window,std::filesystem::path(argv[1])/L"failed-config.png");}catch(...){}PostMessageW(config.window,WM_CLOSE,0,0);}try{close_panel(panel);}catch(...){}return 1;}}

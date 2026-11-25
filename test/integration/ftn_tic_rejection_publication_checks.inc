@@ -1,0 +1,10 @@
+    c=*db.ftn_configuration(owner).value;const auto denied_after_displacement=publish(new_revoked);
+    check(!denied_after_displacement.processed&&denied_after_displacement.reason=="ftn_tic_not_authorized","fresh conclusive Receive denial after displacement becomes review-required");
+    const auto displaced_review=db.review_ftn_tic(owner,new_revoked.tic.id);
+    check(displaced_review&&displaced_review.value->has_value(),"native post-displacement rejection has durable exact review");const auto& held_displaced=**displaced_review.value;
+    check(held_displaced.publication&&held_displaced.publication->phase==app::FtnFilePhase::displaced&&held_displaced.publication->recovered&&held_displaced.publication->staged&&held_displaced.forward_plan&&held_displaced.publication->request.payload_receipt==new_revoked.payload.id,"review binds original pair, stage, displacement, explicit complete plan and phase");
+    const auto& saved_displacement=*held_displaced.publication;
+    check(removed.read(saved_displacement.recovery_key).identity().sha256==tic_hash(old_revoked.bytes)&&general.read(saved_displacement.stage_name).identity().sha256==tic_hash(new_revoked.bytes),"rejected continuation retains both exact byte sets");
+    const auto repeated_denial=publish(new_revoked);check(!repeated_denial.processed&&repeated_denial.reason=="ftn_tic_review_required","automatic processor cannot reevaluate durable rejected publication");
+    app::FtnTicRetryRequest displacement_retry{id(next++),new_revoked.tic.id,{},c.revision,held_displaced.review};check(db.request_ftn_tic_retry(owner,displacement_retry).succeeded()&&db.check_ftn_tic_retry(owner,displacement_retry.operation),"owner intent pins full original post-displacement frontier");
+    check(db.finish_ftn_tic_retry(owner,displacement_retry.operation,false,"ftn_tic_not_authorized").succeeded(),"still-denied exact attempt closes without clearing journal custody");

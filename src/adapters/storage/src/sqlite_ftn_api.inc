@@ -1,0 +1,4 @@
+SFX_FTN_API(application::StorageResult<application::FtnConfiguration>,ftn_configuration,(const application::MessageConfigurationActor& a),(a))
+SFX_FTN_API(application::StorageResult<std::int64_t>,ftn_configuration_receipt,(const application::MessageConfigurationActor& a,const application::FtnTransferToken& token),(a,token))
+SFX_FTN_API(application::StorageResult<application::FtnRetentionPreview>,preview_ftn_retention,(const application::MessageConfigurationActor& a,const application::FtnTransferToken& token,const application::FtnConfiguration& c),(a,token,c))
+SFX_FTN_API(application::StorageResult<application::FtnConfigurationChangeResult>,change_ftn_configuration,(const application::MessageConfigurationActor& a,const application::FtnTransferToken& token,const application::FtnConfiguration& c),(a,token,c))

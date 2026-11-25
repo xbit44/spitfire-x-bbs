@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>Messages and offline mail | Spitfire-X Sysop Wiki</title>
+ <link rel="stylesheet" href="assets/sysop.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to article</a>
+<aside class="sidebar" aria-label="Wiki navigation">
+ <img class="sidebar-logo" src="images/sfx-about-approved.png" width="1254" height="1254" alt="Spitfire-X BBS bison logo">
+ <a class="brand" href="wiki.html">SPITFIRE-X<span>BBS / SYSOP WIKI</span></a>
+ <form action="search.html" method="get" role="search">
+  <label for="wiki-query">Search this wiki</label>
+  <div class="search-field"><input id="wiki-query" name="q" type="search" maxlength="160" placeholder="Search articles" autocomplete="off"><button type="submit" aria-label="Search">Go</button></div>
+ </form>
+ <nav aria-label="Topics"><p class="nav-heading">CONTENTS</p><a href="wiki.html">Wiki home</a><a href="get-ready.html">Get ready</a>
+<a href="linux-controls.html">Linux browser controls</a>
+<a href="daily-operation.html">Daily operation</a>
+<a href="callers-chat.html">Callers &amp; chat</a>
+<a href="messages-mail.html" aria-current="page">Messages &amp; mail</a>
+<a href="files-transfers.html">Files &amp; transfers</a>
+<a href="doors.html">Doors</a>
+<a href="ftn-networks.html">FTN networks</a>
+<a href="maintenance-recovery.html">Maintenance &amp; recovery</a>
+<a href="updates-help.html">Updates &amp; troubleshooting</a>
+<a href="customization-reference.html">Customization &amp; Displays</a>
+<a href="thanks-to.html">Thanks to</a>
+</nav>
+ <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
+</aside>
+<main id="main" tabindex="-1">
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">Sysop wiki</span></div>
+ <article data-search="article"><h1>Messages and offline mail</h1><p class="lead">Guide callers through reading and scans, set up public message areas, and manage local and offline mail.</p>
+<p>Use <strong>Messages &gt; Groups &amp; Local Echoes</strong> for the local message catalog. An echo is a public message area. A group gathers related echoes under one heading; the group's access requirement applies as well as each echo's requirements. Network connections and imported echo tags are covered under <a href="ftn-networks.html">FTN networks</a>.</p>
+<h2>In this guide</h2>
+<ul class="article-links"><li><a href="#caller-reading">Caller Message Menu</a></li><li><a href="#read-messages">Read Messages</a></li><li><a href="#your-message-scan">Your Message Scan</a></li><li><a href="#message-lists">Lists and Browse</a></li><li><a href="#list-delete-undelete">Delete or restore listed messages</a></li><li><a href="#search-messages">Search and Specific Caller</a></li><li><a href="#scan-settings">Caller Scan Settings</a></li><li><a href="#change-conference">Change Conference</a></li><li><a href="#message-preview">Sysop Preview and read state</a></li><li><a href="#groups-echoes">Groups and local echoes</a></li><li><a href="#clone-options">Clone Options</a></li><li><a href="#retention">Retention and unread private mail</a></li><li><a href="#delete-area">Remove an echo or group</a></li><li><a href="#shared-message-settings">System Sysop, message size and private colors</a></li><li><a href="#message-pipe-colors">Message pipe colors</a></li><li><a href="#quote-selection">Caller quote selection</a></li><li><a href="#qwk-policy">QWK settings and offline mail</a></li></ul>
+<section id="caller-reading"><h2>Caller Message Menu</h2>
+<p>From Main, choose <strong>M Message Menu</strong>. The commands below describe caller reading and scans. A conference is a public message area; its access and reading permissions still apply. Private mail remains limited to its authorized participants. A command for reading messages does not send a new message.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Command</th><th>Use it for</th></tr></thead><tbody>
+<tr><td>R Read Messages</td><td>This Conference, All Conferences, Only Queued Conferences or the separate New Message Scan.</td></tr>
+<tr><td>Y Your Message Scan</td><td>Review your personal-message summary and choose To You, From You, Both or List. Retained private Inbox and sent-private/NetMail views are available here.</td></tr>
+<tr><td>B Browse Messages</td><td>Choose the current, all or queued conferences, then select messages from their header lists.</td></tr>
+<tr><td>T Search Messages</td><td>Find a literal phrase in readable public-message subjects or bodies.</td></tr>
+<tr><td>S Specific Caller Messages</td><td>Find public messages to, from or involving a confirmed local caller or remote/header name.</td></tr>
+<tr><td>A Message Scan Settings</td><td>Choose each conference's independent Unread and To-you scan flags.</td></tr>
+<tr><td>C Change Conference</td><td>Choose and save the current conference, then optionally read it now.</td></tr>
+<tr><td>L QWK / Offline Mail</td><td>Keep the existing packet-download, REP-upload, packet-settings, shared scan-settings and pointer controls.</td></tr>
+<tr><td>E Enter a Message</td><td>Use the existing public/local-private composition flow, with NetMail offered where configured and permitted.</td></tr>
+<tr><td>Q Main Menu</td><td>Leave Message Menu for Main. This does not log off.</td></tr>
+<tr><td>G Goodbye / /G Quick</td><td>G keeps the normal logoff confirmation; /G is the existing quick logoff.</td></tr>
+</tbody></table></div>
+<p>Use <strong>?</strong> for help on the commands currently offered. Follow the prompt for the current screen: Q in a reader, QWK or Scan Settings has that screen's return behavior, rather than being a universal logoff key. Entered message or editor text is not a navigation command.</p>
+</section>
+<section id="read-messages"><h2>R Read Messages</h2>
+<p>The Read menu offers <strong>T This Message Conference</strong>, <strong>A All Message Conferences</strong>, <strong>O Only Queued Conferences</strong>, <strong>N New Message Scan</strong> and <strong>Q Return to Message Menu</strong>. Your Message Scan is the direct <strong>Y</strong> command on Message Menu.</p>
+<h3>This Conference</h3>
+<p>T identifies the selected accessible conference by number and full group/conference name, shows its available message-number range and your saved reading position, and offers a message number, <strong>L List</strong> or <strong>Q Quit</strong>. If the saved message is still available, Enter resumes that message itself. Opening an older message does not lower your saved highest reading position.</p>
+<p>Without a usable saved message, choose an available number or List; SFX does not silently jump to the newest message. Empty, removed or inaccessible areas get an appropriate notice. A failed read is not reported as an empty conference.</p>
+<h3>All and Only Queued</h3>
+<p>A reads accessible conferences in configured order. O uses conferences where <strong>Unread OR To-you</strong> is enabled in Scan Settings; it selects conferences, rather than meaning unread message bodies only. Each conference keeps its own saved position and T-style number/range/resume/List starting prompt.</p>
+<p><strong>K Skip Conference</strong> leaves the rest of that conference and advances to the next eligible one. At a long-body paging pause, <strong>S Stop</strong> stops displaying that body and reaches its reader controls; it does not skip the conference. <strong>Q</strong> ends the whole All/Queued run and returns to Message Menu. Empty conferences show a brief notice and advance; no eligible conferences or the end of the last one returns to Message Menu without wrapping.</p>
+<p>All/Queued does not replace your separately saved Change Conference choice. Skip or Quit does not catch up unread positions or mark skipped mail received; ordinary effects from a body already opened remain subject to the current Preview choice.</p>
+<h3>New Message Scan</h3>
+<p>N retains the existing new-message scan and its current-echo, current-group or all-accessible scope. It uses the shared Unread/To-you selections. It is separate from Your Message Scan and the private Inbox/Sent views.</p>
+</section>
+<section id="your-message-scan"><h2>Y Your Message Scan</h2>
+<p>Y opens your personal-message summary and review directly from Message Menu. Reading defaults to <strong>T To You</strong>; choose <strong>F From You</strong>, <strong>B Both</strong>, <strong>L List</strong> or Quit as offered. The List filter defaults to <strong>B Both</strong> and offers <strong>T To You</strong>, <strong>F From You</strong>, <strong>I Private Inbox</strong>, <strong>S Sent Private/NetMail</strong> and <strong>Q Quit</strong>. Q here returns directly to the Message Menu. Lists use the numbered To/From/Subject/Date layout below. Opening a sent copy does not mark a recipient's copy received.</p>
+<p>If an existing Y Door shortcut is available to you, SFX first offers <strong>Y Your Message Scan</strong>, <strong>D</strong> for that Door or <strong>Q Return</strong>. Enter defaults to Your Message Scan. This choice keeps the configured Door reachable rather than silently replacing it; D is the choice inside this conflict prompt.</p>
+<p>The personal scan retains its saved public To-you scan eligibility and access checks, together with your received private mail. It is not an unread-only login count. Use the offered filters to distinguish personal public matches, received private mail and sent-private history. Selecting a filter does not grant access to another caller's mail.</p>
+<p>Listing headers alone changes neither saved reading positions nor received status. Opening a body uses normal reading or the configured System Sysop's Preview choice. Reply, quoting, editing, Save and Abort retain their existing behavior and return to the opening reading/list context.</p>
+</section>
+<section id="message-lists"><h2>Lists and B Browse Messages</h2>
+<p>Browse offers <strong>T This Conference</strong>, <strong>A All</strong>, <strong>O Queued</strong> and <strong>Q Quit</strong>, with This Conference as the default. All/Queued shows one conference at a time in configured order, skipping empty conferences and preserving your separately saved current-conference choice.</p>
+<p>Each list shows selection number, To, From, Subject and Date. A displayed selection number chooses that row; it is distinct from the actual conference-local message number shown in the selected details. Selection numbers continue through the pages of a conference, and messages retain their normal message-number order.</p>
+<p>Use Up or Down to move the lightbar one result at a time. Up from the first visible row selects the last row of the previous page. Down from the last visible row selects the first row of the next page, even when that page is only partly full. The lightbar stops at the first and last results. <strong>PgUp/PgDn</strong> still move a full page. Press Enter to open the selected row, or type its displayed number and press Enter in the numbered view. The conference heading follows the displayed list.</p>
+<p>To/From/Subject text is shortened inside its own column, with a gap before the next field. An ellipsis describes display truncation only; the stored subject, names and message body are not shortened.</p>
+<p>After a Browse body finishes, <strong>Enter or L</strong> returns to the same list page and selection. At a paging pause, Enter still continues that body. Explicit Next/Previous, Reply, scrolling and authorized actions remain available. <strong>K</strong> skips current-conference results in All/Queued; <strong>Q/Escape</strong> at Browse navigation prompts returns to Message Menu. <strong>S</strong> remains paging Stop.</p>
+<h3 id="list-delete-undelete">Delete or restore a listed message</h3>
+<p>In a header list, highlight the row and press <strong>D</strong> when <strong>[D] Delete</strong> is offered. In the plain numbered view, enter <code>D 12</code> to act on displayed row 12. The change saves immediately and a <code>*</code> appears beside the row number. To restore that row, press D again when <strong>[D] Undelete</strong> is offered. You can use the same numbered command to restore it. The star clears when the restore succeeds.</p>
+<p>These controls apply to the starting Read list, Your Message Scan, Browse, Search and Specific Caller lists. Each action checks current permissions and Permanent protection. A deleted row stays available only to callers who can restore it. Removing a message from your Private Inbox affects your recipient copy. Deleting a message for everyone requires the separate authority for that action.</p>
+<p>List paging, deleting and restoring a row leave the read or received status and saved reading position intact. Opening the body uses normal reading or <a href="#message-preview">System Sysop Preview</a>.</p>
+</section>
+<section id="search-messages"><h2>T Search Messages</h2>
+<p>Choose This Conference, All, Queued or Quit; This Conference is the default. Enter a literal word or phrase of up to 128 characters. Matching retains the existing case handling and checks Subject <strong>or</strong> body. It is not a Boolean, wildcard, regular-expression or six-keyword search.</p>
+<p>Results use the Browse-style layout, lightbar or numbers, PgUp/PgDn, selected details and display-only truncation. After a body, Enter/L returns to the same result page and selection. Explicit Next/Previous visits matching messages only. K skips a conference's matches in All/Queued; Q/Escape at search navigation returns to Message Menu; S remains paging Stop.</p>
+<p>Watch progress and the matching-message total. Completed no matches, cancellation/partial results and a failed search are different outcomes. The saved current conference, message access and normal/Preview read-state rules remain in effect.</p>
+</section>
+<section id="specific-caller"><h2>S Specific Caller Messages</h2>
+<p>Choose This Conference, All, Queued or Quit, default This Conference. Choose <strong>L Local caller</strong> or <strong>H FTN/header name</strong>, enter a full or partial name, choose the complete candidate and confirm it. Known local identity, network and address distinguish similarly named participants; a remote sender need not have a local account.</p>
+<p>Choose To, From, Both or Quit. <strong>Both</strong> is the default, and a message matching both directions appears once. This searches readable public conferences; use Your Message Scan's retained private-mail views for your Inbox and sent-private copies.</p>
+<p>Matching results keep the Browse layout, paging, numeric/plain fallback and same-page/selection return after body Enter/L. Explicit Next/Previous stays among matching messages. K skips a conference's matches in All/Queued, S stops body paging, and Q/Escape at navigation returns to Message Menu. With no candidate, choose retry or Quit; distinguish a completed no-match result from a cancelled or failed operation. Existing access and Preview/read-state rules still apply.</p>
+</section>
+<section id="scan-settings"><h2>A Caller Message Scan Settings</h2>
+<p>From Message Menu or QWK, open Message Scan Settings, choose a group and review its conferences. <strong>Unread</strong> includes new public conference posts in regular new scans. <strong>To-you</strong> includes messages addressed to you in personal/new scans. The two columns are independent. If no preference is saved, both start On; an update keeps saved choices. O Queued includes an accessible conference when either flag is On.</p>
+<p>Use arrows/PgUp/PgDn to navigate, Left/Right to choose a column and Enter to toggle it; follow the matching plain/narrow controls when a lightbar is unavailable. Each individual toggle saves immediately. Check its saved or failed result before assuming the new value is in use.</p>
+<p>For a group-wide column change, review the group, selected column, intended On/Off value and affected count. Confirmation defaults to <strong>No</strong>. These changes keep reading positions, received status, private-mail settings and your current-conference selection. Turning off a scan flag does not remove separately authorized manual reading or posting access.</p>
+<p>Q/Escape backs to the group list and then to the opening Message or QWK menu. QWK uses the same saved public-echo selections, with its separate received-private inclusion controlled by Packet Settings; it does not maintain a second subscription list.</p>
+</section>
+<section id="change-conference"><h2>C Change Conference</h2>
+<p>Choose a message group, then a numbered accessible conference. Cancelling before a valid change keeps the old selection. After a successful save, SFX asks whether to read the selected conference now, with <strong>Yes</strong> as the default.</p>
+<p>Yes enters that conference through T's reading flow directly, without another Read scope menu: applicable Preview, saved position/range, message number, Enter to resume and L List. No or cancellation at the read-now question returns to Message Menu while keeping the newly saved conference. A failed save is reported as a failure, not a successful change. Leaving the reader returns to Message Menu with the new conference retained.</p>
+</section>
+<section id="message-preview"><h2>System Sysop Preview and read state</h2>
+<p>Only the board's configured <strong>System Sysop account</strong> is offered Preview, default <strong>No</strong>, once before the first body in a reading visit. Sysop security privileges alone do not offer it to another account. A new reading visit starts at No rather than saving a caller preference or inheriting an old visit.</p>
+<p><strong>No</strong> gives normal reading effects. <strong>Yes</strong> permits authorized body reading without changing the original message's received status or your saved last-read position. The choice carries across that visit's reading/list body opens. Header listings alone change neither state in either mode. Preview never expands access to private or otherwise unavailable mail.</p>
+<p>Replies save normally even during Preview. The original message's state remains protected, and the normal reply target/network, quoting/editor, Save/Abort and opening reading/list context remain unchanged. Enter Message and QWK/REP retain their current functions; Preview is not a new packet, reply or private-mail permission.</p>
+</section>
+<section id="groups-echoes"><h2>Groups and local echoes</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Choose a named group or echo and use its actions below the list. Browsing another row can change the available actions while the current Editing item remains open. Save Changes saves that Editing item; use the intended Edit action before changing a different item. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>A fresh installation has an enabled <strong>Local</strong> group, access level 1, containing <strong>Sysop Notices</strong> and <strong>Public Chat</strong>. Both echoes allow access and reading from level 1. Sysop Notices initially requires the configured Sysop threshold for posting; Public Chat allows posting from level 1. Updates preserve your saved catalog and settings.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Setting</th><th>Allowed value and purpose</th><th>New-entry value</th></tr></thead><tbody>
+<tr><td>Name</td><td>1–64 printable ASCII characters; no leading or trailing spaces. Applies separately to groups and echoes. For example, <code>Local Events</code>.</td><td>Blank; enter a name.</td></tr>
+<tr><td>Display order</td><td>A nonnegative whole number; lower values sort first within the catalog. Windows accepts up to 9,223,372,036,854,775,807; Linux accepts up to 9,223,372,036,854,775,806. Small values such as 0, 10 and 20 are easier to manage.</td><td>0 for a new group or echo. Insert uses the selected echo's position.</td></tr>
+<tr><td>Access minimum</td><td>Security level 1–999. A caller must meet both the group's and the echo's access minimum.</td><td>1 for each.</td></tr>
+<tr><td>Enabled</td><td>Show and allow use of the group or echo, subject to its permissions. Disabling a group also makes its echoes unavailable to callers. Disabling preserves messages.</td><td>On for each.</td></tr>
+<tr><td>Parent group</td><td>Choose an existing group for the echo. Windows uses the parent selector. On Linux, browse groups and choose <strong>Move Here</strong>; the displayed parent ID is read-only.</td><td>The selected group.</td></tr>
+<tr><td>Reading minimum</td><td>Security level 1–999, in addition to access. Applies only to echoes.</td><td>1.</td></tr>
+<tr><td>Posting minimum</td><td>Security level 1–999, in addition to access. Raise this to make an announcement area readable by callers but writable only by staff.</td><td>1.</td></tr>
+<tr><td>Renegade pipe colors</td><td>Enable pipe colors for this echo's message bodies. Off displays the codes as text. The board's <a href="#message-pipe-colors">message pipe color setting</a> selects how enabled codes are displayed.</td><td>Off.</td></tr>
+<tr><td>Maximum Message Count</td><td>1–999,999,999 messages, or Unlimited. The next retention run removes eligible oldest messages when the area exceeds this count.</td><td>1,000.</td></tr>
+<tr><td>Maximum Message Age</td><td>1–65,535 full days, or Unlimited. A full day is 24 hours; this is not a midnight cutoff. Applies independently of the count limit.</td><td>Unlimited.</td></tr>
+</tbody></table></div>
+<p>On Windows, enter <code>Unlimited</code> for an unlimited retention limit. On Linux, leave the corresponding field blank. Zero is not a finite limit. For example, count <code>5000</code> and age <code>90</code> permit retention to remove messages that exceed either limit.</p>
+<p>Choose <strong>New Group</strong> or <strong>New Local Echo</strong>, enter the fields and review Save. For a new echo, select its parent group first. Use the next-page controls when the catalog has more entries. Save applies the current access rules without a BBS restart. Moving an echo preserves its messages and stable identity. Saving retention values removes nothing immediately.</p>
+<p>The catalog assigns a conference number from 1–999; you do not type a new number when editing an echo. Caller-visible numbers follow readable group order. Use <strong>Insert</strong> to place a new echo before a selected echo, or <strong>Up</strong>/<strong>Down</strong> to change order. Select by name and review the current entry rather than relying on an old screen position.</p>
+<p>If another edit changes the catalog, reload and review the new values. If Save has an unresolved outcome, use <strong>Reconcile</strong> for that same operation before making another change. A missing response is not proof that Save failed.</p>
+</section>
+<section id="clone-options"><h2>Clone Options</h2>
+<p class="linux-config-flow"><strong>Linux SFXConfig:</strong> Choose the source echo and exact targets through the named lists. Check the selected fields and before/after review before applying the copy. Choosing another browse row alone does not replace the open clone draft. See <a href="linux-controls.html#edit">editing and save results</a>.</p>
+<p>Clone Options copies selected settings from one echo to explicitly selected target echoes. It does not create copies of the messages or the source echo.</p>
+<ol><li>On Windows, select the source in Groups &amp; Local Echoes and choose <strong>Use as Clone Source</strong>. On Linux, open Clone Options, browse to the echo and choose <strong>Use as Source</strong>.</li><li>Browse target groups and pages. Add the exact target echoes; the source cannot also be a target. Up to 999 distinct targets are accepted.</li><li>Check only the fields to copy: <strong>Access</strong>, <strong>Reading</strong>, <strong>Posting</strong>, <strong>Maximum Message Count</strong> and/or <strong>Maximum Message Age</strong>. These choices start unchecked.</li><li>Review the source, targets and before/after values, then apply the change. Clear targets before choosing a different source on Linux.</li></ol>
+<p>Unselected values stay as they were. Names, enabled state, pipe colors, message contents, Permanent flags, private-mail policy, numbers and caller scan state are not copied. With no fields or no targets selected, nothing changes. Permissions apply immediately; copied retention limits take effect at the next retention run. Apply does not purge messages or require a restart. If the source or targets changed since selection, discard the stale preview and select them again.</p>
+</section>
+<section id="retention"><h2>Retention and unread private mail</h2>
+<p>Public echo retention protects messages marked <strong>Permanent</strong> and messages with outstanding FTN work. They can keep an echo above its configured count; the job reports protected overage. Lowering a limit does not remove this protection. Count and age limits are independent, so Unlimited age still leaves a finite count limit in force.</p>
+<p><strong>Tools &gt; Scheduled Jobs &gt; Unread-Mail Age</strong> controls the recipient's unread private inbox. The fresh value is <strong>365 full days</strong>; saved values survive updates. Acceptable values are 1–65,535 days or Unlimited. Enter <code>Unlimited</code> on Windows; leave the field blank in Linux's <strong>Unread Private Inbox Age</strong> section.</p>
+<p>Use <strong>Save Unread-Mail Age</strong> on Windows or the section's <strong>Save Setting</strong> on Linux. This is a separate save from the job schedule. The next retention run expires eligible unread recipient-inbox entries. Read mail, sender copies and stored bodies remain. Save itself expires nothing and does not require a restart.</p>
+<p>Review the actual job result under <a href="maintenance-recovery.html">maintenance and recovery</a>. A partial or interrupted job can have committed earlier batches; it is not equivalent to no change. A clean integrity check clears applicable integrity holds but does not itself run retention.</p>
+</section>
+<section id="delete-area"><h2>Remove an echo or group</h2>
+<p>Use Disable when you want to hide an area while retaining its messages. <strong>Delete Echo</strong> and <strong>Delete Group</strong> permanently remove the selected area and its public messages, including Permanent messages. Group deletion includes its contained echoes. Stop the BBS normally before using deletion.</p>
+<p>The workflow first identifies the exact area and offers a backup. Choosing a backup requires it to complete and verify successfully; a failed backup stops that deletion attempt. Choosing no backup still leads to a separate final review. Check the name, echo count, message count and Permanent-message count before confirming. Cancel preserves the area; an already completed backup remains available.</p>
+<p>If the result is unconfirmed, reconcile that exact operation and inspect the current catalog. Do not select a different area and repeat the command. Recovery requires a supported backup restore. Area deletion does not delete unrelated private mail, accounts or other groups.</p>
+</section>
+<section id="shared-message-settings"><h2>System Sysop, message size and private colors</h2>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Setting and location</th><th>Value, default and effect</th></tr></thead><tbody>
+<tr><td>System Sysop<br>General &gt; Board Identity</td><td>Choose an active caller at or above the current Sysop threshold. Fresh setup designates the initial Sysop account. Existing assignments are retained; if none is eligible, explicitly choose one. This designates the System Sysop without granting privileges or transferring old mail. Reassign before locking, removing or demoting that caller.</td></tr>
+<tr><td>Maximum body lines / Message Body Limit<br>Users &amp; Access &gt; Security Levels</td><td>Select an active level, then enter 1–65,535 body lines. Fresh level 10 starts at 200; fresh level 999 starts at 1,000. Newly added levels start at 200. There is no Unlimited value. Existing saved limits survive updates. Save this separately from the level's access and time settings.</td></tr>
+<tr><td>Enable pipe colors for private mail and NetMail<br>Windows: General &gt; Displays &amp; Menus<br>Linux: Private Message Colors</td><td>On or Off. New boards start with On and updates keep the saved choice. This enables pipe colors in private local mail and messages without an area, independently of each public echo. Off displays codes as text.</td></tr>
+</tbody></table></div>
+<p>For the System Sysop, find the caller by name and check the selected account before confirming. Results are paged; a page can contain no eligible candidate even when later pages do. On Linux, use the setting's own <strong>Save Setting</strong>; on Windows, the assignment and private-color buttons open their individual reviews.</p>
+<p>These message settings apply without a restart. A lowered body-line limit does not truncate stored messages. Connected drafts must meet the current limit when saved; a caller may need to shorten a draft. The message body's separate 1 MiB size ceiling still applies. For example, raising a level from 200 to 500 lines permits longer new messages but does not change its daily connection time.</p>
+</section>
+<section id="message-pipe-colors"><h2>Message pipe colors</h2>
+<p>In Windows SFXConfig, open <strong>General &gt; Displays &amp; Menus</strong>. Under <strong>Message Pipe Colors</strong>, choose <strong>Synchronet (default)</strong> or <strong>Legacy SFX</strong> and click <strong>Save</strong>. The private mail and NetMail switch is available in the same section and asks you to confirm a change separately. On Linux, the <strong>Use legacy message pipe colors</strong> checkbox selects the style. Echo and private-message settings control where pipe colors are enabled.</p>
+<p>With pipe colors enabled, Synchronet style interprets <code>|00</code> through <code>|23</code>. Pipe styling resets at each newline in the stored message and continues across lines that only wrap on screen. <code>|24</code> through <code>|31</code> appear as text.</p>
+<p><strong>Legacy SFX</strong> interprets all 32 codes and lets pipe styling carry across stored newlines. These choices affect display of plain-text message bodies. SFX keeps the stored text, authored ANSI artwork and FTN mail formatting as written.</p>
+</section>
+<section id="quote-selection"><h2>Caller quote selection</h2>
+<p>The quote selector shows <code>Space marks; A All; N ranges; ESC cancels; Enter returns</code>.</p>
+<p>Use <strong>Space</strong> to mark lines, <strong>A</strong> for all lines, or <strong>N</strong> to enter line numbers/ranges. <strong>Enter</strong> applies the current or marked quote lines and returns to message composition. <strong>Esc</strong> cancels the quote selection and returns to composition.</p></section>
+<section id="qwk-policy"><h2>QWK settings and offline mail</h2>
+<p>Open <strong>General &gt; Board Identity</strong> for the separate QWK settings.</p>
+<div class="table-scroll"><table class="settings-table"><thead><tr><th>Setting</th><th>Allowed value</th><th>Fresh default</th></tr></thead><tbody>
+<tr><td>QWK ID</td><td>1–8 ASCII characters, starting with a letter. Letters are saved uppercase. Remaining characters may be letters, digits or <code>! # $ % &amp; ' ( ) - @ ^ _ &#96; { } ~</code> (without spaces). Reserved names are refused: SYSOP, NETMAIL, CON, PRN, AUX, NUL, CLOCK$, COM1–COM9 and LPT1–LPT9.</td><td><code>SFX</code> followed by five generated hexadecimal characters. This is not derived from your board name.</td></tr>
+<tr><td>Messages per QWK download</td><td>A whole number from 1–65,535. This caps the message count per packet. Zero and Unlimited are not accepted.</td><td>10,000.</td></tr>
+</tbody></table></div>
+<p>Use <strong>Save QWK</strong>; changing the board name does not save the QWK fields. Existing saved QWK values survive updates. Future packets use the new values without a restart. Changing the QWK ID makes older QWK/REP packets for the previous ID incompatible, while stored messages and conference mappings remain unchanged. Choose a stable ID such as <code>NVALLEY</code> before callers begin exchanging packets.</p>
+<p>If the outcome is unknown, <strong>Reconcile QWK</strong> checks the same Save before allowing another change. A revision conflict means you should reload and review the current policy.</p>
+<p>Callers download messages in a QWK packet and upload replies in a REP packet. While preparing a packet, SFX shows each selected message area as it scans, followed by <strong>Packing your QWK packet...</strong> before transfer.</p>
+<p>While SFX prepares and packs the packet, a moving <code>#####</code> line shows that it is working. This is an activity indicator, not a percentage or an estimate of time remaining. The line clears before the next prompt or file transfer.</p>
+<p>Classic CP437 QWK packets use byte <code>0xE3</code> as a line-break marker. If that byte appears as the pi character (<code>&pi;</code>) in a message body, SFX substitutes <code>*</code> in the downloaded classic packet and continues. The stored message and its real line breaks stay unchanged.</p>
+<p>For a reader that supports UTF-8, choose <strong>Full headers: Yes</strong> and <strong>Encoding: UTF-8</strong> in the caller's Packet Settings to keep that character in the packet. Read <strong>Packet choice saved.</strong> after changing a choice, then return to the QWK menu and choose <strong>D</strong> to download.</p></section>
+<section><h3>NetMail</h3><p>For newly composed REP NetMail without an explicit domain or known reply network, SFX chooses one eligible route: first a zone-and-net match, then a zone match, then the first configured eligible fallback. There is no network prompt and the message is not sent through several networks.</p><p>An explicit domain or the network of a known reply is retained.</p></section>
+<div class="related"><h2>Related topics</h2><a href="callers-chat.html">Manage callers and chat</a><a href="files-transfers.html">Files and transfers</a></div></article>
+ <footer>Spitfire-X BBS <span aria-hidden="true">/</span> Sysop documentation <a href="#main">Back to top</a></footer>
+</main>
+
+</body>
+</html>

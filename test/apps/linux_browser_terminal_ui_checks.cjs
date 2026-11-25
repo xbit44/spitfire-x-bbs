@@ -1,0 +1,27 @@
+'use strict';
+module.exports=async({assert,sandbox,evaluate,elements,drafts,response})=>{
+  const array=expression=>Array.from(evaluate(expression));
+  for(const [key,expected] of Object.entries({Delete:[27,91,51,126],Insert:[27,91,50,126],PageUp:[27,91,53,126],PageDown:[27,91,54,126],Backspace:[8],Enter:[13],ArrowUp:[27,91,65]}))assert.deepEqual(array('terminalKeyBytes({key:'+JSON.stringify(key)+'})'),expected,'native BBS key '+key);
+  assert.deepEqual(array('terminalKeyBytes({key:"x",ctrlKey:true})'),[24],'Ctrl-X reaches Telnet Gate');
+  assert.equal(evaluate('terminalKeyBytes({key:"x",metaKey:true})'),undefined);
+  assert.deepEqual(array('terminalEncode("A B\\né")'),[65,32,66,13,130],'CP437 printable space and accented input');
+  assert.throws(()=>evaluate('terminalEncode("😀")'),/CP437/);
+  assert.equal(evaluate('nodePresentation({enabled:false,available:true,ready:false},true).logon'),false);
+  assert.equal(evaluate('nodePresentation({enabled:false,available:true,ready:false},true).label'),'Disabled');
+  assert.equal(evaluate('nodePresentation({enabled:true,available:true,ready:false,activity:"Waiting for local client"},true).label'),'Waiting for local client');
+  assert.equal(evaluate('nodePresentation({enabled:true,available:false,ready:false},true).label'),'Unavailable');
+  assert.equal(evaluate('nodePresentation({enabled:true,available:true,ready:true},true).logon'),true,'released re-enabled node permits logon');
+  assert.equal(evaluate('nodePresentation({ready:true},false).logon'),false,'stopped BBS never offers logon');
+  const handle='a'.repeat(64),view=()=>({active:true,connecting:false,handle,node:2,generation:'4',sequence:'1',columns:80,rows:25,cursor_column:0,cursor_row:0,cells:Array.from({length:2000},()=>[32,7])});
+  sandbox.terminalFixture=view();evaluate('authenticated=true;maintenanceActive=false;clearNodeTerminal();terminalState=terminalFixture');
+  let release,posts=[];sandbox.fetch=async(path,options)=>{assert.equal(path,'/api/node-terminal/input');posts.push(JSON.parse(options.body));await new Promise(resolve=>release=resolve);return response({ok:true});};
+  evaluate('queueTerminalInput([65])');assert.equal(posts.length,1);evaluate('queueTerminalInput([66,67])');assert.equal(posts.length,1,'typing queues while first request is in flight');
+  release();await new Promise(resolve=>setImmediate(resolve));assert.equal(posts.length,2);assert.equal(posts[1].sequence,'2');assert.deepEqual(posts[1].bytes,[66,67]);release();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(evaluate('terminalState.sequence'),'3');assert.equal(evaluate('terminalQueue.length'),0);
+  sandbox.fetch=async(path,options)=>{posts.push(JSON.parse(options.body));throw new Error('reply lost after caller received input');};
+  evaluate('queueTerminalInput([68])');await new Promise(resolve=>setImmediate(resolve));const count=posts.length;assert.equal(evaluate('terminalBlocked'),true);evaluate('queueTerminalInput([69])');assert.equal(posts.length,count,'unconfirmed input is never resent or extended');
+  sandbox.fetch=async(path,options)=>{assert.equal(path,'/api/node-terminal');assert.equal(options.method||'GET','GET');const current=view();current.sequence='4';return response(current);};
+  await evaluate('refreshNodeTerminal(true)');assert.equal(evaluate('terminalBlocked'),false);assert.equal(evaluate('terminalState.sequence'),'4','explicit readback reconciles sequence without resending input');
+  elements.get('terminal-line').value='private caller password';evaluate('lockWebAccess()');assert.equal(elements.get('terminal-line').value,'');assert.equal(evaluate('terminalState'),null);assert.equal(evaluate('terminalQueue.length'),0);
+  assert.ok([...drafts.values()].every(value=>!value.includes('private caller password')),'terminal secrets never enter retained drafts');
+};

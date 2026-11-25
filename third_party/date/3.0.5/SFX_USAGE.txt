@@ -1,0 +1,16 @@
+SFX Linux timezone reader: upstream date3.0.5, MIT licensed per source file.
+Official archive and selected unmodified inputs are bound in SOURCE.json.
+
+SFX compiles USE_OS_TZDB=0, HAS_REMOTE_API=0 and AUTO_DOWNLOAD=0. It uses the
+private bundled IANA2026f text rules, not the host TZif transition table. The
+initial SOURCE.json preparation purpose described the first OS-table candidate;
+this file and cmake/SfxLinuxTimeZone.cmake describe the selected implementation.
+No libcurl, Runtime network update, host timezone change or global TZ mutation.
+Rules ship with the SFX installation and update through a later SFX update.
+The Linux package must include the selected data and all upstream license
+notices, including individual copyright headers in the date source files.
+
+Legacy Windows keys use the pinned CLDR48 territory001 global default mapping.
+The saved key is preserved and the resolved IANA name is available for display.
+Unknown keys fail explicitly; there is no host-local or UTC fallback. Users
+with a more specific region can choose its IANA zone in Region & Time.

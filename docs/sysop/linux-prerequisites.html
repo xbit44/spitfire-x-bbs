@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>Linux prerequisites | Spitfire-X Sysop Wiki</title>
+ <link rel="stylesheet" href="assets/sysop.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to article</a>
+<aside class="sidebar" aria-label="Wiki navigation">
+ <img class="sidebar-logo" src="images/sfx-about-approved.png" width="1254" height="1254" alt="Spitfire-X BBS bison logo">
+ <a class="brand" href="wiki.html">SPITFIRE-X<span>BBS / SYSOP WIKI</span></a>
+ <form action="search.html" method="get" role="search">
+  <label for="wiki-query">Search this wiki</label>
+  <div class="search-field"><input id="wiki-query" name="q" type="search" maxlength="160" placeholder="Search articles" autocomplete="off"><button type="submit" aria-label="Search">Go</button></div>
+ </form>
+ <nav aria-label="Topics"><p class="nav-heading">CONTENTS</p><a href="wiki.html">Wiki home</a><a href="get-ready.html">Get ready</a>
+<a href="linux-controls.html">Linux browser controls</a>
+<a href="daily-operation.html">Daily operation</a>
+<a href="callers-chat.html">Callers &amp; chat</a>
+<a href="messages-mail.html">Messages &amp; mail</a>
+<a href="files-transfers.html">Files &amp; transfers</a>
+<a href="doors.html">Doors</a>
+<a href="ftn-networks.html">FTN networks</a>
+<a href="maintenance-recovery.html">Maintenance &amp; recovery</a>
+<a href="updates-help.html">Updates &amp; troubleshooting</a>
+<a href="customization-reference.html">Customization &amp; Displays</a>
+<a href="thanks-to.html">Thanks to</a>
+</nav>
+ <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
+</aside>
+<main id="main" tabindex="-1">
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">v1.0.0b1 prerequisites</span></div>
+ <article data-search="article"><h1>Linux prerequisites</h1>
+<p class="lead">Requirements for the Linux 1.0.0b1 test package.</p>
+<div class="notice"><strong>Linux test build</strong>These requirements describe the included runtime bundle. Recorded native checks include Pop!_OS 22.04; the focused DOS-door caller checks also passed on Linux Mint 22.3. This is not qualification of every browser, Linux version or BBS feature. Matching the library versions below does not by itself qualify a system.</div>
+<h2>Computer and runtime software</h2>
+<p>Use native AMD64 / x86-64 Linux with glibc. This package is not qualified for ARM, 32-bit systems, macOS / Darwin or Alpine / musl. WSL1 is used for builds and core checks, not as a fully qualified BBS host.</p>
+<p>You need Python 3.8 or newer for the installer and entry scripts, plus glibc, libstdc++ and libgcc runtime libraries. The full bundle, including ClamAV, needs glibc 2.30 or newer and a GCC 9-era libstdc++ runtime. Its required C++ symbol versions are <code>GLIBCXX_3.4.26</code> and <code>CXXABI_1.3.11</code>.</p>
+<p>No compiler, CMake or Rust SDK is needed to run this ready-built package. BBS SSH uses built-in DeuceSSH; you do not need a separate OpenSSH BBS server. SFX does not reconfigure the operating system's administrator SSH service.</p>
+<h2>Desktop and browser controls</h2>
+<p>The normal first-run path uses a terminal on the Linux desktop, then a default browser opened by <code>xdg-open</code> (usually from <code>xdg-utils</code>). No separate Qt or GTK toolkit is needed. After installation, run its exact printed <code>spitfire-x</code> command to open the Control Panel, complete initial BBS setup, review settings and choose Start BBS deliberately.</p>
+<p>Pop!_OS 22.04 and Mint 22.3 have been used for native SFX testing at the recorded scopes. The release notes identify this candidate's actual fresh-install, upgrade and runtime checks. Other glibc x86-64 distributions meeting the listed requirements are expected to be portable, not universally qualified. Building SFX yourself remains an option; bundled vendor assets keep their separate runtime requirements.</p>
+<p>For a connection from another computer, follow the complete <a href="linux-controls.html#ssh-access">SSH forwarding instructions</a>. The <code>--print-url</code> option prints a private, expiring loopback link; it needs that same-port SSH forward to reach it from a remote browser. <a href="linux-controls.html#lan">LAN HTTPS/Web Access</a> is a separate post-setup choice.</p>
+<h2>Your account, folder and startup</h2>
+<p>A fresh Linux board uses a new, empty folder with the lowercase layout. An existing lowercase board can use the <a href="linux-controls.html#update">same-folder upgrade</a>, preserving its board data and settings. Older uppercase boards and archives are not converted. See <a href="linux-controls.html#layout">layout names and exceptions</a>.</p>
+<p>Install and run SFX as your normal Linux account, not root. Use the default <code>~/sfx</code> or another folder you own. A new board starts with callers stopped. The default caller ports are Telnet 2323 and SSH 2222; the optional low-port service plan still runs SFX under your normal account.</p>
+<p>Starting management with Linux and <strong>Start BBS when Linux starts</strong> are separate choices. Follow <a href="linux-controls.html">Linux browser controls</a> for installation, setup, service plans, updates and recovery.</p>
+<h2>Included extras and network access</h2>
+<p>Portable ClamAV 1.4.7 is included. It needs Internet access for initial virus definitions and updates; engine files alone are not ready definitions. Check the result on the ClamAV page. If a required scan cannot finish, SFX does not publish the upload. An already received file can remain held privately for Sysop review.</p>
+<p>Fresh installations add SFX Guess a Number, NewsWire-X RSS and the native X-Gate gateway menu entry. Updates preserve your Door and menu choices. Original DOS games and DOSEMU2 are not installed by this package. Optional DOS Doors may need an emulator or other software; check each Door's requirements in <a href="doors.html">Doors</a>.</p>
+<p>RSS feeds, FTN and public gateways need their own working network access. The Wiki works offline.</p>
+<h2>Allow room for your board</h2>
+<p>Keep room for programs, virus definitions, board data, uploaded files and verified backups. Final download size and minimum disk or memory figures are not fixed yet. Source companions are separate downloads, not source folders installed with the BBS.</p>
+<div class="related"><h2>Related topic</h2><a href="get-ready.html">Get your BBS ready</a></div></article>
+ <footer>Spitfire-X BBS <span aria-hidden="true">/</span> Sysop documentation <a href="#main">Back to top</a></footer>
+</main>
+
+</body>
+</html>

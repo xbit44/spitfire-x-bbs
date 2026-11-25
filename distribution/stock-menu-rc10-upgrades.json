@@ -1,0 +1,26 @@
+{
+  "main": {
+    "ans": "e39de603a583bbb83d247de204e5e6d0b5b0fae8c10d578b7f0e4442c8ae22f5",
+    "asc": "90802c5a5c4952f2db68542c9ef70f158f8cb8bd012dfd9a3c85a57bfcb8fef3"
+  },
+  "main999": {
+    "ans": "891219a9a83f25b1242ac8c7e290c7f9454f13fab7e4a1b05aa5348753f343f6",
+    "asc": "3110891784b05228637039191a00c9b5cf6439d8ef8070a3676f2d5107599a0a"
+  },
+  "your": {
+    "ans": "9469aa64c8b98da19384141b3736afbe6df401f8717aeff6541af24d7e5fc8f0",
+    "asc": "f86fdf230a54fc734d4a5cb1012d1e635b08e3499672e10c6d3761e4481c86b8"
+  },
+  "bulletin": {
+    "ans": "d13ba46ebaac9524e7164553e9281275e49347b8ac073e373e83e3a8d6bf6b1b",
+    "asc": "87d8495875e2ac2a5fb37a5da620bcc8497a60fa55cba8933fbba58b26f3c6f2"
+  },
+  "file": {
+    "ans": "716207d9ed4d39941192a527c55c4b21ecbcb96039d1d19cd8182bdba945ade3",
+    "asc": "c5841fb734ce00cf37abbc0b6c65f3b5b6e1737663ff8accf37f0c19df090b7e"
+  },
+  "sysop": {
+    "ans": "6c975b2a24c480bf08eca89b32078f1cf3f1e7af2421337beec3a1398d8bd07a",
+    "asc": "a6b90431a324776e6fe4fbfd1e81a6a9aefd47dce6980105f47d3f2a5f445d67"
+  }
+}

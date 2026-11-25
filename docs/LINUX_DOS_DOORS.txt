@@ -1,0 +1,301 @@
+LINUX DOS DOOR SETUP
+
+SFX's Linux Runtime runs DOS Doors through its DOSEMU2 adapter, using an
+ordinary account. Individual games still need their own setup and caller
+test. Earlier adapter qualification used Pop!_OS 22.04, AMD64. This is not
+a promise that every Linux version, emulator version or DOS game works.
+
+GUIDED SETUP - LINUX DOORS
+
+This guide covers the Linux 1.0.0-beta.11 Door controls. Earlier beta.8
+packages use Doors > Set up DOS doors; older beta.7 ZIPs do not include
+that wizard.
+
+For a complete game, select its category in Doors, choose
+Add Door, then DOS game. The category stays with the setup. Stop the BBS
+first and leave browser controls open. Follow the existing six steps:
+  1. Check installed DOSEMU2, or prepare the optional separate SFX copy.
+  2. Choose an existing game folder, program and its command arguments.
+  3. Select I/O, drop file, input pacing and caller requirements.
+  4. Review the preselected category and choose an unused menu number.
+  5. Review, then Save and add to the named category.
+  6. Start the BBS and test through a normal caller session.
+
+Doors > DOS Runtime Setup is a separate runtime-only tool. Check/reuse or
+prepare a runtime, then Save Runtime. After the saved result, close it to
+return to Doors. It creates no game, Door or caller menu entry. Add Door
+uses the same runtime steps. The checked choice is saved for later DOS
+Doors and used by the real caller launcher. It includes an executable
+identity check. Recheck and save it after replacing or updating the
+executable.
+
+Existing installed DOSEMU2 is checked without requiring a particular
+distribution name. Automatic preparation of a separate SFX copy retains
+the qualified Pop!_OS 22.04 AMD64 profile described below. On other systems,
+install DOSEMU2 using the distribution's instructions, then check it here.
+The wizard does not run sudo, add repositories or install system packages.
+
+Choose the actual AMD64 Linux executable, with the required DOS resources.
+Folder paths must not contain spaces, quotes, backslashes or links. The
+wizard finds DOS programs in the chosen game folder; it does not download
+games or run their own installers. Read the game's instructions for command
+arguments, I/O and drop-file requirements. Those choices are not guessed.
+
+Review includes CanDisconnect=false and this game's input pacing, as
+described below. Other valid driver settings are kept. New games default
+to Sysop-only while you test them; Edit Door can change access afterward.
+Simultaneous callers stay off unless you explicitly choose them for a game
+that supports them.
+
+Closing with edits offers the allowed Save, Discard, Stay or
+Close / Keep Draft choices. Save is unavailable for an incomplete review
+or an uncertain operation. Discard drops unsaved text; it cannot undo
+runtime, driver or Door settings already saved. Background preparation
+has its own progress/cancellation and is not cancelled by closing.
+
+Door creation and menu placement save separately. If the Door saves but
+placement fails, keep that Door and correct its placement with Place Saved
+Door. Do not create a duplicate. After an uncertain reply, use Refresh /
+Review Saved Result before another save. The wizard never automatically
+repeats the save. A confirmed save followed by a failed readback is not
+proof that nothing happened.
+
+Start the BBS, log in as Sysop and choose the game. Check the caller/node,
+input/output and a clean return. If simultaneous callers are enabled,
+test two different callers in the same game at the same time. A successful
+runtime check or configuration save is not a completed game test.
+
+PREPARE THE DOS FILES
+
+The beta.11 Linux package uses the fresh lowercase layout. It does not
+convert an older uppercase installation. Required DOS/game filenames keep
+their original spelling; use the exact game files you were supplied.
+
+The beta.11 Linux package installs these in bin/tools under your SFX folder:
+  prepare_linux_dos.py
+  linux_dos_pop22_amd64.json
+
+Keep them together; the helper reads the profile beside itself. Matching
+source copies are in scripts/. The browser wizard handles this preparation
+for you. For a manual preparation, start in your installed SFX folder.
+
+Choose an existing test-board folder owned by your account. Its path must
+have no spaces, quotes, backslashes or links. You need Python 3, dpkg-deb,
+an Internet connection for the first preparation, and at least 100 MB free.
+
+  python3 bin/tools/prepare_linux_dos.py /home/yourname/sfx-test
+
+The helper downloads the selected official emulator packages, checks them
+automatically, and extracts them under your board's bin/dosemu folder.
+It does not use sudo, install system packages, add a PPA, or change your
+board settings. The original package notices stay with the files.
+
+Run the same command again to check and reuse those files. For a check only:
+
+  python3 bin/tools/prepare_linux_dos.py /home/yourname/sfx-test --check
+
+This checks the prepared files. Running a DOS Door is a separate check;
+it does not promise that every fresh machine has all needed host libraries.
+
+An existing runtime with changed files or no matching receipt is kept as
+it is. The helper reports the problem instead of replacing it. If a new
+preparation fails, it names the incomplete folder it kept for inspection.
+Do not point it at an existing production BBS while trying this adapter.
+
+The profile is deliberately limited to the tested Pop!_OS 22.04 AMD64
+packages. Other Linux versions are not enabled by this helper. These are
+third-party DOSEMU2/FDPP/ComCom files, not SFX-owned emulator code. Project
+information and notices are at https://dosemu2.github.io/dosemu2/ and in
+bin/dosemu/usr/share/doc. A future package download may become unavailable;
+the helper will stop instead of silently selecting another version.
+
+DOOR SETTINGS
+
+The wizard's saved runtime takes precedence. Without a saved choice, the
+adapter looks for bin/dosemu, then its default system installation. Test
+programs can also select a runtime explicitly. The wizard computes the
+executable identity; you do not have to type a hash.
+
+Choose DOS and the I/O method required by the Door: UART, FOSSIL, either,
+or standard input/output. SFX creates the selected drop file for the actual
+caller and node. Inside DOS, D: is the Door's startup folder, E: is its node
+folder and F: is the drop-file folder. C: holds temporary launch files.
+
+For this Linux DOS adapter, put this line in the Door's sfxexec.ini:
+
+  CanDisconnect=false
+
+The emulator's serial connection does not report a game's DTR hangup.
+SFX refuses CanDisconnect=true rather than promising that feature. Caller
+loss, time limits and Sysop stops are still handled by SFX. DOS programs
+can write files in their mapped folders; this is not a security sandbox.
+
+INPUT PACING
+
+In the wizard, Input pacing (ms) controls the delay between characters sent
+to this game's DOS serial reader. Enter a whole number from 0 through 100.
+The default is 0: no added delay. Keep 0 unless the game misses fast input.
+
+If a legacy game loses characters when a caller types quickly or pastes a
+number, try a suitable delay and test it again. The earlier adapter check
+used 75 ms for original OGSF Guess, about 13 input characters per second.
+This is an optional choice for that game, not a new default for all Doors.
+Screen output is not slowed. Native Doors and DOS standard input/output
+do not use this serial pacing setting.
+
+The wizard saves the choice in the game's sfxexec.ini:
+
+  [SFXEXEC]
+  DosInputIntervalMs=75
+
+Enter 0 to turn pacing off. With no saved pacing setting, the default is 0.
+Rechecking a game keeps its saved choice unless you change it. SFX refuses
+invalid or out-of-range values when saving or launching; correct the value
+before trying again. Other game driver settings are preserved. Windows
+accepts the saved key when configurations are copied, but does not apply
+this Linux setting.
+
+After saving, test normal typing and fast/pasted input through your actual
+SSH or Telnet caller session. Check the full number or command received,
+not just whether the game runs. Also check scores, return to the BBS,
+caller disconnect, time limits and a Sysop stop.
+
+MORE THAN ONE CALLER
+
+Enable simultaneous callers only when the game's own instructions support
+them. Configure the game as well as SFX. Each caller needs a separate node
+and drop-file folder; use Node Directory or a private Temporary Directory
+for a single-name drop file such as DOOR.SYS. The game program and shared
+data must still use the same game folder. Two separate game copies do not
+test two people playing together.
+
+Test with two different accounts, for example one SSH caller and one Telnet
+caller. Keep both inside the game together. Check both names/nodes. If the
+game announces players entering and leaving, confirm that the first player
+sees the second player's name when joining and when leaving. Keep the first
+player in the game while the second returns to the BBS. Check saved progress
+and each player's clean return. A one-caller pass does not establish that
+simultaneous callers work.
+
+For Usurper, its author documents one shared control file with a separate
+drop-file path for each node. The /P option selects that path; /M selects a
+different control file when modem settings differ. Its /W option forces
+network mode if a DOS multitasker is not detected. Follow its own Editor
+and instructions for inter-node polling, file locking and a shared
+semaphore folder. Keep that shared folder separate from caller drop files.
+
+For the supplied Usurper 0.25 on Linux, the checked setup uses FOSSIL Only,
+DOOR.SYS (52 lines) in Node Directory, and one shared Start-up Directory:
+
+  USURPER.EXE /W /N%# /PF:\
+
+SFX replaces %# with the actual caller node. The /N argument gives that
+node to Usurper; F:\ is SFX's separate DOS drop-file mapping for each
+caller. The explicit node argument was needed for the game to show the
+correct separate nodes. These flags are Usurper settings; do not copy
+them to a different game without checking its instructions.
+
+After an interrupted game, an "already online" message can come from the
+game's own saved online state. Usurper's author documents this case after
+an abnormal shutdown. ONLINERS.DAT can also remain normally when no one is
+playing, so its presence alone does not show a stuck SFX session. Check
+actual callers and game processes, then follow the game's own recovery
+instructions. Keep its data before making a recovery change. SFX removes
+its own launch files; it does not erase the game's saved online data.
+
+ORIGINAL SPITFIRE GUESS A NUMBER
+
+The original SFGUESS.EXE v3.0 was tested unchanged, using UART and
+SFDOORS.DAT in the startup folder. It displayed its screens, accepted
+guesses, saved a winning caller in its top ten and returned to SFX.
+Local-only /L mode was not used.
+
+This older game's serial reader loses characters when input arrives too
+quickly. Earlier adapter checks used the optional test-program pacing at
+75 ms; unpaced input and shorter tested intervals lost characters. The
+current wizard saves the per-game choice described above. Earlier beta.7
+ZIPs do not include that wizard or the saved pacing key.
+
+The source test target sfx_linux_dos_game_runner accepts these arguments:
+
+  sfx_linux_dos_game_runner NEW_TEST_FOLDER PREPARED_RUNTIME SFGUESS.EXE 75
+
+Use absolute paths and a NEW_TEST_FOLDER that does not exist. For example,
+PREPARED_RUNTIME can be /home/yourname/sfx-test/bin/dosemu. The runner
+copies the supplied game, creates a synthetic caller/drop file, and keeps
+its test results separate. A terminal front end or test controller must
+supply caller bytes and display the returned CP437 screen bytes. The
+runner is a qualification tool, not the BBS Runtime or a finished Door
+launcher.
+
+WHAT HAS BEEN CHECKED
+
+Real DOS instructions have exercised UART, FOSSIL and standard I/O,
+ANSI/CP437 bytes, all three drop-file locations, separate simultaneous
+nodes, normal/nonzero returns, stops and disconnects. Unknown files made
+by a Door in its temporary folder are preserved and reported as incomplete
+cleanup. SFX removes only its own launch files.
+
+The supplied DOS Usurper 0.25 game was also tested unchanged, using FOSSIL
+and DOOR.SYS with no added input delay. Its own Editor initialized a fresh
+test game. A synthetic caller created a character, reached Main Street,
+deposited 500 gold in the Bank, and quit normally with scores written.
+The game used its remote caller connection, not local-only /L mode.
+
+Those earlier checks covered the Door adapter with a test caller. Linux
+Runtime and browser controls are implemented. The current Linux package
+includes the DOS setup controls and saved per-game pacing.
+These results do not establish compatibility with every DOS Door or all
+features of either game.
+
+EARLIER REAL GAME CHECKS THROUGH THE WIZARD - NOVEMBER 15
+
+On native Pop!_OS 22.04, original OGSF Guess was checked through the
+wizard's runtime check/save and game preparation, then the default SFX
+Door adapter.
+Normal caller typing won a game, saved the caller's score, and returned
+cleanly. Caller disconnect, operator stop and time-limit stop also passed;
+the correct caller and node were present in SFDOORS.DAT. The original game
+and reused runtime were unchanged.
+
+Fast whole-number input lost characters in that legacy UART game check:
+500 was received as 50. These checks used the default, with no backend
+input pacing. They preceded the saved per-game pacing work. Do not treat
+the normal-typing pass as a fast-input pass; the original failed result is
+retained separately.
+
+The earlier Ubuntu 20.04 test host used WSL1. DOSEMU2 stopped before the
+game because that host refuses to rename a directory while its lock file
+is open. A separate file-operation test reproduced the failure without
+SFX or DOSEMU2. Native Ubuntu game qualification remains open. The current
+follow-up uses native Pop!_OS and Mint, not local Ubuntu/WSL1.
+
+These checks ran a real DOS game with a synthetic caller. Installed-BBS
+SSH/Telnet sessions and owner acceptance remain separate checks.
+
+INSTALLED DEVELOPMENT CALLER CHECKS - NOVEMBER 15
+
+The follow-up used native Pop!_OS 22.04 and Linux Mint 22.3, with the new
+wizard/backend and actual installed BBS caller routes. Original OGSF Guess
+passed SSH and Telnet checks with saved 75 ms pacing: complete rapid number
+input, a winning score and clean return. Usurper 0.25 passed SSH and Telnet
+checks using FOSSIL, DOOR.SYS and pacing 0. It confirmed a 500-gold deposit,
+wrote scores and saved the caller's character. The persistent numeric bank
+balance was not independently decoded. Guess/Telnet caller disconnect and
+Sysop stop checks also passed on both systems.
+
+Two different SSH/Telnet callers then played in one shared Usurper game on
+each system. Game nodes 1 and 2 matched SFX and their private drop files.
+The first player saw the second player's name in the game's entry and
+departure notices. The first stayed in the game while the second returned
+to the BBS; only the second player's launch files were removed at that
+point. Both then saved scores and returned cleanly. The same game data
+contained both characters. In-game mail was not qualified by these checks.
+
+Both BBS hosts stopped with no callers, and original game executables and
+pristine game seeds were unchanged. These were development checks with
+automated loopback callers. They do not replace a test through your actual
+caller program, owner acceptance, or checks of another game or Linux
+version. These results are retained as prior development qualification
+for beta.11, not a new real-game test run. Test the delivered package
+through your actual caller program before opening a game to callers.

@@ -1,0 +1,201 @@
+{
+  "repository": "https://github.com/SynchronetBBS/sbbs",
+  "commit": "97fab8d84a68882d1ceff0bed7cc05497f4d5973",
+  "files": [
+    {
+      "path": "src/xpdev/datewrap.c",
+      "sha256": "120E6B9B18C4882F6FCD6AC7951CB2B974D8A6096D89E70863BCFD015A966FF5",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/datewrap.c"
+    },
+    {
+      "path": "src/xpdev/dirwrap.c",
+      "sha256": "394235E7DD33A928490203B258B63980AD17136250039AFAD3832BADADD5A8EA",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/dirwrap.c"
+    },
+    {
+      "path": "src/xpdev/genwrap.c",
+      "sha256": "811B26C86BCF9A594FB216090C85E1457EB2FEF691FDD2C91007F3EA1FD0D1B7",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/genwrap.c"
+    },
+    {
+      "path": "src/xpdev/ini_file.c",
+      "sha256": "8B17143D805057534E93DAB21BE368A819F38F9595FB647EF4EB5E7E5241C08D",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/ini_file.c"
+    },
+    {
+      "path": "src/xpdev/semwrap.c",
+      "sha256": "AB287E94D6B1F42F4C9068A741C16606A6978E105E6ED0494F3C677DCD274703",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/semwrap.c"
+    },
+    {
+      "path": "src/xpdev/str_list.c",
+      "sha256": "DBFB3DEFF0F0DA01EF2629B176F18839EC4C2861E581927BC1D5DF77CA2EF5DC",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/str_list.c"
+    },
+    {
+      "path": "src/xpdev/threadwrap.c",
+      "sha256": "756B52D59610465C05CF4B50512165C492CF6FFE4D46F20757FD4832DA21EE6B",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/threadwrap.c"
+    },
+    {
+      "path": "src/xpdev/xpdatetime.c",
+      "sha256": "03C1F75CA94D6A90898351F27EDBC0ABE26D92A14BD7332BBC56F88F43165F87",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/xpdatetime.c"
+    },
+    {
+      "path": "src/xpdev/xpprintf.c",
+      "sha256": "FEFB08455858C6192E949F90C21CD9EFCB19B06FE6BBF1171C20047DC12238B4",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/xpprintf.c"
+    },
+    {
+      "path": "src/sbbs3/ringbuf.c",
+      "sha256": "5377AE875F9378792CA9BBC93436F11BBD3F0B852F47E87E33C1E662104A2AFB",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/sbbs3/ringbuf.c"
+    },
+    {
+      "path": "src/sbbs3/sbbsexec.c",
+      "sha256": "3D4B4DC20868E339C622C94C8F810172E0746322AA8C13563800CDF13B932EF2",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/sbbs3/sbbsexec.c"
+    },
+    {
+      "path": "src/sbbs3/dosxtrn/dosxtrn.c",
+      "sha256": "6F0B42B033D9C75DB44CF305E98433C014F7AF0BAD030F3C8542D8ABC7EF3E22",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/sbbs3/dosxtrn/dosxtrn.c"
+    },
+    {
+      "path": "src/xpdev/xpdev_mt.props",
+      "sha256": "69220FAA7344FE0DCE96FA1C3F56B7DDB3D3E2F45F229F601C3726451A0E7199",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/xpdev_mt.props"
+    },
+    {
+      "path": "src/build/undeprecate.props",
+      "sha256": "3A51B91485EBF398260CC1745DC60CF4B6EC2E7633BAE7C18C67E175F1BCECDF",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/build/undeprecate.props"
+    },
+    {
+      "path": "src/build/target_ia32.props",
+      "sha256": "30355BF6CD6E8AEFB5E96F0F9475F3D1D7285E5265E249467BB667114D642FA2",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/build/target_ia32.props"
+    },
+    {
+      "path": "src/xpdev/genwrap.h",
+      "sha256": "EE5CD90B264BC32ADE08B166C8B2D7C30DE9B76AAA22502CEBB108324A792D7D",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/genwrap.h"
+    },
+    {
+      "path": "src/xpdev/datewrap.h",
+      "sha256": "0195016C6C2D24B47AED3C8FF78BF24329BB47EDEEF74E0FB201711CF33D0838",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/datewrap.h"
+    },
+    {
+      "path": "src/xpdev/dirwrap.h",
+      "sha256": "F7732D601752842981CEC8035A9AA825A86447FB9D3150136B5AC6075F6968C5",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/dirwrap.h"
+    },
+    {
+      "path": "src/xpdev/filewrap.h",
+      "sha256": "DAA9AB0A0B179AECCBAB7EDF56B9FF6F3127D5CF5BCDAFC23B5EC1A643B7F4A3",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/filewrap.h"
+    },
+    {
+      "path": "src/xpdev/strwrap.h",
+      "sha256": "4F992DC2853770817C26EC4FEE4A6882CB67FD66D74865AEDC8435AA706156F6",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/strwrap.h"
+    },
+    {
+      "path": "src/xpdev/str_list.h",
+      "sha256": "6933ADB658EE5F76A1609DA83BFD10DA79A2ED7A568982F8586ADEC157D6CDB5",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/str_list.h"
+    },
+    {
+      "path": "src/xpdev/ini_file.h",
+      "sha256": "469121013CE5CA22D296D3A348647CF37615CB5D66243F8A9DFE2098A3D645B2",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/ini_file.h"
+    },
+    {
+      "path": "src/xpdev/xpendian.h",
+      "sha256": "B21B3138EF813492AA67B61250151404F9499EF18635D4B2D48870EDD0C75B87",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/xpendian.h"
+    },
+    {
+      "path": "src/xpdev/xpdatetime.h",
+      "sha256": "7B9C4FC9BE51CA277E2516900171C9A214718DDC08A51CCB99881629D8BA505D",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/xpdatetime.h"
+    },
+    {
+      "path": "src/xpdev/netwrap.h",
+      "sha256": "BB062A9581B850B8A4B3B3097E535A9BF285661F5B3F8A93BF6568000E3B05BD",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/netwrap.h"
+    },
+    {
+      "path": "src/xpdev/semwrap.h",
+      "sha256": "117E14C8FF5A28CB92E380E2AEBC4B179F052F640133777DE4B551CF232F3730",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/semwrap.h"
+    },
+    {
+      "path": "src/xpdev/xpprintf.h",
+      "sha256": "8F336CC5795F3C11E8590BC428A4B94A41D39A895DC0EC742619251D045B0F2C",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/xpprintf.h"
+    },
+    {
+      "path": "src/xpdev/threadwrap.h",
+      "sha256": "93BC461F157E5A9597A4FDE7AA7C3181EF3AA63508910B7DD29EC0D0BBBD40B8",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/threadwrap.h"
+    },
+    {
+      "path": "src/xpdev/gen_defs.h",
+      "sha256": "0FB4D4763E2275246C5840618CA5907DC2CA611E27F6D6E05B340B1F1EE06E4D",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/gen_defs.h"
+    },
+    {
+      "path": "src/sbbs3/ringbuf.h",
+      "sha256": "863D5B796E6675C1B6C1F5289BFD299E844FE5516187910BEE8DD5DB939A1067",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/sbbs3/ringbuf.h"
+    },
+    {
+      "path": "src/sbbs3/uartdefs.h",
+      "sha256": "86BB5FF7A3B29ACE3042FEDDA79650B88C8EE2AB602EE4A17813BCD31D138434",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/sbbs3/uartdefs.h"
+    },
+    {
+      "path": "src/sbbs3/vdd_func.h",
+      "sha256": "BD443CF3A06C721D7C19D5B2784D9E10076E22D5A0E37E2BE17746AC4537369D",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/sbbs3/vdd_func.h"
+    },
+    {
+      "path": "src/xpdev/eventwrap.h",
+      "sha256": "5B25500C3C9885AE0CFFEE9D9E8B4E8A921A60CA9C6C193FAB539D8BAE9B721A",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/eventwrap.h"
+    },
+    {
+      "path": "src/sbbs3/fossdefs.h",
+      "sha256": "B992D5A332F0460EFB4F81E9F4F81D77DB4B014987D180181F6EC3A3FBCAC530",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/sbbs3/fossdefs.h"
+    },
+    {
+      "path": "src/xpdev/wrapdll.h",
+      "sha256": "C34E6AD4C4906412CE4E1AB4335398346DE6895C63BC4A88EED64EBF289A0EC3",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/wrapdll.h"
+    },
+    {
+      "path": "src/xpdev/sockwrap.h",
+      "sha256": "7667B0739AA4CDD14C3D320F3D7DFB45E45027608EA6435FD29ED0EA159C3071",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/sockwrap.h"
+    },
+    {
+      "path": "src/xpdev/xpsem.h",
+      "sha256": "B314B392CD6D4405CFB5A8E86B4B22D4AD63DDDF1FB260C77AB010B10B4C51DF",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/xpsem.h"
+    },
+    {
+      "path": "src/xpdev/cp437defs.h",
+      "sha256": "B564FF3DF3546E973E2B575F1D87ACE2B1937E6E0D997B9F891AE5957BC8DA68",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/cp437defs.h"
+    },
+    {
+      "path": "src/xpdev/xpevent.h",
+      "sha256": "EDFFA97FE2F32AC76C6CC1F4DBD36D85925EE0D72DFBDFB694FCC3F2608638F7",
+      "url": "https://raw.githubusercontent.com/SynchronetBBS/sbbs/97fab8d84a68882d1ceff0bed7cc05497f4d5973/src/xpdev/xpevent.h"
+    }
+  ]
+}

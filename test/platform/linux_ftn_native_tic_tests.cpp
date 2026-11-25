@@ -1,0 +1,52 @@
+#include "../support/include/sfx/test/linux_layout_fixture.hpp"
+// Actual Linux custody, portable credentials and managed storage; session provenance is a
+// synthetic trusted-host input, never evidence of a live authenticated peer.
+#define main retained_tic_file_fixture_main
+#include "../integration/file_storage_tests.cpp"
+#undef main
+#include "sfx/platform/linux/ftn_native_tic.hpp"
+#include "sfx/platform/linux/ftn_secrets.hpp"
+#include "sfx/application/ftn_held_control.hpp"
+#include <sodium.h>
+#include <sys/stat.h>
+#include "sfx/platform/linux/portable_key_store.hpp"
+#include "sfx/platform/linux/portable_file_bindings.hpp"
+namespace native=sfx::platform::linux_host;
+
+namespace {
+app::FtnDigest tic_hash(std::string_view v){app::FtnDigest out{};crypto_hash_sha256(out.data(),reinterpret_cast<const unsigned char*>(v.data()),v.size());return out;}
+template<class F> void refuses(F&& f,const char* reason){bool refused{};try{f();}catch(const std::exception& e){refused=std::string_view(e.what())==reason;if(!refused)std::cerr<<"unexpected refusal "<<e.what()<<'\n';}check(refused,reason);}
+}
+#ifndef SFX_FTN_TIC_ENTRY
+#define SFX_FTN_TIC_ENTRY main
+#endif
+int SFX_FTN_TIC_ENTRY(int argc,char** argv){try{
+    check(argc==2,"fresh native TIC root required");const auto root=std::filesystem::absolute(argv[1]);check(!std::filesystem::exists(root),"never overwrite native TIC evidence");std::filesystem::create_directories(root.parent_path());check(::mkdir(root.c_str(),0700)==0,"private native toss fixture");
+    for(const auto* role:{"config","data","ftn","ftn/inbound","ftn/outbound","ftn/bad","ftn/processed","ftn/nonsecure","ftn/inbound/test","ftn/outbound/test","ftn/bad/test","ftn/processed/test"})check(::mkdir((root/role).c_str(),0700)==0,"private FTN fixture role");
+    {auto config=native::open_owned_directory(root/"config");const std::string intent="SFX_LINUX_FIRST_RUN=1\n";native::publish_private_file(config.get(),"first-run.v1",{intent.begin(),intent.end()},false);}
+    check(bool((sfx::test::mark_provisioned_linux_fixture(root),native::initialize_fresh_portable_board_key(root))),"portable toss fixture board key");
+    const auto bindings=native::LinuxFilePayloadBindings::initialize_fresh(root);
+    native::FtnInstallation installed{root,bindings};
+
+    sfx::test::FakeStoragePathPolicy paths;auto s=settings(root/L"data");s.layout_profile=sfx::adapters::storage::SqliteStorageLayoutProfile::linux_lowercase_v1;storage::SqliteStorage db(s,paths);check(db.start().succeeded()&&db.shutdown().succeeded(),"current schema initialized");seed(s.data_directory/L"sfx.db");check(db.start().succeeded(),"managed store ready");const app::MessageConfigurationActor owner{true,{}};
+    auto c=*db.ftn_configuration(owner).value;app::FtnNetwork n;n.code="TEST";n.name="Native TIC";n.address="2:100/1@test";n.enabled=true;c.networks.push_back(n);app::FtnLink l;l.network="TEST";l.code="PEER";l.name="Synthetic peer";l.address="2:100/2@test";l.host="127.0.0.1";l.enabled=true;l.credentials.session=*native::protect_ftn_secret(root.u8string(),n.code,l.code,native::FtnCredentialKind::session,"session-key");l.credentials.tic=*native::protect_ftn_secret(root.u8string(),n.code,l.code,native::FtnCredentialKind::tic,"tic-key");c.links.push_back(l);c.file_echoes.push_back({n.code,"TEST.FILES","Native received files",1});c.permissions.push_back({n.code,l.code,"TEST.FILES",true,true,false,false});check(bool(db.change_ftn_configuration(owner,id(20).bytes,c)),"explicit file mapping and Receive permission");c=*db.ftn_configuration(owner).value;
+    auto incoming=native::FilePayloadDirectory::private_store(root/L"ftn"/L"Inbound"/L"TEST",bindings);const auto live=[]{return true;};unsigned number=100;
+    const auto receive=[&](std::string_view bytes,std::string name,app::FtnIngressProof proof=app::FtnIngressProof::inbound_cram){app::FtnIngressReceipt r;r.id=id(number++);r.session=id(number+10000);r.identity=tic_hash("TIC-"+std::to_string(number));r.network=n.code;r.link=l.code;r.proof=proof;r.configuration_revision=c.revision;r.file={std::move(name),bytes.size(),1700000000+number};auto sink=native::FtnNativeReceive::open(incoming,db,r,live);for(std::size_t offset=0;offset<bytes.size();offset+=16384)sink.append(bytes.substr(offset,16384));sink.finish();return sink.receipt();};
+    std::string payload(150003,'x');payload[65535]='z';payload.back()='!';app::FtnCrc32 crc;for(std::size_t p=0;p<payload.size();p+=997)crc.update(std::string_view(payload).substr(p,997));check(crc.value()==app::ftn_crc32(payload)&&app::ftn_crc32("123456789")==0xcbf43926U,"streaming CRC matches standard vector across uneven chunks");
+    app::FtnTic tic;tic.area="TEST.FILES";tic.file="example.zip";tic.long_file="Description only.zip";tic.origin=*app::parse_ftn_address("2:100/9@test");tic.from=*app::parse_ftn_address(l.address);tic.to=*app::parse_ftn_address(n.address);tic.password="tic-key";tic.size=payload.size();tic.crc=crc.value();tic.descriptions={"Native TIC fixture"};tic.path.push_back({tic.from,std::uint64_t{1700000000},{}});
+    const auto ingest=[&](const app::FtnTic& t,app::FtnIngressProof proof=app::FtnIngressProof::inbound_cram){const auto encoded=app::encode_ftn_tic(t);check(encoded.has_value(),"valid serialized TIC fixture");return receive(*encoded,"control.tic",proof);};
+    auto receipt=ingest(tic);const auto review=native::inspect_ftn_native_tic(db,c,installed,receipt,live);check(review.password_verified&&review.authenticated_same_link&&review.tic.password.empty()&&review.tic.file=="example.zip"&&review.tic.long_file==tic.long_file,"separate protected TIC credential, metadata retained and returned password erased");check(!native::pair_ftn_native_tic_payload(db,installed,receipt,review.tic,live),"TIC arriving before payload remains pending");const auto data=receive(payload,"example.zip");{auto pair=native::pair_ftn_native_tic_payload(db,installed,receipt,review.tic,live);check(pair&&pair->receipt.id==data.id&&pair->payload.identity.sha256==tic_hash(payload),"unique same-custody payload is verified and pinned");}check(!db.ftn_payload_candidates({false,app::MessageActor{id(2),2,1,1}},receipt.id,"example.zip")&&!db.ftn_payload_candidates(owner,receipt.id,"../example.zip"),"ordinary caller and unsafe payload name cannot query private TIC custody");{auto verified=native::inspect_ftn_native_tic_payload(db,installed,data,review.tic,live);check(verified.crc==crc.value()&&verified.identity.sha256==tic_hash(payload)&&verified.identity.bytes==payload.size(),"actual retained native lease and complete payload integrity");}
+    auto wrong=tic;wrong.password="wrong";const auto wrong_receipt=ingest(wrong);refuses([&]{native::inspect_ftn_native_tic(db,c,installed,wrong_receipt,live);},"ftn_tic_password_wrong");
+    wrong=tic;wrong.to=*app::parse_ftn_address("2:100/3@test");const auto wrong_to=ingest(wrong);refuses([&]{native::inspect_ftn_native_tic(db,c,installed,wrong_to,live);},"ftn_tic_wrong_destination");
+    wrong=tic;wrong.path.push_back({*app::parse_ftn_address(n.address),{}, {}});const auto loop=ingest(wrong);refuses([&]{native::inspect_ftn_native_tic(db,c,installed,loop,live);},"ftn_tic_path_loop");
+    wrong=tic;wrong.area="UNGRANTED";const auto unknown=ingest(wrong);refuses([&]{native::inspect_ftn_native_tic(db,c,installed,unknown,live);},"ftn_tic_not_authorized");
+    wrong=tic;wrong.crc=*tic.crc^1;refuses([&]{native::inspect_ftn_native_tic_payload(db,installed,data,wrong,live);},"ftn_tic_payload_crc_mismatch");wrong=tic;wrong.size=*tic.size+1;refuses([&]{native::inspect_ftn_native_tic_payload(db,installed,data,wrong,live);},"ftn_tic_payload_size_mismatch");wrong=tic;wrong.file=wrong.long_file;refuses([&]{native::inspect_ftn_native_tic_payload(db,installed,data,wrong,live);},"ftn_tic_payload_name_mismatch");auto forged=data;forged.digest[0]^=1;refuses([&]{native::inspect_ftn_native_tic_payload(db,installed,forged,tic,live);},"ftn_inbound_content_changed");
+    c.links.front().credentials.tic.clear();check(bool(db.change_ftn_configuration(owner,id(21).bytes,c)),"owner explicitly configures blank TIC credential");c=*db.ftn_configuration(owner).value;tic.password.clear();const auto authenticated=ingest(tic);check(!native::inspect_ftn_native_tic(db,c,installed,authenticated,live).password_verified,"blank credential exception requires actual same-link host proof");c.links.front().credentials.session.clear();check(bool(db.change_ftn_configuration(owner,id(22).bytes,c)),"separate unauthenticated TCP fixture has no required session password");c=*db.ftn_configuration(owner).value;const auto tcp=ingest(tic,app::FtnIngressProof::inbound_tcp);refuses([&]{native::inspect_ftn_native_tic(db,c,installed,tcp,live);},"ftn_tic_same_link_proof_required");
+    const auto repeated=receive(payload,"EXAMPLE.ZIP",app::FtnIngressProof::inbound_tcp);{auto pair=native::pair_ftn_native_tic_payload(db,installed,receipt,review.tic,live);check(pair&&pair->payload.identity.sha256==tic_hash(payload),"identical completed retransmission keeps one unambiguous content choice");}
+    const auto conflicting=receive(std::string(payload.size(),'y'),"example.zip",app::FtnIngressProof::inbound_tcp);refuses([&]{native::pair_ftn_native_tic_payload(db,installed,receipt,review.tic,live);},"ftn_tic_pair_ambiguous");
+    for(unsigned i=0;i<14;++i)receive(payload,"example.zip",app::FtnIngressProof::inbound_tcp);
+    refuses([&]{native::pair_ftn_native_tic_payload(db,installed,receipt,review.tic,live);},"ftn_tic_pair_limit");
+    #include "ftn_tic_review_native_checks.inc"
+    #include "ftn_tic_owner_review_checks.inc"
+    check(db.shutdown().succeeded(),"native TIC store closes");std::cout<<"PASS "<<checks<<" native TIC portable credentials/admission/custody/streaming integrity and exact rejection/review checks; synthetic session proof, no catalog/replacement/hub acceptance\n";return 0;
+}catch(const std::exception& e){std::cerr<<"FAIL "<<checks<<": "<<e.what()<<'\n';return 1;}}

@@ -1,0 +1,31 @@
+// Exact frozen-B literal receipt compatibility + isolated actual FTN object
+// capability. No registry, installed generation, owner data or System32 access.
+#include "sfx/platform/win32/installation_security.hpp"
+#include "ftn_receipt_legacy_fixtures.hpp"
+#include <algorithm>
+#include <iostream>
+#include <stdexcept>
+namespace ins=sfx::platform::win32::installation;
+namespace {
+unsigned checks{};
+void check(bool value,const char* label){++checks;if(!value)throw std::runtime_error(label);}
+template<class F>void refused(F action,const char* label){bool failed{};try{action();}catch(const std::exception&){failed=true;}check(failed,label);}
+template<std::size_t N>std::vector<std::uint8_t> literal(const unsigned char(&value)[N]){return {value,value+N};}
+bool has_ftn(const ins::Receipt& receipt){const auto roles=ins::mutable_directories_for(receipt);return std::any_of(roles.begin(),roles.end(),[](auto leaf){return std::wstring_view(leaf)==L"FTN";});}
+std::string source(const std::vector<std::uint8_t>& bytes){return {bytes.begin(),bytes.end()};}
+}
+int main(int argc,char** argv){try{
+    check(argc==2,"new isolated NTFS fixture required");namespace frozen=sfx::test::receipt_legacy;
+    const std::vector<std::vector<std::uint8_t>> old{literal(frozen::v1),literal(frozen::v2),literal(frozen::v3),literal(frozen::v4),literal(frozen::v5),literal(frozen::v6),literal(frozen::v7),literal(frozen::v8),literal(frozen::v8_introduced_component),literal(frozen::v8_existing_component)};
+    for(const auto& bytes:old){const auto receipt=ins::decode_receipt(bytes);check(!receipt.ftn_layout&&!receipt.ftn_volume&&!receipt.ftn_directory_id&&!has_ftn(receipt)&&ins::encode_receipt(receipt)==bytes,"exact literal1-8 bytes/roles retained without manufactured FTN capability");}
+    for(unsigned choice=7;choice<old.size();++choice){const auto prior=ins::decode_receipt(old[choice]);auto next=prior;next.ftn_layout=true;next.ftn_volume=next.volume;next.ftn_directory_id=500;const auto bytes=ins::encode_receipt(next);const auto decoded=ins::decode_receipt(bytes);check(source(bytes).rfind("SFX-DESKTOP-INSTALL-9\n",0)==0&&std::count(bytes.begin(),bytes.end(),'\n')==43&&decoded.ftn_layout&&decoded.ftn_directory_id==500&&has_ftn(decoded)&&ins::encode_receipt(decoded)==bytes,"explicit canonical9 with exact private FTN object binding");
+        check(decoded.door_component.registered==prior.door_component.registered&&decoded.door_component.introduced==prior.door_component.introduced&&decoded.door_component.path==prior.door_component.path&&decoded.door_component.volume==prior.door_component.volume&&decoded.door_component.file_id==prior.door_component.file_id&&decoded.door_component.sha256==prior.door_component.sha256&&decoded.door_component.compatibility==prior.door_component.compatibility,"version9 preserves all version8 shared DOS identity/introduction/compatibility fields");
+        for(std::size_t size=0;size<bytes.size();++size)refused([&]{ins::decode_receipt({bytes.begin(),bytes.begin()+size});},"every truncated9 refuses without partial capability");
+        auto invalid=next;invalid.ftn_volume^=1;refused([&]{ins::encode_receipt(invalid);},"FTN volume must equal bound installation volume");invalid=next;invalid.ftn_directory_id=invalid.root_id;refused([&]{ins::encode_receipt(invalid);},"FTN identity cannot alias root");invalid=next;invalid.ftn_directory_id=invalid.program_ids[0];refused([&]{ins::encode_receipt(invalid);},"FTN identity cannot alias program payload");invalid=next;invalid.ftn_directory_id=0;refused([&]{ins::encode_receipt(invalid);},"zero FTN identity refuses");
+        auto malformed=source(bytes);malformed.replace(malformed.find("ftn-private-v1"),14,"unknown-policy");refused([&]{ins::decode_receipt({malformed.begin(),malformed.end()});},"unknown capability does not grant FTN");malformed=source(bytes)+"extra\n";refused([&]{ins::decode_receipt({malformed.begin(),malformed.end()});},"unknown extra9 fields refuse");
+    }
+    auto legacy=ins::decode_receipt(old[7]);legacy.root=L"C:\\FTN";check(!has_ftn(legacy)&&!ins::decode_receipt(ins::encode_receipt(legacy)).ftn_layout,"FTN pathname/current program count is not capability");legacy.ftn_volume=legacy.volume;refused([&]{ins::encode_receipt(legacy);},"absent flag cannot carry orphaned FTN identity");auto older=ins::decode_receipt(old[6]);older.ftn_layout=true;older.ftn_volume=older.volume;older.ftn_directory_id=500;refused([&]{ins::encode_receipt(older);},"legacy payload inventory cannot claim new role");
+    const auto root=std::filesystem::absolute(argv[1]);check(!std::filesystem::exists(root),"preserve all older native fixtures");std::filesystem::create_directories(root.parent_path());const auto owner=ins::operator_sid();const auto descriptor=ins::mutable_descriptor(owner);ins::create_directory(root,descriptor.get());ins::create_directory(root/L"FTN",descriptor.get());auto actual=ins::decode_receipt(old[7]);actual.root=root;actual.owner=owner;actual.ftn_layout=true;{auto directory=ins::open_object(root/L"FTN",true);actual.volume=actual.ftn_volume=ins::volume_serial(directory.get());actual.ftn_directory_id=ins::file_id(directory.get());}ins::verify_ftn_directory(actual);check(true,"actual private NTFS role volume/object/owner ACL verifies");auto absent=actual;absent.ftn_layout=false;refused([&]{ins::verify_ftn_directory(absent);},"existing FTN path cannot manufacture absent installation capability");auto wrong=actual;++wrong.ftn_directory_id;refused([&]{ins::verify_ftn_directory(wrong);},"different object ID refuses");wrong=actual;wrong.owner=L"S-1-5-21-100-200-300-1001";refused([&]{ins::verify_ftn_directory(wrong);},"wrong owner policy refuses actual role");
+    check(MoveFileExW((root/L"FTN").c_str(),(root/L"FTN.original").c_str(),MOVEFILE_WRITE_THROUGH)!=FALSE,"retain empty test-created original directory by nonrecursive rename");ins::create_directory(root/L"FTN",descriptor.get());refused([&]{ins::verify_ftn_directory(actual);},"same name and private ACL with replaced object cannot inherit capability");
+    std::cout<<"PASS "<<checks<<" literal1-8/new9 codec and actual private NTFS FTN object guards; no installed/registry/System32 claim\n";return 0;
+}catch(const std::exception& error){std::cerr<<"FAIL "<<checks<<": "<<error.what()<<" win32="<<GetLastError()<<'\n';return 1;}}
