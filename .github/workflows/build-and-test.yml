@@ -44,7 +44,7 @@ jobs:
           build/linux-gcc/sfx_file_session_tests "$scratch/board"
 
   windows:
-    name: Windows x86 build
+    name: Windows x86 build and smoke tests
     if: github.event_name == 'workflow_dispatch'
     runs-on: windows-2022
     timeout-minutes: 35
@@ -76,5 +76,12 @@ jobs:
             -DCMAKE_SUPPRESS_REGENERATION=ON `
             "-DSFX_OPENSSL_PERL_EXECUTABLE=$($nativePerl.Source)" `
             "-DSFX_OPENSSL_NASM_EXECUTABLE=$nasmPath"
-      - name: Build Runtime, Control Panel, and SFXConfig
-        run: cmake --build --preset windows-v143-x86 --parallel 4 --target SFXRuntime SFXControlPanel SFXConfig -- /nr:false
+      - name: Build applications and smoke tests
+        run: >-
+          cmake --build --preset windows-v143-x86 --parallel 4 --target
+          SFXRuntime SFXControlPanel SFXConfig
+          sfx_file_transfer_completion_tests sfx_scheduler_tests -- /nr:false
+      - name: Run smoke tests
+        run: >-
+          ctest --preset windows-v143-x86 --output-on-failure --no-tests=error
+          -R '^sfx\.unit\.(file_transfer_completion|scheduler)$'
