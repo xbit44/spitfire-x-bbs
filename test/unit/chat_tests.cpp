@@ -51,7 +51,32 @@ void formats(){
     check(chat_safe_text("a\x1b[2J\r\nb")=="a[2Jb","controls stripped");check(chat_node(2)=="02"&&chat_node(2,128)=="002","node width");
     check(valid_pchat_frame(stock_pchat_frame()),"stock frame valid");check(!valid_pchat_frame("\x1b[2;3Hsecret"),"art cannot overwrite live header");check(!valid_pchat_frame("\x1b[24;1H"),"row24 reserved");check(!valid_pchat_frame("\x1b[1;80H"),"column80 reserved");check(!valid_pchat_frame("\x1b[1;23r"),"no scroll takeover");
     const auto emote=parse_chat_emotes("wave|TARGET|{caller} waves to {target}\n");check(emote.size()==1,"case insensitive emote");check(render_chat_emote(emote[0],"{target}","Other")=="{target} waves to Other","substitution text stays inert");
-    std::ifstream file("distribution/Display/chat-emote.txt",std::ios::binary);const std::string stock((std::istreambuf_iterator<char>(file)),{});check(parse_chat_emotes(stock).size()==33,"all33 emotes retained");
+    std::ifstream file("distribution/Display/chat-emote.txt",std::ios::binary);const std::string stock((std::istreambuf_iterator<char>(file)),{});check(parse_chat_emotes(stock).size()==32,"all 32 remaining stock emotes");
+    check(parse_chat_emotes("help|NONE|Reserved\nWAVE|TARGET|{caller} waves to {target}\n").size()==1,"legacy Help emote ignored");
+}
+void private_replies(){
+    ChatHub hub;
+    auto a=caller(1),b=caller(2),ghost=caller(3,true);
+    ghost.preferences.ghost=true;
+    check(hub.attach(a)&&hub.attach(b)&&hub.attach(ghost),"reply participants attached");
+    hub.poll(a.identity,true);hub.poll(b.identity,true);hub.poll(ghost.identity,true);
+    check(hub.text(a.identity,ghost.identity,"direct")==ChatResult::unavailable,"ordinary lookup cannot address Ghost");
+    check(hub.text(ghost.identity,a.identity,"private question")==ChatResult::ok,"Ghost sends private text");
+    const auto delivery=hub.poll(a.identity,true);
+    check(delivery.size()==1&&delivery[0].reply_token,"delivered text can be answered");
+    const auto token=delivery[0].reply_token;
+    check(hub.reply_text(b.identity,token,"other caller")==ChatResult::unavailable,"reply authority belongs to recipient");
+    check(hub.reply_text(a.identity,token,"private answer")==ChatResult::ok,"recipient can answer Ghost");
+    check(hub.reply_text(a.identity,token,"another answer")==ChatResult::unavailable,"reply consumed once");
+    const auto answer=hub.poll(ghost.identity,true);
+    check(answer.size()==1&&answer[0].text=="private answer","reply delivered only to Ghost");
+    check(hub.poll(b.identity,true).empty()&&hub.visible(a.identity).size()==2,"reply preserves global privacy");
+    check(hub.text(ghost.identity,a.identity,"another question")==ChatResult::ok,"second text sent");
+    const auto stale=hub.poll(a.identity,true).at(0).reply_token;
+    hub.detach(ghost.identity);
+    ghost.identity.session.bytes[1]=1;
+    check(hub.attach(ghost),"replacement connected to same node");
+    check(hub.reply_text(a.identity,stale,"stale answer")==ChatResult::unavailable,"node reuse cannot receive reply");
 }
 void bounded_invitation_queue(){
     ChatHub hub;auto a=caller(1),b=caller(2);check(hub.attach(a)&&hub.attach(b),"bounded invitation callers attached");hub.poll(a.identity,true);hub.poll(b.identity,true);
@@ -98,4 +123,4 @@ void private_limits(){
 namespace {
 #include "chat_followup_checks.inc"
 }
-int main(){try{routing();formats();bounded_invitation_queue();operators();operator_codecs();private_limits();followup_checks();std::cout<<"PASS "<<checks<<" Chat model/session checks\n";return 0;}catch(const std::exception& e){std::cerr<<"FAIL "<<checks<<": "<<e.what()<<'\n';return 1;}}
+int main(){try{routing();formats();private_replies();bounded_invitation_queue();operators();operator_codecs();private_limits();followup_checks();std::cout<<"PASS "<<checks<<" Chat model/session checks\n";return 0;}catch(const std::exception& e){std::cerr<<"FAIL "<<checks<<": "<<e.what()<<'\n';return 1;}}

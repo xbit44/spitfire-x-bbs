@@ -1,4 +1,4 @@
-BUILDING SPITFIRE-X BBS 1.0.0b2
+BUILDING SPITFIRE-X BBS 1.0.0b3
 
 Use a new extracted SourceSnapshot folder. Required pinned dependency archives,
 qualified transfer-helper sources, original notices and exact build-qualification
@@ -157,7 +157,7 @@ DoorSource has separately identified Windows/Linux source variants and original
 licenses. Their program versions and external CA asset revision are recorded
 separately. Read the actual source manifests and build notes for each variant.
 
-Use the source snapshot supplied with the v1.0.0b2 release.
+Use the source snapshot supplied with the v1.0.0b3 release.
 
 The commands above are rebuild instructions. Actual delivered build origin
 and bounded source amendments are recorded in BUILD_INFO.json and

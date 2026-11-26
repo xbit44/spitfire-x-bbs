@@ -44,6 +44,11 @@ chat_ports.read=[&]{struct Restore{MenuModalStream& stream;~Restore(){stream.pre
     guarded.preserve_poll_timeouts(true);return terminal.read_editor_byte();};
 chat_ports.write=[&](std::string_view text){return write_all(guarded,text);};
 chat_ports.now=[&]{return clock.monotonic_millis();};chat_ports.refresh=chat_refresh;
+chat_ports.take_idle_warning=[&]{
+    const bool pending=caller.idle_warning_pending;
+    caller.idle_warning_pending=false;
+    return pending;
+};
 chat_ports.ansi=[&]{return ready.graphics==app::GraphicsMode::ansi;};
 chat_ports.rows=[&]{return assignment->snapshot().terminal_rows;};chat_ports.columns=[&]{return assignment->snapshot().terminal_columns;};
 chat_ports.node_count=[&]{return config.logical_nodes;};chat_ports.accepted_key=[&](bool cr){terminal.finish_editor_key(cr);};

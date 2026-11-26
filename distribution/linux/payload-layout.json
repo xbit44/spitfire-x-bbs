@@ -1,6 +1,6 @@
 {
   "format": 1,
-  "version": "1.0.0b2",
+  "version": "1.0.0b3",
   "platform": "linux-amd64",
   "layout_schema": "linux-lowercase-v1",
   "purpose": "Normative installed payload aliases and exact case exceptions for fresh Linux installations. Source names are logical input slots, not a requirement to create an uppercase staging tree. Source repository and standalone upstream names remain unchanged. This map plus component build instructions does not claim exact reproduction of a private test ZIP or a final build from empty dependencies.",

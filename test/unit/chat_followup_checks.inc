@@ -27,6 +27,29 @@ struct FollowupCaller {
     FollowupCaller(){a.name="Alice";b.name="Bob";check(hub.attach(a)&&hub.attach(b),"follow-up callers attached");hub.poll(a.identity,true);hub.poll(b.identity,true);}
 };
 void followup_checks(){
+    {
+        FollowupCaller f;
+        f.ansi=true;
+        f.stream.input="/?\r\r/L\r\r/R\r1\r/WAVE bOb\r/WAVE\r2\r/EMOTE HELP\r/Q\r";
+        check(f.hub.join(f.b.identity,1)==ChatResult::ok,"Bob already in room");
+        std::ifstream file("distribution/Display/chat-emote.txt",std::ios::binary);
+        const std::string stock((std::istreambuf_iterator<char>(file)),{});
+        auto ports=f.ports();
+        ports.emotes=[&]{return parse_chat_emotes(stock);};
+        bool pending=true;
+        ports.take_idle_warning=[&]{const auto value=pending;pending=false;return value;};
+        ChatCallerSession session(f.hub,f.a.identity,std::move(ports));
+        check(session.enter(1)==ChatExit::chat_menu,"framed commands return to room and exit");
+        const auto& out=f.stream.output;
+        check(out.find("Alice, Bob")!=out.npos&&out.find("Lobby - 2 callers")!=out.npos,"entry shows room roster");
+        check(out.find("logged off.")!=out.npos,"idle warning rendered inside chat");
+        check(out.find("Enter for more, Q to return")==out.npos&&out.find("/LAG *")!=out.npos,"all stock commands fit in one view");
+        check(out.find("Chat Rooms")!=out.npos&&out.find("Change Chat Room")!=out.npos,"room commands open separate panels");
+        check(out.find("Node number (Enter cancels)")==out.rfind("Node number (Enter cancels)"),"only bare wave asks for node");
+        const auto events=f.hub.poll(f.b.identity,true);
+        check(std::count_if(events.begin(),events.end(),[](const auto& e){return e.text=="Alice waves to Bob";})==2,"both wave forms reach the room");
+        check(std::none_of(events.begin(),events.end(),[](const auto& e){return e.text.find("Will somebody help")!=std::string::npos;}),"removed Help emote never broadcasts");
+    }
     for(bool ansi:{false,true})for(const std::string suffix:{"-","1","+","A","anything"}){
         FollowupCaller f;f.ansi=ansi;f.stream.input="Q"+suffix+"\rQ\r";ChatCallerSession c(f.hub,f.a.identity,f.ports());
         check(c.online(),"Who malformed line recovers without disconnect");

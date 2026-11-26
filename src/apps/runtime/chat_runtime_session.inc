@@ -61,6 +61,11 @@ chat_ports.page_accepted=[&]{if(owner.journal)owner.journal->sound(SoundEvent::p
 std::function<std::optional<MenuDoorCommands>(MenuId)> primary_door_commands;
 std::function<std::optional<std::string>(const MenuDoorSelection&)> primary_door_launch;
 chat_ports.read=[&]{struct Restore {MenuModalStream& stream;~Restore(){stream.preserve_poll_timeouts(false);}} restore{modal_stream};modal_stream.preserve_poll_timeouts(true);return terminal.read_editor_byte();};
+chat_ports.take_idle_warning=[&]{
+    const bool pending=afk_notice;
+    afk_notice=false;
+    return pending;
+};
 chat_ports.write=[&](std::string_view text){return write_all(modal_stream,text);};
 chat_ports.now=[] {return GetTickCount64();};chat_ports.refresh=chat_refresh;
 chat_ports.ansi=[&]{return ready->graphics==GraphicsMode::ansi;};

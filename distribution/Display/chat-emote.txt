@@ -15,7 +15,6 @@ HANDSHAKE|TARGET|{caller} is shaking hands with {target}
 SLEEP|NONE|{caller} is nodding off in his chair....   zzzzzzzzzzzzz....
 LAUGH|NONE|{caller} is laughing so hard it hurts!
 BEAT|TARGET|{caller} has picked up a large heavy object and is pummeling {target}!
-HELP|NONE|{caller} doesn't know how to work the chatroom controls... Will somebody help?
 KICK|TARGET|{caller} spins and neatly plants a foot dead in the middle of {target}'s chest.
 BRB|NONE|{caller} will be right back after this brief commercial message...   STAY TUNED.
 BURP|NONE|A loud stomach originated noise is coming from {caller}.

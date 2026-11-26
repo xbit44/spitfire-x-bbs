@@ -82,7 +82,13 @@ void ChatHub::safe(const ChatIdentity& id,bool value){std::lock_guard<std::mutex
 std::optional<ChatParticipant> ChatHub::participant(const ChatIdentity& id)const{std::lock_guard<std::mutex> lock(mutex_);const auto* s=find(id);return s?std::optional<ChatParticipant>(s->caller):std::nullopt;}
 std::vector<ChatParticipant> ChatHub::visible(const ChatIdentity& id,bool room_only)const{std::lock_guard<std::mutex> lock(mutex_);std::vector<ChatParticipant> out;const auto* s=find(id);if(!s)return out;for(const auto& item:sessions_)if(visible_to(*s,item.second,room_only)){auto p=item.second.caller;if(p.room){p.activity="Chat Lobby";for(const auto& r:config_.rooms)if(r.id==p.room&&chat_room_access(r,s->caller))p.activity="Chat Lobby ["+r.name+"]";}out.push_back(std::move(p));}return out;}
 std::vector<ChatRoom> ChatHub::rooms(const ChatIdentity& id)const{std::lock_guard<std::mutex> lock(mutex_);std::vector<ChatRoom> out;const auto* s=find(id);if(s)for(const auto& r:config_.rooms)if(chat_room_access(r,s->caller))out.push_back(r);return out;}
-void ChatHub::room_notice(const ChatParticipant& p,std::string_view action){for(auto& item:sessions_)if(item.second.caller.room==p.room&&item.second.caller.identity!=p.identity)push(item.second,{ChatEventKind::public_text,p.identity,p.name,p.name+std::string(action),0,p.room});}
+void ChatHub::room_notice(const ChatParticipant& p,std::string_view action){
+    for(auto& item:sessions_){
+        const auto& caller=item.second.caller;
+        if(caller.room==p.room&&caller.identity!=p.identity)
+            push(item.second,{ChatEventKind::public_text,p.identity,p.name,p.name+std::string(action),0,p.room,false,ChatLineStyle::presence});
+    }
+}
 void ChatHub::leave_locked(Session& s){if(!s.caller.room)return;room_notice(s.caller," left the room.");s.caller.room=0;s.events.erase(std::remove_if(s.events.begin(),s.events.end(),[](const auto& e){return e.kind==ChatEventKind::public_text;}),s.events.end());}
 void ChatHub::leave(const ChatIdentity& id){std::lock_guard<std::mutex> lock(mutex_);if(auto* s=find(id))leave_locked(*s);}
 ChatResult ChatHub::join(const ChatIdentity& id,ChatRoomId room){std::lock_guard<std::mutex> lock(mutex_);auto* s=find(id);if(!s||s->peer||s->operator_token)return ChatResult::unavailable;for(const auto& r:config_.rooms)if(r.id==room){if(!chat_room_access(r,s->caller))return ChatResult::denied;if(s->caller.room==room)return ChatResult::ok;leave_locked(*s);s->caller.room=room;room_notice(s->caller," joined the room.");return ChatResult::ok;}return ChatResult::unavailable;}
@@ -94,12 +100,33 @@ ChatResult ChatHub::say(const ChatIdentity& id,std::string_view text,bool action
     if(s->peer){auto* other=find(*s->peer);if(!other)return ChatResult::unavailable;if(other->events.size()>=64||s->events.size()>=64)return ChatResult::full;push(*other,{ChatEventKind::public_text,id,s->caller.name,line});push(*s,{ChatEventKind::public_text,id,s->caller.name,line});return ChatResult::ok;}
     if(!s->caller.room)return ChatResult::unavailable;
     for(const auto& item:sessions_)if(item.second.caller.room==s->caller.room&&item.second.events.size()>=64)return ChatResult::full;
-    for(auto& item:sessions_)if(item.second.caller.room==s->caller.room)push(item.second,{ChatEventKind::public_text,id,s->caller.name,line,0,s->caller.room});
+    for(auto& item:sessions_)if(item.second.caller.room==s->caller.room)
+        push(item.second,{ChatEventKind::public_text,id,s->caller.name,line,0,s->caller.room,false,action?ChatLineStyle::emote:ChatLineStyle::caller});
     return ChatResult::ok;}
 ChatResult ChatHub::text(const ChatIdentity& from,const ChatIdentity& to,std::string_view text,bool whisper,bool override_dnd){std::lock_guard<std::mutex> lock(mutex_);auto* a=find(from);auto* b=find(to);if(!a||!b||from==to||!visible_to(*a,*b,whisper))return ChatResult::unavailable;
     if(b->caller.preferences.dnd&&!(override_dnd&&a->caller.sysop))return ChatResult::dnd;
     const auto clean=chat_safe_text(text);if(clean.empty())return ChatResult::invalid;
     return push(*b,{ChatEventKind::private_text,from,a->caller.name,clean,0,whisper?a->caller.room:ChatRoomId{},override_dnd&&a->caller.sysop})?ChatResult::ok:ChatResult::full;}
+ChatResult ChatHub::reply_text(const ChatIdentity& from,std::uint64_t token,std::string_view text,bool override_dnd){
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto* sender=find(from);
+    if(!sender)return ChatResult::unavailable;
+    const auto reply=sender->replies.find(token);
+    if(reply==sender->replies.end())return ChatResult::unavailable;
+    auto* recipient=find(reply->second);
+    sender->replies.erase(reply);
+    if(!recipient)return ChatResult::unavailable;
+    const bool overridden=override_dnd&&sender->caller.sysop;
+    if(recipient->caller.preferences.dnd&&!overridden)return ChatResult::dnd;
+    const auto clean=chat_safe_text(text);
+    if(clean.empty())return ChatResult::invalid;
+    return push(*recipient,{ChatEventKind::private_text,from,sender->caller.name,clean,
+        0,0,overridden,ChatLineStyle::text,0,true})?ChatResult::ok:ChatResult::full;
+}
+void ChatHub::discard_reply(const ChatIdentity& id,std::uint64_t token){
+    std::lock_guard<std::mutex> lock(mutex_);
+    if(auto* caller=find(id))caller->replies.erase(token);
+}
 ChatRequestResult ChatHub::invite(const ChatIdentity& from,const ChatIdentity& to,std::uint64_t now,bool override_dnd){std::lock_guard<std::mutex> lock(mutex_);auto* a=find(from);auto* b=find(to);if(!a||!b||from==to||!visible_to(*a,*b))return {};
     if(a->caller.private_seconds_remaining_today==0||b->caller.private_seconds_remaining_today==0)return {ChatResult::denied,0};
     if(b->caller.preferences.dnd&&!(override_dnd&&a->caller.sysop))return {ChatResult::dnd,0};
@@ -161,7 +188,16 @@ void ChatHub::detach(const ChatIdentity& id,std::uint64_t now){std::lock_guard<s
     for(auto& item:sessions_)if(item.second.caller.preferences.notices&&(!p.preferences.ghost||item.second.caller.sysop))push(item.second,{ChatEventKind::presence,id,p.name,p.name+" (Node "+chat_node(id.node)+") logged off."});}
 std::vector<ChatEvent> ChatHub::poll(const ChatIdentity& id,bool boundary){std::lock_guard<std::mutex> lock(mutex_);std::vector<ChatEvent> out;auto* s=find(id);if(!s||!boundary)return out;
     while(!s->events.empty()){auto e=std::move(s->events.front());s->events.pop_front();const auto* sender=find(e.sender);
-        if(e.kind==ChatEventKind::private_text){if(!sender||!visible_to(*sender,*s,e.room!=0)||(s->caller.preferences.dnd&&!(e.override_dnd&&sender->caller.sysop))||(e.room&&(sender->caller.room!=e.room||s->caller.room!=e.room)))continue;}
+        if(e.kind==ChatEventKind::private_text){
+            if(!sender||(!e.direct_reply&&!visible_to(*sender,*s,e.room!=0))||
+                (s->caller.preferences.dnd&&!(e.override_dnd&&sender->caller.sysop))||
+                (e.room&&(sender->caller.room!=e.room||s->caller.room!=e.room)))continue;
+            if(!e.room){
+                if(s->replies.size()>=64)s->replies.erase(s->replies.begin());
+                e.reply_token=next_request_++;
+                s->replies.emplace(e.reply_token,e.sender);
+            }
+        }
         if(e.kind==ChatEventKind::invite&&!invites_.count(e.request))continue;
         if(e.kind==ChatEventKind::presence&&(!s->caller.preferences.notices||(sender&&sender->caller.preferences.ghost&&!s->caller.sysop)))continue;
         if(e.kind==ChatEventKind::public_text&&e.room&&e.room!=s->caller.room)continue;
@@ -179,7 +215,7 @@ ChatResult ChatHub::notice(std::optional<ChatIdentity> target,ChatRoomId room,st
     for(const auto& it:sessions_)if((!room||it.second.caller.room==room)&&it.second.events.size()>=64)return ChatResult::full;
     for(auto& it:sessions_)if(!room||it.second.caller.room==room)push(it.second,{ChatEventKind::notice,{}, {},"Sysop notice: "+clean});
     return ChatResult::ok;}
-std::vector<ChatEmote> parse_chat_emotes(std::string_view text){std::vector<ChatEmote> out;if(text.size()>65536)return out;std::set<std::string> names;while(!text.empty()){auto n=text.find('\n');auto line=text.substr(0,n);if(n==text.npos)text={};else text.remove_prefix(n+1);if(!line.empty()&&line.back()=='\r')line.remove_suffix(1);if(line.empty()||line.front()=='#'||line.front()==';')continue;auto a=line.find('|'),b=a==line.npos?line.npos:line.find('|',a+1);if(a==line.npos||b==line.npos)continue;auto name=std::string(line.substr(0,a));for(auto& ch:name)if(ch>='a'&&ch<='z')ch=static_cast<char>(ch-'a'+'A');if(name.empty()||name.size()>24||!std::all_of(name.begin(),name.end(),[](char c){return c>='A'&&c<='Z';})||!names.insert(name).second)continue;auto mode=line.substr(a+1,b-a-1);if(mode!="NONE"&&mode!="TARGET")continue;auto body=chat_safe_text(line.substr(b+1));if(body.empty())continue;out.push_back({name,mode=="TARGET",body});if(out.size()==128)break;}return out;}
+std::vector<ChatEmote> parse_chat_emotes(std::string_view text){std::vector<ChatEmote> out;if(text.size()>65536)return out;std::set<std::string> names;while(!text.empty()){auto n=text.find('\n');auto line=text.substr(0,n);if(n==text.npos)text={};else text.remove_prefix(n+1);if(!line.empty()&&line.back()=='\r')line.remove_suffix(1);if(line.empty()||line.front()=='#'||line.front()==';')continue;auto a=line.find('|'),b=a==line.npos?line.npos:line.find('|',a+1);if(a==line.npos||b==line.npos)continue;auto name=std::string(line.substr(0,a));for(auto& ch:name)if(ch>='a'&&ch<='z')ch=static_cast<char>(ch-'a'+'A');if(name=="HELP"||name.empty()||name.size()>24||!std::all_of(name.begin(),name.end(),[](char c){return c>='A'&&c<='Z';})||!names.insert(name).second)continue;auto mode=line.substr(a+1,b-a-1);if(mode!="NONE"&&mode!="TARGET")continue;auto body=chat_safe_text(line.substr(b+1));if(body.empty())continue;out.push_back({name,mode=="TARGET",body});if(out.size()==128)break;}return out;}
 std::optional<std::string> render_chat_emote(const ChatEmote& e,std::string_view caller,std::string_view target){if(e.targeted&&target.empty())return {};std::string out;for(std::size_t i=0;i<e.text.size();){
     if(e.text.compare(i,8,"{caller}")==0){out+=chat_safe_text(caller,64);i+=8;}
     else if(e.text.compare(i,8,"{target}")==0){out+=chat_safe_text(target,64);i+=8;}

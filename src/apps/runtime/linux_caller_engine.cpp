@@ -106,7 +106,7 @@ public:
         std::uint64_t last_checkpoint{UINT64_MAX};std::optional<std::int64_t> remaining;
         std::uint64_t authenticated_millis{};
         std::int64_t calling_snapshot_utc{};
-        bool timed_out{};std::uint8_t caller_color{7};
+        bool timed_out{},idle_warning_pending{};std::uint8_t caller_color{7};
         bool authenticated_as_sysop{},published{},live_sysop{},ended_recorded{},registration_started{};
         app::OperationalContext log_context;
         std::optional<app::CallerStage> last_log_stage;
@@ -186,10 +186,17 @@ public:
                 inactivity->set_sysop_exemption(*caller.value->security_level>=policy.value->sysop_threshold);
                 if(remaining&&*remaining==0){timed_out=true;return false;}
             }
-            if(inactivity&&inactivity->poll(owner.clock.monotonic_millis())==app::CallerInactivity::Action::disconnect){timed_out=true;return false;}
+            if(inactivity){
+                const auto action=inactivity->poll(owner.clock.monotonic_millis());
+                if(action==app::CallerInactivity::Action::disconnect){timed_out=true;return false;}
+                if(action==app::CallerInactivity::Action::warn)idle_warning_pending=true;
+            }
             return true;
         }
-        void keyboard(){if(inactivity)inactivity->keyboard(owner.clock.monotonic_millis());}
+        void keyboard(){
+            if(inactivity)inactivity->keyboard(owner.clock.monotonic_millis());
+            idle_warning_pending=false;
+        }
     };
     std::filesystem::path root;LinuxRuntimeStore& store;app::IClock& clock;app::Identifier128 epoch;
     app::OperationalConfiguration config;std::string sysop_name;

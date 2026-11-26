@@ -39,9 +39,13 @@ struct ChatParticipant {
     std::optional<std::int64_t> private_seconds_remaining_today;
 };
 enum class ChatEventKind : std::uint8_t { public_text,private_text,presence,notice,invite,started,ended };
+enum class ChatLineStyle : std::uint8_t { text, caller, presence, emote, warning };
 struct ChatEvent {
     ChatEventKind kind{}; ChatIdentity sender; std::string name,text;
     std::uint64_t request{}; ChatRoomId room{}; bool override_dnd{};
+    ChatLineStyle style{};
+    std::uint64_t reply_token{};
+    bool direct_reply{};
 };
 enum class ChatResult : std::uint8_t { ok,unavailable,denied,dnd,busy,full,conflict,invalid };
 struct ChatConfigurationResult {ChatResult code{ChatResult::unavailable};std::optional<ChatConfiguration> configuration{};};
@@ -82,6 +86,8 @@ public:
     void leave(const ChatIdentity&);
     ChatResult say(const ChatIdentity&,std::string_view,bool action=false);
     ChatResult text(const ChatIdentity&,const ChatIdentity&,std::string_view,bool whisper=false,bool override_dnd=false);
+    ChatResult reply_text(const ChatIdentity&,std::uint64_t token,std::string_view,bool override_dnd=false);
+    void discard_reply(const ChatIdentity&,std::uint64_t token);
     ChatRequestResult invite(const ChatIdentity&,const ChatIdentity&,std::uint64_t now,bool override_dnd=false);
     ChatResult answer(const ChatIdentity&,std::uint64_t,bool accept,std::uint64_t now);
     bool invite_pending(const ChatIdentity&,std::uint64_t request) const;
@@ -111,7 +117,8 @@ public:
     void end_operator(const ChatIdentity&,std::uint64_t now);
 private:
     struct Session {ChatParticipant caller;std::deque<ChatEvent> events;std::optional<ChatIdentity> peer;ChatRoomId suspended_room{};
-        std::uint64_t page{},page_expires{},operator_token{},paused_millis{},private_started{},private_millis{};};
+        std::uint64_t page{},page_expires{},operator_token{},paused_millis{},private_started{},private_millis{};
+        std::map<std::uint64_t,ChatIdentity> replies{};};
     struct Invite {std::uint64_t id{},expires{};ChatIdentity from,to;bool override_dnd{};};
     struct Operator {
         std::uint64_t token{};Identifier128 view;ChatIdentity caller;

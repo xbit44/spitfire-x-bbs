@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include "sfx/application/chat.hpp"
 #include "sfx/application/terminal_stream.hpp"
 namespace sfx::application {
@@ -22,6 +23,7 @@ struct ChatSessionPorts {
     std::function<bool()> hotkeys{};
     std::function<bool()> can_disconnect{};
     std::function<std::string(const ChatParticipant&)> disconnect{};
+    std::function<bool()> take_idle_warning{};
 };
 // Accept only frame decoration; interpreted output may never occupy live cells.
 bool valid_pchat_frame(std::string_view) noexcept;
@@ -44,17 +46,22 @@ private:
     std::string caller_row(const ChatParticipant&,std::uint16_t maximum_node=99) const;
     bool private_chat();
     bool run_conversation(bool private_mode,ChatExit& exit);
-    bool compose(bool whisper=false,std::optional<ChatIdentity> reply={});
+    bool compose(bool whisper=false,const ChatEvent* reply=nullptr);
     std::optional<ChatParticipant> choose(bool room_only=false);
     bool invite(const ChatParticipant&);
     std::optional<bool> consent(std::uint64_t request);
     bool override_dnd(const ChatParticipant&);
     bool help(bool private_mode);
+    bool pause_panel(std::string_view prompt,bool prompt_visible=false);
+    bool show_list(std::string_view title,const std::vector<std::string>& rows);
     bool redraw(bool private_mode,bool full=true);
     bool framed() const;
-    void append(std::string_view);
+    void append(std::string_view,ChatLineStyle=ChatLineStyle::text,std::size_t prefix=0,bool yellow=false);
+    void show_roster();
+    struct HistoryLine { std::string text; ChatLineStyle style{}; std::size_t prefix{}; bool yellow{}; };
     ChatHub& hub_; ChatIdentity identity_; ChatSessionPorts ports_;
-    std::deque<std::string> history_;std::string draft_;std::uint64_t presentations_{};
+    std::deque<HistoryLine> history_;std::string draft_;std::uint64_t presentations_{};
+    std::array<std::string,24> public_rows_{};
     std::uint64_t history_version_{},plain_seen_{};
     bool plain_ready_{},plain_prompt_pending_{};
     bool private_return_to_menu_{};
