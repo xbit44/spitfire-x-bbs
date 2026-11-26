@@ -1,4 +1,5 @@
 #include "linux_web_caller_actions.hpp"
+#include <algorithm>
 #include <iostream>
 
 namespace app=sfx::application;namespace web=sfx::apps::runtime::web;

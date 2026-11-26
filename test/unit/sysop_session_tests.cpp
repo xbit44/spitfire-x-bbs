@@ -1,6 +1,7 @@
 #include "sfx/application/sysop_session.hpp"
 #include "sfx/application/terminal_stream.hpp"
 #include "sfx/application/chat_session.hpp"
+#include <algorithm>
 #include <deque>
 #include <filesystem>
 #include <fstream>

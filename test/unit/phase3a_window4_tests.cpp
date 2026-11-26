@@ -317,7 +317,7 @@ void test_fixed_field_order_validation_and_private_observation_safety() {
     options.allow_x = true;
     options.email = app::EmailRegistrationMode::ask;
     options.transfer = true;
-    options.transfer_choices = {app::TransferProtocolPreference::zmodem};
+    options.transfer_choices = std::vector{app::TransferProtocolPreference::zmodem};
     script_name_checks(fixture, "New Caller");
     script_password(fixture);
     fixture.terminal.script_presentation("registration.real_name.explanation");
@@ -527,7 +527,7 @@ void test_policy_retry_transfer_modes_and_age_boundaries() {
         Fixture fixture;
         ConfigurationOptions options;
         options.transfer = true;
-        options.transfer_choices = {app::TransferProtocolPreference::zmodem};
+        options.transfer_choices = std::vector{app::TransferProtocolPreference::zmodem};
         script_name_checks(fixture, "New Caller");
         script_password(fixture);
         fixture.terminal.script_key("registration.transfer_protocol",
@@ -870,7 +870,7 @@ void test_review_edits_every_field_and_boundary_stops() {
     options.allow_x = true;
     options.email = app::EmailRegistrationMode::required;
     options.transfer = true;
-    options.transfer_choices = {app::TransferProtocolPreference::xmodem,
+    options.transfer_choices = std::vector{app::TransferProtocolPreference::xmodem,
         app::TransferProtocolPreference::zmodem};
     fixture.names.results.push_back(stored(registerable("New Caller")));
     script_password(fixture);
@@ -1260,7 +1260,7 @@ void script_stop_at(Fixture& fixture, ConfigurationOptions& options,
             break;
         case PreconfirmationBoundary::transfer:
             options.transfer = true;
-            options.transfer_choices = {app::TransferProtocolPreference::zmodem};
+            options.transfer_choices = std::vector{app::TransferProtocolPreference::zmodem};
             fixture.terminal.script_key("registration.transfer_protocol", outcome);
             break;
         case PreconfirmationBoundary::review_presentation:
@@ -1436,7 +1436,7 @@ void test_c4_review_authority_and_failures() {
         Fixture fixture;
         ConfigurationOptions options;
         options.transfer = true;
-        options.transfer_choices = {app::TransferProtocolPreference::xmodem,
+        options.transfer_choices = std::vector{app::TransferProtocolPreference::xmodem,
             app::TransferProtocolPreference::ymodem, app::TransferProtocolPreference::ymodem_g,
             app::TransferProtocolPreference::zmodem};
         script_name_checks(fixture, "New Caller");
@@ -1469,7 +1469,7 @@ void test_f02_maximum_fields_and_f03_quit() {
         options.location = options.birth_date = options.sex = app::RegistrationFieldMode::required;
         options.email = app::EmailRegistrationMode::ask;
         options.transfer = true;
-        options.transfer_choices = {app::TransferProtocolPreference::ymodem_g};
+        options.transfer_choices = std::vector{app::TransferProtocolPreference::ymodem_g};
         const std::string real_name(64, 'R'), location(64, 'L');
         const std::string email = std::string(64, 'e') + "@" + std::string(63, 'a') + "." +
             std::string(63, 'b') + "." + std::string(57, 'c') + ".net";

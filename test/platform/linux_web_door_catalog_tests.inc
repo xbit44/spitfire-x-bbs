@@ -7,7 +7,7 @@
     const auto catalog=web::door_catalog_page(c,0,op);check(catalog["entries"].size()==3&&catalog["doors"].size()==3&&catalog["revision"]=="9007199254740993","bounded selected menu and exact catalog revision");
     auto editor=web::door_editor_page(c,1,op);auto value=make("door",editor.at("entry"));const auto unchanged=web::door_catalog_update(value,c,{});
     check(app::encode_door_definition(unchanged.door)==app::encode_door_definition(c.doors[0]),"native Door roundtrip retains every setting");
-    for(const auto bad:std::vector<Json>{true,-1,1000,1.5,"1",nullptr}){value=make("door",editor.at("entry"));value["entry"]["id"]=bad;refuses([&]{web::door_catalog_update(value,c,{});});}
+    for(const auto& bad:std::vector<Json>{true,-1,1000,1.5,"1",nullptr}){value=make("door",editor.at("entry"));value["entry"]["id"]=bad;refuses([&]{web::door_catalog_update(value,c,{});});}
     value=make("door",editor.at("entry"));value["revision"]=9007199254740993ULL;refuses([&]{web::door_catalog_update(value,c,{});});
     value=make("door",editor.at("entry"));value["revision"]="9007199254740992";refuses([&]{web::door_catalog_update(value,c,{});});
     value=make("door",editor.at("entry"));value["entry"]["protected_credential"]=Json::array({1,2,3});refuses([&]{web::door_catalog_update(value,c,{});});

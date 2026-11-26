@@ -12,6 +12,7 @@
 #include "sfx/platform/linux/ftn_native_toss.hpp"
 #include "sfx/platform/linux/installation_layout.hpp"
 #include "sfx/application/ftn_retention.hpp"
+#include <algorithm>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>

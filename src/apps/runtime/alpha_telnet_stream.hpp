@@ -27,6 +27,7 @@ public:
     bool begin_gateway() noexcept {
         if(binary_mode_||binary_half_iac_||gateway_mode_)return false;
         if(!net::set_nonblocking(socket_,true))return false;
+        text_cr_pending_=false;
         gateway_mode_=true;return true;
     }
     application::InteractiveStreamWriteResult write_ready(std::string_view bytes){
@@ -73,6 +74,7 @@ public:
     bool message_binary_mode(bool value) noexcept {
         const std::uint32_t receive=value?100:250,send_timeout=value?100:5000;
         if(!net::set_timeout(socket_,SO_RCVTIMEO,receive)||!net::set_timeout(socket_,SO_SNDTIMEO,send_timeout))return false;
+        if(binary_mode_!=value)text_cr_pending_=false;
         binary_mode_=value;return !binary_half_iac_;
     }
     bool ansi_terminal() const noexcept { return ansi_terminal_; }
@@ -233,15 +235,23 @@ private:
         subnegotiation_iac
     };
 
+    void filter_data(std::uint8_t byte, std::vector<std::uint8_t>& output) noexcept {
+        // RFC 854 pads a text CR with NUL. Keep the CR immediate for BBS
+        // clients that send it alone, and leave binary data byte-for-byte intact.
+        const bool discard_padding = text_cr_pending_ && byte == 0;
+        text_cr_pending_ = byte == '\r' && !remote_binary_enabled_ && !binary_mode_ && !gateway_mode_;
+        if (!discard_padding) output.push_back(byte);
+    }
+
     void filter(const std::uint8_t byte, std::vector<std::uint8_t>& output) noexcept {
         switch (state_) {
             case InputState::data:
                 if (byte == kTelnetIac) state_ = InputState::iac;
-                else output.push_back(byte);
+                else filter_data(byte, output);
                 break;
             case InputState::iac:
                 if (byte == kTelnetIac) {
-                    output.push_back(byte);
+                    filter_data(byte, output);
                     state_ = InputState::data;
                 } else if (byte == kTelnetDo || byte == kTelnetDont ||
                     byte == kTelnetWill || byte == kTelnetWont) {
@@ -261,6 +271,7 @@ private:
                     }else if(option_command_==kTelnetDont && local_binary_enabled_){
                         local_binary_enabled_=false;queue_control(kTelnetWont,0);
                     }else if(option_command_==kTelnetWill && !remote_binary_enabled_){
+                        text_cr_pending_=false;
                         remote_binary_enabled_=true;queue_control(kTelnetDo,0);
                     }else if(option_command_==kTelnetWont && remote_binary_enabled_){
                         remote_binary_enabled_=false;queue_control(kTelnetDont,0);
@@ -293,6 +304,7 @@ private:
     std::function<void(std::string_view)> output_observer_;
     std::function<void(bool)> activity_;
     InputState state_{InputState::data};
+    bool text_cr_pending_{};
     std::uint8_t option_command_{};
     std::array<char,67> sub_bytes_{};
     std::size_t sub_size_{};

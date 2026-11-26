@@ -963,7 +963,7 @@ private:
                                    : Phase3aWorkflowCode::cleanup_failure);
         }
         lease_owner_ = AccountSessionAdmissionLeaseOwner::create(
-            std::move(*admitted.lease), dependencies_.admission, dependencies_.cleanup_health);
+            *admitted.lease, dependencies_.admission, dependencies_.cleanup_health);
         if (!lease_owner_.has_value()) return finish(Phase3aWorkflowCode::internal_failure);
 
         const auto now = dependencies_.clock.unix_seconds();

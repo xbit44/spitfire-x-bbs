@@ -2,6 +2,7 @@
 #include "sfx/test/storage_fakes.hpp"
 #include "sqlite_internal.hpp"
 #include "sqlite_statement.hpp"
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <stdexcept>

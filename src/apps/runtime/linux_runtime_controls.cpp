@@ -1,4 +1,5 @@
 #include "linux_runtime_host.hpp"
+#include <algorithm>
 #include "linux_node_controls.hpp"
 
 namespace sfx::apps::runtime {

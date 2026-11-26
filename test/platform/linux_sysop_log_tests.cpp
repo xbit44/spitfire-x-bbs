@@ -2,6 +2,7 @@
 #define main retained_sysop_session_main
 #include "../unit/sysop_session_tests.cpp"
 #undef main
+#include <algorithm>
 #include <sstream>
 #include <fstream>
 #include <iostream>

@@ -31,16 +31,16 @@
  <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
 </aside>
 <main id="main" tabindex="-1">
- <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">v1.0.0b1 Linux controls</span></div>
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">v1.0.0b2 Linux controls</span></div>
  <article data-search="article"><h1>Linux browser controls</h1>
 <p class="lead">Open your controls, change settings and try a caller session.</p>
-<div class="notice"><strong>v1.0.0b1 test build</strong>This guide covers the Linux 1.0.0b1 browser Control Panel and SFXConfig. Install the new lowercase layout separately from older uppercase boards.</div>
+<div class="notice"><strong>v1.0.0b2 test build</strong>This guide covers the Linux 1.0.0b2 browser Control Panel and SFXConfig. Install the new lowercase layout separately from older uppercase boards.</div>
 
 <h2 id="first-run">Fresh install on the Linux desktop</h2>
 <p>For a new board, use a terminal opened on the Linux desktop where SFX will run. Install as your normal account into a new, empty folder you own. Existing lowercase boards use the <a href="#update">upgrade steps</a>; older uppercase boards and backups are not converted.</p>
 <p>Download the single Linux <code>.tar.gz</code>, extract it once, and enter its versioned folder. For this release:</p>
-<pre><code>tar -xzf spitfire-x-1.0.0b1-rc2-linux-x86_64-20261124-r1.tar.gz
-cd spitfire-x-1.0.0b1-linux-x86_64
+<pre><code>tar -xzf spitfire-x-1.0.0b2-linux-x86_64.tar.gz
+cd spitfire-x-1.0.0b2-linux-x86_64
 python3 install.py</code></pre>
 <p><strong>Staging and installation are different folders.</strong> The extracted versioned folder contains <code>install.py</code> and <code>payload/</code>. Run the installer there, then choose the separate folder that will hold your board, for example <code>$HOME/sfx</code>. The fresh destination must be new or empty. Do not select the extracted package folder or a parent that contains it.</p>
 <p>The installer asks for a full destination path and confirmation. Enter accepts the shown <code>~/sfx</code> default. The parent folder must exist; run without sudo. An explicit <code>--prefix "$HOME/sfx"</code> selects a destination without prompting. See <a href="linux-prerequisites.html">runtime and desktop requirements</a>.</p>
@@ -198,8 +198,8 @@ python3 install.py</code></pre>
 <p>These steps support a current lowercase installation, including an existing Pop!_OS board. Keep a usable whole-board backup and use the same owner account and installation folder. Choose <strong>Stop BBS</strong> and wait for callers and maintenance to finish. Closing the browser does not close management. Run the installed command using your actual folder:</p>
 <pre><code>"$HOME/sfx/spitfire-x" --stop-management</code></pre>
 <p>The command refuses a running BBS, callers or active work and verifies that the installation lock is released. For a service-managed board it prints the exact administrator stop command. Once management has stopped, extract the new single TAR into a separate staging folder. From that new package, upgrade the EXISTING board:</p>
-<pre><code>tar -xzf spitfire-x-1.0.0b1-rc2-linux-x86_64-20261124-r1.tar.gz
-cd spitfire-x-1.0.0b1-linux-x86_64
+<pre><code>tar -xzf spitfire-x-1.0.0b2-linux-x86_64.tar.gz
+cd spitfire-x-1.0.0b2-linux-x86_64
 python3 install.py --prefix "$HOME/sfx" --upgrade</code></pre>
 <p>Substitute the real existing folder. Programs, web files and unchanged stock help are refreshed; board data, caller accounts, settings, messages, files, menus, artwork and Door/BotGate choices remain. Do not use a new empty folder or repeat initial BBS setup to update an established board. Preserve any retained transaction and follow the actual recovery result rather than deleting work to force an update.</p>
 <p>After success, run the printed launcher command on the Linux desktop, check the version and saved settings, then deliberately <strong>Start BBS</strong>. The <a href="#ssh-access">separate SSH route</a> can reopen the same existing controls remotely.</p>
@@ -221,7 +221,7 @@ python3 install.py --prefix "$HOME/sfx" --upgrade</code></pre>
 <p>Core Restore reviews and replaces the selected <code>config</code>/<code>data</code>/<code>display</code>/<code>doors</code>/<code>logs</code>/<code>botgate</code>/<code>ftn</code> core, retaining previous state. Live file-library contents and durable intake stay separate. Standard archive member names remain canonical; the verified Linux layout maps them to lowercase live paths. Final confirmation ends browser sessions: reopen through the launcher and read the result. Use preparation only if SFX asks. The BBS stays stopped.</p>
 <p><strong>Recover FTN History...</strong> is a separate stopped-board action in Backup &amp; Restore. Keep the management app and browser open. SFX verifies the board and queued files, then offers <strong>Review FTN History Recovery...</strong> with UTC seconds, pending-file counts, separate held counts and the one-copy confirmation. Use it only for the reported history hold; it does not replace Core Restore or Prepare Copied Files. Read the <a href="maintenance-recovery.html#ftn-history">full sequence and committed-report retry instructions</a>.</p>
 <p><strong>Inspect File Contents...</strong> offers only areas included in that restore point, with none selected automatically. Select wanted areas and request their preview. Check every current destination and the missing, identical and conflict counts. The separate final <strong>Restore Missing Files</strong> confirmation creates only missing files. Identical files remain and conflicts are skipped; existing files are not replaced or deleted. Core settings and catalog identities stay unchanged. Read the finished counts.</p>
-<p>The verified pre-restore safety backup records the current SFX version. In this build, that is <strong>1.0.0b1</strong>; read the actual operation result before treating recovery as complete.</p>
+<p>The verified pre-restore safety backup records the current SFX version. In this build, that is <strong>1.0.0b2</strong>; read the actual operation result before treating recovery as complete.</p>
 <p>Selection and final confirmation are separate five-minute steps. Cancel in the final dialog declines the restore and leaves the preview open; <strong>Cancel Maintenance</strong> cancels the pending operation. If a reply is uncertain, read actual status before retrying. Keep failed or uncertain work for review; do not remove ownership markers, required archives or retained partial files to clear a hold.</p>
 <p>Use File Manager Inspect/Reconcile or the offered preparation before serving restored files. Existing bytes alone do not mean a file is cataloged and ready. <strong>Prepare Copied Files...</strong> matches file records to copied or restored files; missing or changed files stay unresolved. Keep failed work and logs, and check the actual result before another attempt.</p>
 <h2 id="help">Find help and version details</h2>

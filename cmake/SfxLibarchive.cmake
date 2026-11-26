@@ -77,11 +77,32 @@ if(MSVC)
 endif()
 
 set(SFX_ARCHIVE_ENABLE_ICONV OFF)
+set(SFX_ARCHIVE_ICONV_CMAKE_ARGS)
+set(SFX_ARCHIVE_CHARSET_LIBRARY "")
 if(NOT WIN32)
     # POSIX needs iconv for the archive engine's explicit UTF-8 ZIP headers.
     # Windows keeps libarchive's native conversion and its existing static inputs.
     find_package(Iconv REQUIRED)
     set(SFX_ARCHIVE_ENABLE_ICONV ON)
+    # Use the same iconv provider in the child build and in the consumer link.
+    # Libarchive otherwise probes host libcharset even when libc provides iconv.
+    list(APPEND SFX_ARCHIVE_ICONV_CMAKE_ARGS
+        "-UICONV_INCLUDE_DIR" "-UHAVE_ICONV_*"
+        "-UHAVE_LOCALCHARSET_H" "-UHAVE_LOCALE_CHARSET")
+    if(Iconv_IS_BUILT_IN)
+        list(APPEND SFX_ARCHIVE_ICONV_CMAKE_ARGS "-DLIBICONV_PATH:FILEPATH=")
+    else()
+        get_filename_component(iconv_library_dir "${Iconv_LIBRARY}" DIRECTORY)
+        unset(charset_in_iconv_dir CACHE)
+        find_library(charset_in_iconv_dir NAMES charset PATHS "${iconv_library_dir}" NO_DEFAULT_PATH)
+        if(charset_in_iconv_dir)
+            set(SFX_ARCHIVE_CHARSET_LIBRARY "${charset_in_iconv_dir}")
+        endif()
+        list(APPEND SFX_ARCHIVE_ICONV_CMAKE_ARGS
+            "-DICONV_INCLUDE_DIR:PATH=${Iconv_INCLUDE_DIR}"
+            "-DLIBICONV_PATH:FILEPATH=${Iconv_LIBRARY}")
+    endif()
+    list(APPEND SFX_ARCHIVE_ICONV_CMAKE_ARGS "-DLIBCHARSET_PATH:FILEPATH=${SFX_ARCHIVE_CHARSET_LIBRARY}")
 endif()
 
 ExternalProject_Add(sfx_zlib_external
@@ -146,6 +167,7 @@ ExternalProject_Add(sfx_libarchive_external
         "-DENABLE_XATTR=OFF"
         "-DENABLE_ACL=OFF"
         "-DENABLE_ICONV=${SFX_ARCHIVE_ENABLE_ICONV}"
+        ${SFX_ARCHIVE_ICONV_CMAKE_ARGS}
         "-DENABLE_TEST=OFF"
         "-DENABLE_COVERAGE=OFF"
         "-DENABLE_INSTALL=ON"
@@ -177,5 +199,8 @@ if(WIN32)
     target_link_libraries(sfx_libarchive INTERFACE bcrypt)
 else()
     target_link_libraries(sfx_libarchive INTERFACE Iconv::Iconv)
+    if(SFX_ARCHIVE_CHARSET_LIBRARY)
+        target_link_libraries(sfx_libarchive INTERFACE "${SFX_ARCHIVE_CHARSET_LIBRARY}")
+    endif()
 endif()
 add_library(sfx::libarchive ALIAS sfx_libarchive)

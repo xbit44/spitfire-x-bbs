@@ -73,7 +73,7 @@ void record_chat_usage_policy(sqlite3* database,const application::StartSessionR
     if(!chat_statistics_supported(database))return;
     SqliteStatement policy(database,"SELECT c.definition,a.security_level,p.sysop_threshold FROM sfx_chat_configuration c JOIN sfx_accounts a ON a.account_id=?1 JOIN sfx_security_policy p WHERE c.singleton_id=1","read usage exclusion at session start");policy.bind(1,request.account_id);
     if(!policy.row())throw StorageFailure(StorageErrorCode::corrupt,"usage policy unavailable",SQLITE_CORRUPT);
-    const auto bytes=policy.blob(0);const auto config=bytes.empty()?std::optional<application::ChatConfiguration>(application::ChatConfiguration{}):application::decode_chat_configuration(bytes);
+    const auto bytes=policy.blob(0);const auto config=bytes.empty()?std::optional<application::ChatConfiguration>(std::in_place):application::decode_chat_configuration(bytes);
     if(!config)throw StorageFailure(StorageErrorCode::corrupt,"usage policy invalid",SQLITE_CORRUPT);
     if(config->exclude_sysop_statistics&&policy.int64(1)>=policy.int64(2)){
         SqliteStatement save(database,"INSERT INTO sfx_chat_usage_exclusions VALUES(?1)","retain session aggregate exclusion");save.bind(1,request.session_id);save.step();

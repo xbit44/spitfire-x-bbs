@@ -19,8 +19,11 @@ int controlled_send_bytes(Socket socket,const char* data,int size){
 #define send_bytes controlled_send_bytes
 #include "alpha_telnet_stream.hpp"
 #undef send_bytes
+#include <array>
+#include <chrono>
 #include <iostream>
 #include <stdexcept>
+#include <thread>
 
 namespace net=sfx::platform::network;
 namespace app=sfx::application;
@@ -78,6 +81,30 @@ int main(){try{
     check(stream.read_some(64).outcome==app::InteractiveStreamOutcome::timed_out&&stream.ansi_terminal(),"ANSI terminal negotiated through actual stream");
     const std::string input="A"+std::string(1,static_cast<char>(255))+"\r\n";send_all(peer.value,wire(input));
     const auto read=stream.read_some(64);check(read.outcome==app::InteractiveStreamOutcome::completed&&std::string(read.bytes.begin(),read.bytes.end())==input&&inbound==1,"input IAC unquoting and keyboard activity");
+    {
+        app::StreamCallerTerminal terminal(stream);
+        const app::TerminalInputRequest first{"first", "First name: ", 30};
+        const app::TerminalInputRequest last{"last", "Last name: ", 30};
+        const std::array<std::string, 3> endings{"\r", "\r\n", std::string("\r\0", 2)};
+        for(const auto& ending : endings) {
+            send_all(peer.value, "Andy" + ending + "Alt" + ending);
+            check(terminal.read_visible(first).value == "Andy", "first name reads with each Telnet Enter encoding");
+            check(terminal.read_visible(last).value == "Alt", "last name reads with each Telnet Enter encoding");
+            constexpr std::string_view expected = "First name: Andy\r\nLast name: Alt\r\n";
+            check(receive(peer.value, expected.size()) == expected, "both names echo normally");
+        }
+    }
+    send_all(peer.value, "\r");
+    check(stream.read_some(1).bytes == std::vector<std::uint8_t>{'\r'}, "bare CR reaches the prompt immediately");
+    const auto before_padding = inbound;
+    send_all(peer.value, std::string{static_cast<char>(255), static_cast<char>(241), '\0'});
+    check(stream.read_some(1).outcome == app::InteractiveStreamOutcome::timed_out &&
+        stream.read_some(1).outcome == app::InteractiveStreamOutcome::timed_out &&
+        stream.read_some(1).outcome == app::InteractiveStreamOutcome::timed_out && inbound == before_padding,
+        "split CR padding is ignored even across a Telnet command and adds no keyboard activity");
+    send_all(peer.value, std::string("X\0", 2));
+    check(stream.read_some(1).bytes == std::vector<std::uint8_t>{'X'} &&
+        stream.read_some(1).bytes == std::vector<std::uint8_t>{0}, "a standalone NUL is preserved");
     const auto activity_before=inbound;
     send_all(peer.value,option(251).substr(0,2));
     check(stream.read_some(64).outcome==app::InteractiveStreamOutcome::timed_out&&net::readable_now(peer.value)==0,"partial option waits for its number");
@@ -86,13 +113,32 @@ int main(){try{
     check(receive(peer.value,6)==option(253)+option(251),"WILL BINARY and DO BINARY receive exact acknowledgments");
     send_all(peer.value,option(251)+option(253));
     check(stream.read_some(64).outcome==app::InteractiveStreamOutcome::timed_out&&net::readable_now(peer.value)==0,"repeated options do not create negotiation loops");
+    send_all(peer.value, std::string("\r\0", 2));
+    check(stream.read_some(1).bytes == std::vector<std::uint8_t>{'\r'} &&
+        stream.read_some(1).bytes == std::vector<std::uint8_t>{0}, "negotiated inbound BINARY preserves CR NUL");
     check(stream.begin_gateway()&&stream.end_gateway(),"negotiated BINARY does not acquire transfer lease or block Doors");
     send_all(peer.value,option(252)+option(254));
     check(stream.read_some(64).outcome==app::InteractiveStreamOutcome::timed_out&&receive(peer.value,6)==option(254)+option(252),"WONT and DONT disable the corresponding directions");
     send_all(peer.value,option(252)+option(254));
     check(stream.read_some(64).outcome==app::InteractiveStreamOutcome::timed_out&&net::readable_now(peer.value)==0,"repeated negative acknowledgments are silent");
+    send_all(peer.value, "\r");
+    check(stream.read_some(1).bytes == std::vector<std::uint8_t>{'\r'} && stream.begin_gateway(),
+        "Door gateway can start after a text Enter");
+    send_all(peer.value, std::string("\0\r\0", 3));
+    for(const auto byte : std::array<std::uint8_t, 3>{0, '\r', 0}) {
+        const auto deadline = net::monotonic_millis() + 2000;
+        auto result = stream.read_ready(1);
+        while (result.outcome == app::InteractiveStreamOutcome::timed_out && net::monotonic_millis() < deadline) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            result = stream.read_ready(1);
+        }
+        check(result.outcome == app::InteractiveStreamOutcome::completed &&
+            result.bytes == std::vector<std::uint8_t>{byte}, "Door payload preserves binary bytes without negotiation");
+    }
+    check(stream.end_gateway(), "return from Door payload to text input");
     check(stream.message_binary_mode(true)&&!stream.begin_gateway(),"binary transfer owns transport exclusively");
     std::string binary;for(unsigned n=0;n<256;++n)binary+=static_cast<char>(n);
+    binary.append("\r\0", 2);
     const auto sent=stream.write_some(binary);check(sent.outcome==app::InteractiveStreamOutcome::completed&&sent.bytes_written==binary.size(),"all byte values transfer with logical count");
     check(receive(peer.value,wire(binary).size())==wire(binary),"binary output preserved including NUL and IAC");
     send_all(peer.value,wire(binary));const auto binary_read=stream.read_some(4096);

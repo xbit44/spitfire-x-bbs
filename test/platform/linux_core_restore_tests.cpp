@@ -7,6 +7,7 @@
 #include "sfx/platform/linux/bbs_time_zone_provider.hpp"
 #include "sfx/adapters/storage/sqlite_storage.hpp"
 #include "../../src/apps/product_version.h"
+#include <algorithm>
 #include <array>
 #include <fstream>
 #include <iostream>

@@ -1,4 +1,5 @@
 #include "linux_caller_registry.hpp"
+#include <algorithm>
 #include <chrono>
 #include <stdexcept>
 #include <vector>

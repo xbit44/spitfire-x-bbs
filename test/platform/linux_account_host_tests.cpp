@@ -1,5 +1,6 @@
 #include "linux_runtime_host.hpp"
 #include "sfx/platform/linux/bbs_time_zone_provider.hpp"
+#include <algorithm>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <poll.h>

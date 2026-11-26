@@ -1,5 +1,6 @@
 #include "linux_runtime_host.hpp"
 #include "sfx/platform/linux/bbs_time_zone_provider.hpp"
+#include <algorithm>
 #include <unistd.h>
 #include <iostream>
 #include <sys/socket.h>

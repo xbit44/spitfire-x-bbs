@@ -448,10 +448,6 @@ bool valid_authenticated_caller_ready(
 }
 
 AuthenticatedCallerReadyHandoff::AuthenticatedCallerReadyHandoff(
-    AuthenticatedCallerReady value)
-    : value_(std::move(value)) {}
-
-AuthenticatedCallerReadyHandoff::AuthenticatedCallerReadyHandoff(
     AuthenticatedCallerReadyHandoff&& other) noexcept
     : value_(std::move(other.value_)) {
     other.value_.reset();
@@ -469,7 +465,9 @@ AuthenticatedCallerReadyHandoff& AuthenticatedCallerReadyHandoff::operator=(
 std::optional<AuthenticatedCallerReadyHandoff>
 AuthenticatedCallerReadyHandoff::create(AuthenticatedCallerReady value) {
     if (!valid_authenticated_caller_ready(value)) return std::nullopt;
-    return AuthenticatedCallerReadyHandoff(std::move(value));
+    std::optional<AuthenticatedCallerReadyHandoff> handoff{AuthenticatedCallerReadyHandoff{}};
+    handoff->value_.emplace(std::move(value));
+    return handoff;
 }
 
 std::optional<AuthenticatedCallerReady> AuthenticatedCallerReadyHandoff::take() noexcept {

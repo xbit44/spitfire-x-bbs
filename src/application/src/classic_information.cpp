@@ -170,10 +170,14 @@ BulletinOutcome run_bulletin_session(const MenuSessionPorts& ports,std::optional
                 for(const auto& update:updates)notification_rows.push_back({MenuTextRole::feedback,update});
                 if(!rows(ports,*state,std::move(notification_rows))) return false;
             }
-            if(!feedback.empty() && !rows(ports,*state,{{MenuTextRole::feedback,feedback}})) return false;
+            if(!feedback.empty()) {
+                const MenuTextRow feedback_row{MenuTextRole::feedback,feedback};
+                if(!rows(ports,*state,std::vector<MenuTextRow>(1,feedback_row))) return false;
+            }
             if(ports.notifications && !rows(ports,*state,ports.notifications()))return false;
-            return rows(ports,*state,{{MenuTextRole::prompt,
-                "Bulletin <#>, <L>ist Bulletins, <N>ew Bulletins, < ENTER > To Continue? ",true}}) &&
+            const MenuTextRow prompt_row{MenuTextRole::prompt,
+                "Bulletin <#>, <L>ist Bulletins, <N>ew Bulletins, < ENTER > To Continue? ",true};
+            return rows(ports,*state,std::vector<MenuTextRow>(1,prompt_row)) &&
                 ports.write(state->graphics==GraphicsMode::ansi?menu_text_sgr(state->input_color):std::string{});
         };
         if(!draw()) return BulletinOutcome::failed;

@@ -3,7 +3,7 @@ application::ChatConfiguration config(sqlite3* db){
     SqliteStatement q(db,"SELECT revision,definition FROM sfx_chat_configuration WHERE singleton_id=1","read Chat configuration");
     if(!q.row())file_detail::corrupt();
     const auto bytes=q.blob(1);
-    auto c=bytes.empty()?std::optional<application::ChatConfiguration>(application::ChatConfiguration{}):application::decode_chat_configuration(bytes);
+    auto c=bytes.empty()?std::optional<application::ChatConfiguration>(std::in_place):application::decode_chat_configuration(bytes);
     if(!c||c->revision!=q.int64(0))file_detail::corrupt();
     return *c;
 }

@@ -4,10 +4,10 @@ Spitfire-X is a bulletin board system for Windows and Linux, inspired by Mike Wo
 
 ## Download the first public beta
 
-Get the Windows x86 ZIP or Linux x86-64 TAR and its SHA-256 checksum from the [v1.0.0b1 release](../../releases/tag/v1.0.0b1). Follow the README in your download to install or upgrade. Windows uses a desktop Control Panel and SFXConfig. Linux uses browser-based Sysop controls.
+Get the Windows x86 ZIP or Linux x86-64 TAR and its SHA-256 checksum from the [v1.0.0b2 release](../../releases/tag/v1.0.0b2). Follow the README in your download to install or upgrade. Windows uses a desktop Control Panel and SFXConfig. Linux uses browser-based Sysop controls.
 
 Use the matching Full Source archive from the release to build the packages. See the [build guide](distribution/BUILDING.txt), [third-party notices](distribution/ThirdParty/) and [MIT license](LICENSE).
 
-![Spitfire-X BBS v1.0.0b1 Windows Control Panel](screenshots/windows-control-panel-v1.0.0b1.png)
+![Spitfire-X BBS v1.0.0b2 Windows Control Panel](screenshots/windows-control-panel-v1.0.0b2.png)
 
 Maintained by [xbit ops](https://github.com/xbit44).

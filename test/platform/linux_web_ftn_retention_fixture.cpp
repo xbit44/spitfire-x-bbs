@@ -4,6 +4,7 @@
 #include "sfx/platform/linux/bbs_time_zone_provider.hpp"
 #include "sfx/platform/linux/ftn_native_toss.hpp"
 #include "sfx/platform/linux/ftn_secrets.hpp"
+#include <algorithm>
 #include <sodium.h>
 #include <sys/stat.h>
 #include <unistd.h>

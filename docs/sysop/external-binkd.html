@@ -3,7 +3,7 @@
 <head>
  <meta charset="utf-8">
  <meta name="viewport" content="width=device-width, initial-scale=1">
- <title>External BinkD setup and daily use (v1.0.0b1 test build) | Spitfire-X Sysop Wiki</title>
+ <title>External BinkD setup and daily use (v1.0.0b2 test build) | Spitfire-X Sysop Wiki</title>
  <link rel="stylesheet" href="assets/sysop.css">
 </head>
 <body>
@@ -33,10 +33,10 @@
  <p class="sidebar-note">Included with your BBS.<br>Read and search offline.</p>
 </aside>
 <main id="main" tabindex="-1">
- <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">v1.0.0b1 test build</span></div>
+ <div class="page-meta"><span>Spitfire-X documentation</span><span class="status">v1.0.0b2 test build</span></div>
  <article data-search="article">
-<h1>External BinkD setup and daily use (v1.0.0b1 test build)</h1>
-<div class="notice">External BinkD support is included in the 1.0.0b1 test packages. Stock BinkD is installed separately.</div>
+<h1>External BinkD setup and daily use (v1.0.0b2 test build)</h1>
+<div class="notice">External BinkD support is included in the 1.0.0b2 test packages. Stock BinkD is installed separately.</div>
 <h2>In this guide</h2><ul class="article-links"><li><a href="#what-binkd-and-sfx-do">What BinkD and SFX do</a></li><li><a href="#choose-the-mailer">Choose the mailer</a></li><li><a href="#place-or-update-the-optional-helper">Place or update the optional helper</a></li><li><a href="#prepare-your-profile">Prepare your profile</a></li><li><a href="#start-from-the-sfx-folder">Start from the SFX folder</a></li><li><a href="#daily-use-and-profile-changes">Daily use and profile changes</a></li><li><a href="#private-binkd-log">Private BinkD log</a></li><li><a href="#areafix-attachments-and-retained-mail">AreaFix, attachments and retained mail</a></li><li><a href="#backup-restore-and-moving-the-board">Backup, restore and moving the board</a></li></ul>
 <h2 id="what-binkd-and-sfx-do">What BinkD and SFX do</h2>
 <p>The setup uses ONE stock BinkD instance and ONE configuration profile for all your FTN networks. Each network has its own domain, addresses and outbound folder.</p>
@@ -50,9 +50,9 @@
 <p>Native listener endpoints and the setup wizard&#x27;s hub host, port, session password, queued-mail contact and timer values do not control External mode. Their saved Native values remain for later use. BinkD uses the host, port, session password and calling rules in its own profile. SFX still uses separate packet, AreaFix and TIC passwords; do not clear them just because you changed mailers. Routes and Hold mail keep their rules.</p>
 <p>Set Up a Network... opens the network setup steps. Supply the network and hub FTN identities, choose echoes and their permissions, then review before saving. In External mode the wizard does not supply BinkD&#x27;s connection settings. Keep the manual shared profile consistent with the saved networks.</p>
 <h2 id="place-or-update-the-optional-helper">Place or update the optional helper</h2>
-<p>Use the helper supplied with the matching v1.0.0b1 test package; adding it alone does not update the Runtime or configuration programs. Install stock BinkD separately.</p>
-<p>The Windows v1.0.0b1 test ZIP includes Optional/SFXBinkD/SFXBinkD.exe as an optional companion, with PLACEMENT-AND-BUILD.txt beside it. Place it manually at &lt;SFX folder&gt;\Bin\SFXBinkD.exe; Setup does not install this helper automatically. Stop independent BinkD before replacing it. If the file already exists, compare its checksum with the documented old/current helper. Do not overwrite an unknown file. Keep a recognized old copy separately until the update is checked. Preserve all FTN and Config data.</p>
-<p>The fresh Linux v1.0.0b1 test package installs bin/sfxbinkd through its normal install/update path, with executable permission for the normal SFX owner. Keep access private to that owner, stop BinkD before updating it, and preserve <code>ftn</code> and <code>config</code>.</p>
+<p>Use the helper supplied with the matching v1.0.0b2 test package; adding it alone does not update the Runtime or configuration programs. Install stock BinkD separately.</p>
+<p>The Windows v1.0.0b2 test ZIP includes Optional/SFXBinkD/SFXBinkD.exe as an optional companion, with PLACEMENT-AND-BUILD.txt beside it. Place it manually at &lt;SFX folder&gt;\Bin\SFXBinkD.exe; Setup does not install this helper automatically. Stop independent BinkD before replacing it. If the file already exists, compare its checksum with the documented old/current helper. Do not overwrite an unknown file. Keep a recognized old copy separately until the update is checked. Preserve all FTN and Config data.</p>
+<p>The fresh Linux v1.0.0b2 test package installs bin/sfxbinkd through its normal install/update path, with executable permission for the normal SFX owner. Keep access private to that owner, stop BinkD before updating it, and preserve <code>ftn</code> and <code>config</code>.</p>
 <h2 id="prepare-your-profile">Prepare your profile</h2>
 <p>Create the source profile manually under <code>FTN/External</code> on Windows or <code>ftn/external</code> on fresh Linux. The helper does not create its password-bearing contents.</p>
 <p>Use your normal Sysop account. On Windows, keep the FTN folder private with its existing SFX access permissions; do not prepare the profile as LocalSystem. On Linux, your account must own FTN with mode 0700 and the source profile with mode 0600. Use ordinary files and folders, not links.</p>

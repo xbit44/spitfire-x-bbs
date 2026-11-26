@@ -1373,7 +1373,7 @@ private:
             return result;
         }
         lease_owner_ = AccountSessionAdmissionLeaseOwner::create(
-            std::move(*admitted.lease), dependencies_.admission, dependencies_.cleanup_health);
+            *admitted.lease, dependencies_.admission, dependencies_.cleanup_health);
         if (!lease_owner_.has_value()) {
             return finish_after_generic(Phase3aWorkflowCode::internal_failure);
         }

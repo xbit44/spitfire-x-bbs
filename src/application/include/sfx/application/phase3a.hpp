@@ -354,7 +354,7 @@ public:
     bool consumed() const noexcept;
 
 private:
-    explicit AuthenticatedCallerReadyHandoff(AuthenticatedCallerReady value);
+    AuthenticatedCallerReadyHandoff() = default;
 
     std::optional<AuthenticatedCallerReady> value_;
 };

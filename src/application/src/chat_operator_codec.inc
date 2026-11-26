@@ -8,7 +8,13 @@ struct ChatWireWriter {
 struct ChatWireReader {
     const std::vector<std::uint8_t>& b;std::size_t p{};bool ok{true};
     std::uint64_t n(unsigned bytes){if(bytes>b.size()-p){ok=false;return 0;}std::uint64_t out{};for(unsigned i=0;i<bytes;++i)out|=static_cast<std::uint64_t>(b[p++])<<(i*8);return out;}
-    Identifier128 id(){Identifier128 out;for(auto& c:out.bytes)c=static_cast<std::uint8_t>(n(1));return out;}
+    Identifier128 id(){
+        Identifier128 out{};
+        if(out.bytes.size()>b.size()-p){ok=false;return {};}
+        std::copy_n(b.begin()+p,out.bytes.size(),out.bytes.begin());
+        p+=out.bytes.size();
+        return out;
+    }
     bool flag(){auto value=n(1);if(value>1)ok=false;return value==1;}
     std::string text(std::size_t maximum){const auto len=n(2);if(len>maximum||len>b.size()-p){ok=false;return {};}
         std::string out(b.begin()+p,b.begin()+p+static_cast<std::size_t>(len));p+=static_cast<std::size_t>(len);if(chat_safe_text(out,maximum)!=out)ok=false;return out;}

@@ -1,6 +1,6 @@
 SPITFIRE-X BBS WINDOWS SOFTWARE CREDITS AND SOURCE
 
-This is the 1.0.0b1 RC2 Windows test build. The Windows programs are
+This is the 1.0.0b2 Windows public beta. The Windows programs are
 unsigned. Check the supplied archive SHA-256 before running Setup.
 
 Original SFX source is under the MIT license in SFX-LICENSE.txt beside this
@@ -10,7 +10,7 @@ replace those terms or put third-party work under SFX's license.
 
 The matching full SFX source companion is:
 
-  SFX-1.0.0b1-rc2-Full-Source-20261124-r1.zip
+  SFX-1.0.0b2-Full-Source.zip
 
 Tools/sexyz.exe, Tools/SFXFileTransfer.exe and Tools/SFXQWKTransfer.exe
 are separate GPL-2.0-or-later programs based on SEXYZ by Rob Swindell and

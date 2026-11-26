@@ -1,11 +1,17 @@
 #include "sfx/application/chat_notice.hpp"
+#include <algorithm>
 namespace sfx::application {
 std::vector<std::uint8_t> encode_chat_notice(const ChatNoticeRequest& r){
     if(r.text.empty()||r.text.size()>512||chat_safe_text(r.text)!=r.text||
        (r.target&&(!r.target->valid()||r.room))||(!r.target&&r.override_dnd))return {};
     std::vector<std::uint8_t> b{1,static_cast<std::uint8_t>(r.target.has_value()),static_cast<std::uint8_t>(r.override_dnd)};
     const auto n=[&](std::uint64_t v,unsigned bytes){for(unsigned i=0;i<bytes;++i)b.push_back(static_cast<std::uint8_t>(v>>(8*i)));};
-    n(r.room,2);if(r.target){b.insert(b.end(),r.target->runtime_epoch.bytes.begin(),r.target->runtime_epoch.bytes.end());n(r.target->node,2);n(r.target->generation,8);}
+    n(r.room,2);
+    if(r.target){
+        for(const auto byte : r.target->runtime_epoch.bytes) b.push_back(byte);
+        n(r.target->node,2);
+        n(r.target->generation,8);
+    }
     n(r.text.size(),2);b.insert(b.end(),r.text.begin(),r.text.end());return b;
 }
 std::optional<ChatNoticeRequest> decode_chat_notice(const std::vector<std::uint8_t>& b){
