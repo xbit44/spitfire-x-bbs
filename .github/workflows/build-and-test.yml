@@ -20,6 +20,12 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Test the Linux installer
+        shell: bash
+        run: |
+          scratch="$(mktemp -d "$RUNNER_TEMP/sfx-installer.XXXXXX")"
+          python3 -B test/apps/linux_installer_tests.py distribution/linux/install.py "$scratch/board"
+          python3 -B test/apps/linux_installer_cli_tests.py distribution/linux/install.py
       - name: Configure
         # GCC flags an existing copy of a small pair in ftn_secrets.cpp.
         run: cmake --preset linux-gcc -DCMAKE_CXX_FLAGS=-Wno-error=range-loop-construct
