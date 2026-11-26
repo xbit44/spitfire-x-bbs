@@ -58,8 +58,8 @@ jobs:
           if ($nasm) {
             $nasmPath = $nasm.Source
           } else {
-            choco install nasm --yes --no-progress
-            $nasmPath = Join-Path $env:ChocolateyInstall 'bin/nasm.exe'
+            choco install nasm --version=3.2.0 --yes --no-progress
+            $nasmPath = Join-Path $env:ProgramFiles 'NASM/nasm.exe'
           }
           if (!(Test-Path -LiteralPath $nasmPath -PathType Leaf)) {
             throw 'NASM is required to build OpenSSL.'
