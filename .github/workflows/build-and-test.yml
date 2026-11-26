@@ -1,0 +1,73 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux x86-64 build and smoke tests
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Configure
+        run: cmake --preset linux-gcc
+      - name: Build applications and smoke tests
+        run: |
+          cmake --build --preset linux-gcc --parallel 4 --target \
+            SFXWeb SFXRuntime SFXHostLookup SFXBinkD SFXFileTransfer SFXQWKTransfer \
+            sfx_file_presentation_tests sfx_file_transfer_completion_tests \
+            sfx_operational_configuration_tests sfx_scheduler_tests sfx_file_session_tests
+      - name: Run smoke tests
+        shell: bash
+        run: |
+          ctest --preset linux-gcc --output-on-failure --no-tests=error \
+            -R '^sfx\.unit\.(file_presentation|file_transfer_completion|operational_configuration|scheduler)$'
+          scratch="$(mktemp -d "$RUNNER_TEMP/sfx-file-session.XXXXXX")"
+          build/linux-gcc/sfx_file_session_tests "$scratch/board"
+
+  windows:
+    name: Windows x86 build
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: windows-2022
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Configure
+        shell: pwsh
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          $nativePerl = Get-Command perl.exe -CommandType Application -All |
+            Where-Object { (& $_.Source -e 'print $^O;') -eq 'MSWin32' } |
+            Select-Object -First 1
+          if (!$nativePerl) { throw 'Native Windows Perl is required to build OpenSSL.' }
+
+          $nasm = Get-Command nasm.exe -CommandType Application -ErrorAction SilentlyContinue
+          if ($nasm) {
+            $nasmPath = $nasm.Source
+          } else {
+            choco install nasm --yes --no-progress
+            $nasmPath = Join-Path $env:ChocolateyInstall 'bin/nasm.exe'
+          }
+          if (!(Test-Path -LiteralPath $nasmPath -PathType Leaf)) {
+            throw 'NASM is required to build OpenSSL.'
+          }
+
+          cmake --preset windows-v143-x86 -A 'Win32,version=10.0.26100.0' `
+            -DCMAKE_SUPPRESS_REGENERATION=ON `
+            "-DSFX_OPENSSL_PERL_EXECUTABLE=$($nativePerl.Source)" `
+            "-DSFX_OPENSSL_NASM_EXECUTABLE=$nasmPath"
+      - name: Build Runtime, Control Panel, and SFXConfig
+        run: cmake --build --preset windows-v143-x86 --parallel 4 --target SFXRuntime SFXControlPanel SFXConfig -- /nr:false
