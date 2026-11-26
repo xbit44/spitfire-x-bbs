@@ -21,7 +21,8 @@ jobs:
         with:
           persist-credentials: false
       - name: Configure
-        run: cmake --preset linux-gcc
+        # GCC flags an existing copy of a small pair in ftn_secrets.cpp.
+        run: cmake --preset linux-gcc -DCMAKE_CXX_FLAGS=-Wno-error=range-loop-construct
       - name: Build applications and smoke tests
         run: |
           cmake --build --preset linux-gcc --parallel 4 --target \
