@@ -25,8 +25,8 @@ void* operator new(std::size_t size) {
     throw std::bad_alloc();
 }
 void* operator new[](std::size_t size) { return ::operator new(size); }
-#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ == 16
-// GCC 16 diagnoses the inlined free even though this fixture replaces new with malloc.
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 11
+// GCC 11 and newer can warn about the inlined free in this malloc-backed allocator.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmismatched-new-delete"
 #endif
@@ -34,7 +34,7 @@ void operator delete(void* value) noexcept { std::free(value); }
 void operator delete[](void* value) noexcept { std::free(value); }
 void operator delete(void* value, std::size_t) noexcept { std::free(value); }
 void operator delete[](void* value, std::size_t) noexcept { std::free(value); }
-#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ == 16
+#if defined(__GNUC__) && !defined(__clang__) && __GNUC__ >= 11
 #pragma GCC diagnostic pop
 #endif
 
