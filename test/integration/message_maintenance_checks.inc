@@ -18,7 +18,7 @@ void maintenance_migration_checks(const std::filesystem::path& root,sfx::test::F
         check(scalar(file,"SELECT maximum_age_days FROM sfx_unread_mail_retention")==365,"missing unread policy seeded365");
         check(scalar(file,"SELECT count(*) FROM sfx_message_maintenance_runs")==0 && scalar(file,"SELECT count(*) FROM sfx_message_permanent")==0,"seeding runs no cleanup and assigns no automatic Permanent");
         check(current.shutdown().succeeded() && current.start().succeeded() && current.shutdown().succeeded(),"restart idempotent without cleanup");
-        check(scalar(file,"SELECT count(*) FROM sfx_schema_migrations")==30 && scalar(file,"SELECT count(*) FROM sfx_local_messages")==2,"thirty ledger entries with frozen predecessor and old bodies retained");
+        check(scalar(file,"SELECT count(*) FROM sfx_schema_migrations")==sfx::test::shipping_migration_count && scalar(file,"SELECT count(*) FROM sfx_local_messages")==2,"the full migration ledger with frozen predecessor and old bodies retained");
     }
 }
 

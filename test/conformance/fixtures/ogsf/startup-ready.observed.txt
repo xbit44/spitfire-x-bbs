@@ -1,0 +1,5 @@
+EVIDENCE: research/ogsf/STARTUP_NODE_AND_SYSOP.md
+CLASSIFICATION: DOCUMENTED; runtime presentation partial
+
+Spitfire ready for use
+

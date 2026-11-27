@@ -1,6 +1,7 @@
 #include "sfx/adapters/storage/sqlite_storage.hpp"
 #include "sfx/application/account_storage.hpp"
 #include "sfx/application/local_account_administration.hpp"
+#include "sfx/test/shipping_schema.hpp"
 #include "sfx/test/account_storage_fakes.hpp"
 #include "sfx/test/foundation_fakes.hpp"
 #include "sfx/test/storage_fakes.hpp"
@@ -194,9 +195,9 @@ void test_production_migration_and_interrupted_bootstrap(const std::filesystem::
     test::FakeStoragePathPolicy policy;
     storage::SqliteStorage database(settings_for(directory), policy, storage::sfx_storage_migrations());
     require(database.start().succeeded(), "production migration applies");
-require(database.health().schema_version == 27, "active shipping SFX schema includes classic information");
+require(database.health().schema_version == sfx::test::shipping_schema_version, "active shipping SFX schema includes classic information");
     const auto migrations = storage::sfx_storage_migrations();
-    require(migrations.size() == 27 && migrations.back().version == 27 && migrations[0].version == 1 &&
+    require(migrations.size() == sfx::test::shipping_migration_count && migrations.back().version == sfx::test::shipping_schema_version && migrations[0].version == 1 &&
             migrations[0].name == "sfx-v1-initial-persistence-baseline" &&
             migrations[0].sql.size() == 25'849U &&
             migrations[0].content_sha256 == "c9ed2791ec70d18cb69696f837d27cc74f931d7c3253247768b7245bf0864806",

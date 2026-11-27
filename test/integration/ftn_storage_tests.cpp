@@ -16,14 +16,14 @@ void migration(const std::filesystem::path& root,sfx::test::FakeStoragePathPolic
         {storage::SqliteStorage failed(s,paths);check(!failed.start(),"migration boundary interruption reported");}
         const auto version=scalar(s.data_directory/"SFX.DB","PRAGMA user_version");
         check(version==(std::string_view(point)=="after-ftn-migration-commit"?21:20),"upgrade all committed or all rolled back");
-        s.bootstrap_boundary_hook={};storage::SqliteStorage retry(s,paths);check(retry.start().succeeded()&&retry.health().schema_version==27,"interrupted upgrade safely retries through current schema27");check(retry.shutdown().succeeded(),"retry stopped");
+        s.bootstrap_boundary_hook={};storage::SqliteStorage retry(s,paths);check(retry.start().succeeded()&&retry.health().schema_version==sfx::test::shipping_schema_version,"interrupted upgrade safely retries through current shipping schema");check(retry.shutdown().succeeded(),"retry stopped");
     }
 }
 }
 int main(int argc,char** argv){try{
     check(argc==2,"fresh fixture directory argument required");const std::filesystem::path root=argv[1];check(!std::filesystem::exists(root),"preserve prior fixture evidence");
     sfx::test::FakeStoragePathPolicy paths;auto s=settings(root/"database");
-    {storage::SqliteStorage fresh(s,paths);check(fresh.start().succeeded()&&fresh.health().schema_version==27,"fresh current schema27");check(fresh.shutdown().succeeded(),"fresh stopped for synthetic owner fixture");}
+    {storage::SqliteStorage fresh(s,paths);check(fresh.start().succeeded()&&fresh.health().schema_version==sfx::test::shipping_schema_version,"fresh current shipping schema");check(fresh.shutdown().succeeded(),"fresh stopped for synthetic owner fixture");}
     seed(s.data_directory/"SFX.DB");storage::SqliteStorage db(s,paths);check(db.start().succeeded(),"real SQLite writer ready");const app::MessageConfigurationActor owner{true,{}};
     auto query=db.ftn_configuration(owner);check(query&&query.value&&query.value->revision==1&&query.value->networks.empty(),"default empty typed FTN catalog");
     check(!db.ftn_configuration({false,app::MessageActor{id(2),2,1,1}}),"ordinary caller cannot inspect FTN credentials");

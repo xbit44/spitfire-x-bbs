@@ -1,4 +1,5 @@
 #include "sfx/adapters/storage/sqlite_storage.hpp"
+#include "sfx/test/shipping_schema.hpp"
 #include "sfx/test/storage_fakes.hpp"
 #include "sqlite_internal.hpp"
 #include "sqlite_sfx_baseline.hpp"
@@ -41,7 +42,7 @@ int main() {
         sfx::test::FakeStoragePathPolicy paths;
         auto options=settings(root/"fresh");
         db::SqliteStorage storage(options,paths);
-check(storage.start().succeeded() && storage.health().schema_version==27,"fresh current shipping schema");
+check(storage.start().succeeded() && storage.health().schema_version==sfx::test::shipping_schema_version,"fresh current shipping schema");
         app::CredentialEnvelope credential; credential.envelope_format_version=1; credential.scheme_identifier="menu-fixture";
         credential.parameter_encoding_version=1; credential.canonical_parameters={1}; credential.salt={1,2};
         credential.verifier={3,4}; credential.created_utc_seconds=1788990000;
@@ -109,7 +110,7 @@ check(storage.start().succeeded() && storage.health().schema_version==27,"fresh 
                     "failed migration preserves existing account");
             }
             migration_options.bootstrap_boundary_hook={}; db::SqliteStorage upgraded(migration_options,paths);
-check(upgraded.start().succeeded() && upgraded.health().schema_version==27,"retry upgrade succeeds");
+check(upgraded.start().succeeded() && upgraded.health().schema_version==sfx::test::shipping_schema_version,"retry upgrade succeeds");
             const auto preference=upgraded.menu_preferences(1);
             check(preference && preference.value->revision==1 && preference.value->preferences.color==0 &&
                 !preference.value->preferences.hotkey,"legacy account backfill retains Off rather than new-account default");

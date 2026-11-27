@@ -1,5 +1,6 @@
 #include "sfx/adapters/storage/sqlite_storage.hpp"
 #include "sfx/application/storage.hpp"
+#include "sfx/test/shipping_schema.hpp"
 #include "sfx/test/storage_fakes.hpp"
 
 #include "sqlite_internal.hpp"
@@ -166,14 +167,14 @@ void test_lifecycle_migration_backup_restore(const std::filesystem::path& root) 
     require(database.start().succeeded(), "storage lifecycle starts");
     const app::StorageHealth ready = database.health();
     require(ready.state == app::StorageRuntimeState::ready, "storage reports ready");
-    require(ready.schema_version == 27, "Section14 current shipping migration version published");
+    require(ready.schema_version == sfx::test::shipping_schema_version, "Section14 current shipping migration version published");
     require(ready.engine_version == "3.53.4", "health reports pinned engine");
     require(database.database_path().filename() == "SFX.DB", "single physical database name");
     require(database.checkpoint().succeeded(), "manual passive checkpoint");
 
     const std::filesystem::path backup_file = std::filesystem::absolute(backups / "qualification.db");
     const storage::SqliteBackupResult backup = database.create_backup(backup_file);
-    require(backup.status && backup.database_bytes > 0 && backup.schema_version == 27, "live backup succeeds");
+    require(backup.status && backup.database_bytes > 0 && backup.schema_version == sfx::test::shipping_schema_version, "live backup succeeds");
     require(database.validate_backup(backup_file).succeeded(), "backup validates while storage is active");
     require(database.restore_backup(backup_file).code == app::StorageErrorCode::shutting_down,
             "active restore rejected");
@@ -182,7 +183,7 @@ void test_lifecycle_migration_backup_restore(const std::filesystem::path& root) 
     require(database.restore_backup(backup_file).succeeded(), "offline restore succeeds");
     require(std::filesystem::exists(data / "SFX.DB.pre-restore"), "restore preserves previous database");
     require(database.start().succeeded(), "restored database starts");
-    require(database.health().schema_version == 27, "restored shipping schema version retained");
+    require(database.health().schema_version == sfx::test::shipping_schema_version, "restored shipping schema version retained");
     require(database.shutdown().succeeded(), "restored database shuts down");
 
     const storage::SqliteBackupResult duplicate = [&] {
@@ -329,7 +330,7 @@ void test_restore_after_startup_failure(const std::filesystem::path& root) {
     require(target.health().state == app::StorageRuntimeState::stopped,
             "validated restore clears sticky recovery state");
     require(target.start().succeeded(), "restored storage restarts on same object");
-    require(target.health().schema_version == 27, "restored shipping schema version is active");
+    require(target.health().schema_version == sfx::test::shipping_schema_version, "restored shipping schema version is active");
     require(target.shutdown().succeeded(), "restored storage stops cleanly");
 }
 

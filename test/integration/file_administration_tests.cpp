@@ -1,3 +1,4 @@
+#include "sfx/test/shipping_schema.hpp"
 #include "sfx/application/chat.hpp"
 // Owned native fixtures, not an installed owner relay or actual File Manager UI.
 #define main retained_file_manager_administration_main
@@ -84,7 +85,7 @@ int main(int argc,char** argv){try{
     read_request={};read_request.kind=app::FileManagementQueryKind::imports;read=reads.snapshot(read_request);check(read.code==app::LocalAccountResultCode::ok&&read.pending.size()==12&&read.pending_next.valid()&&app::decode_file_management_read_snapshot(app::encode_file_management_read_snapshot(read)).has_value(),"actual journal page limited to12 with valid continuation");read_request.pending_after=read.pending_next;const auto last_page=reads.snapshot(read_request);check(last_page.code==app::LocalAccountResultCode::ok&&last_page.pending.size()==1&&!last_page.pending_next.valid()&&last_page.pending[0].operation==pending_ids.back(),"next journal page returns remaining exact intent once");
     native::WindowsFileManager unchanged(db,{true,{}},install,sid);for(const auto operation:pending_ids)check(unchanged.cancel_import_unchanged(operation).cancelled,"explicit test-intent cancellation verifies unchanged real source");
     read=reads.snapshot(read_request);check(read.code==app::LocalAccountResultCode::ok&&read.pending.empty()&&!external.absent("duplicate.txt"),"journal reads/cancellations preserve actual source payload");
-    const auto current_schema=db.verified_schema_version(database);check(current_schema&&current_schema.value&&*current_schema.value==27,"read-only preflight exposes exact current schema27 version");
+    const auto current_schema=db.verified_schema_version(database);check(current_schema&&current_schema.value&&*current_schema.value==sfx::test::shipping_schema_version,"read-only preflight exposes exact current shipping schema version");
     const auto predecessor=root/L"predecessor";ins::create_directory(predecessor,security.get());auto old_settings=settings;old_settings.data_directory=predecessor;auto plan=storage::sfx_storage_migrations();plan.resize(14);
     {storage::SqliteStorage old(old_settings,paths,plan);check(old.start().succeeded()&&old.shutdown().succeeded(),"new owned production-lineage14 fixture, not a Setup upgrade claim");}
     {storage::SqliteStorage verifier(old_settings,paths);const auto prior=verifier.verified_schema_version(predecessor/L"SFX.DB");check(prior&&prior.value&&*prior.value==14&&scalar(predecessor/L"SFX.DB","PRAGMA user_version")==14,"pre-start version check identifies older approved schema without silently migrating it");check(!verifier.verified_schema_version(predecessor/L"NeverCreated.DB")&&!std::filesystem::exists(predecessor/L"NeverCreated.DB"),"read-only preflight never creates a missing database");}

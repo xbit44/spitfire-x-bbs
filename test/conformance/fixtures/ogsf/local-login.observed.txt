@@ -1,0 +1,10 @@
+EVIDENCE: research/ogsf/OGSF_LOGIN_NEWUSER_OBSERVATION.md sections 3, 6, 16, and 17
+CLASSIFICATION: OBSERVED prompt fragments; final SFNG post-authentication order follows the owner-locked resolution
+
+Do you want ANSI COLOR GRAPHICS? [y/N]
+Enter your first name:
+Enter your last name:
+Enter your password:
+
+This fixture deliberately omits caller-specific names, counters, optional displays, and unresolved remote/account-state variants.
+

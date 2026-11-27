@@ -1,0 +1,7 @@
+@CLS@<<< Your Info >>>
+
+your alias:          @ALIAS|L25@
+your sec level:      @SLEVEL|R3@
+time left today:     @TIMELEFT:HMS@
+@PAUSE@
+

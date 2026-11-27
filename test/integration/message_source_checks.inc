@@ -14,10 +14,10 @@ void source_migration_checks(const std::filesystem::path& root,sfx::test::FakeSt
             check(internal::validate_sfx_shipping_database(c.get(),true),"source failure retains exact known manifest");
             check(c.scalar_int64("PRAGMA user_version","source atomicity")== (std::string_view(point)=="after-message-source-migration-commit"?12:11),"source migration atomic");}
         s.bootstrap_boundary_hook={};db::SqliteStorage current(s,policy);
-        check(current.start().succeeded() && current.health().schema_version==30,"source upgrade retry once to current shipping lineage");
+        check(current.start().succeeded() && current.health().schema_version==sfx::test::shipping_schema_version,"source upgrade retry once to current shipping lineage");
         check(scalar(file,"SELECT count(*) FROM sfx_message_sources")==0 && scalar(file,"SELECT count(*) FROM sfx_local_messages")==1,"legacy message retained without fake source backfill");
         check(current.shutdown().succeeded() && current.validate_backup(backup).succeeded() && current.restore_backup(backup).succeeded() && current.start().succeeded(),"v11 source backup restore remigrates");
-        check(scalar(file,"SELECT count(*) FROM sfx_local_messages")==1 && scalar(file,"SELECT count(*) FROM sfx_message_commit_receipts")==1 && scalar(file,"SELECT count(*) FROM sfx_schema_migrations")==30,"legacy message/receipt and all thirty migrations retained");
+        check(scalar(file,"SELECT count(*) FROM sfx_local_messages")==1 && scalar(file,"SELECT count(*) FROM sfx_message_commit_receipts")==1 && scalar(file,"SELECT count(*) FROM sfx_schema_migrations")==sfx::test::shipping_migration_count,"legacy message/receipt and all shipping migrations retained");
         check(current.shutdown().succeeded(),"source migration fixture stopped");
     }
 }
