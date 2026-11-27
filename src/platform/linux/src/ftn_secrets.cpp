@@ -33,7 +33,7 @@ std::optional<application::RloginSecret> unprotect_ftn_secret(std::string_view i
 bool valid_ftn_protected_credentials(std::string_view installation,const application::FtnConfiguration& configuration){
     for(const auto& link:configuration.links){
         const auto& p=link.credentials;
-        for(const auto entry:{std::pair<FtnCredentialKind,const std::vector<std::uint8_t>*>{FtnCredentialKind::session,&p.session},{FtnCredentialKind::packet,&p.packet},{FtnCredentialKind::areafix,&p.areafix},{FtnCredentialKind::tic,&p.tic}})
+        for(const auto& entry:{std::pair<FtnCredentialKind,const std::vector<std::uint8_t>*>{FtnCredentialKind::session,&p.session},{FtnCredentialKind::packet,&p.packet},{FtnCredentialKind::areafix,&p.areafix},{FtnCredentialKind::tic,&p.tic}})
             if(!entry.second->empty()&&!unprotect_ftn_secret(installation,link.network,link.code,entry.first,*entry.second))return false;
     }
     return true;
