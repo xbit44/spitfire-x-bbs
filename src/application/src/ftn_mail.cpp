@@ -25,10 +25,29 @@ bool equal_ftn_secret(std::string_view a,std::string_view b)noexcept{
 bool same_ftn_address(const FtnAddress& a,const FtnAddress& b,bool domainless)noexcept{return a.zone==b.zone&&a.net==b.net&&a.node==b.node&&a.point==b.point&&(same(a.domain,b.domain)||(domainless&&(a.domain.empty()||b.domain.empty())));}
 std::optional<FtnPeerMatch> resolve_ftn_peer(const FtnConfiguration& c,const std::vector<FtnAddress>& remote,std::string_view en,std::string_view el){
     if(remote.empty()||remote.size()>64)return {};
+    if(!en.empty()&&!el.empty()) {
+        const auto* selected_network=network(c,en);
+        const auto* selected_link=link(c,{std::string(en),std::string(el)});
+        if(!selected_network||!selected_network->enabled||!selected_link||!selected_link->enabled)return {};
+        bool selected_claim=false;
+        for(const auto& claim:remote) {
+            if(!claimed(*selected_link,claim))continue;
+            // Other advertised addresses can belong to other networks. A
+            // single claim matching two links still cannot identify a peer.
+            for(const auto& other:c.links) {
+                if(&other==selected_link||!other.enabled)continue;
+                const auto* other_network=network(c,other.network);
+                if(other_network&&other_network->enabled&&claimed(other,claim))return {};
+            }
+            selected_claim=true;
+        }
+        if(selected_claim)return FtnPeerMatch{selected_network->code,selected_link->code};
+        return {};
+    }
     std::optional<FtnPeerMatch> result;
     for(const auto& l:c.links){const auto* n=network(c,l.network);if(!n||!n->enabled||!l.enabled)continue;
         bool match=false;for(const auto& claim:remote)if(claimed(l,claim))match=true;if(!match)continue;
-        // Reject cross-network/AKA ambiguity before applying an outbound hint.
+        // Inbound sessions must match one enabled link across all claims.
         if(result)return {};
         result=FtnPeerMatch{n->code,l.code};
     }

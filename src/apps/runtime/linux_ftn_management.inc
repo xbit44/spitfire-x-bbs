@@ -25,7 +25,7 @@ application::FtnRuntimeResponse LinuxRuntimeHost::ftn_runtime(const application:
     if(request.action==app::FtnRuntimeAction::poll&&(!ftn_engine_||!ftn_engine_->poll(request.network,request.link,request.include_hold)))out.code=app::FtnConfigurationCode::unavailable;
     if(request.action==app::FtnRuntimeAction::scan&&(!ftn_engine_||!ftn_engine_->scan()))out.code=app::FtnConfigurationCode::unavailable;
     if(ftn_engine_){const auto state=ftn_engine_->snapshot();out.mode=state.mode;out.saved_revision=state.saved_revision;out.active_revision=state.active_revision;out.capable=state.capable;out.paused=state.paused;out.serial_recovery_required=state.serial_recovery_required;out.classic_listening=state.classic_listening;out.tls_listening=state.tls_listening;out.processing=state.processing;out.classic_port=state.classic_port;out.tls_port=state.tls_port;out.diagnostic=state.diagnostic;out.classic_error=state.classic_error;out.tls_error=state.tls_error;out.processing_error=state.processing_error;out.processed_receipts=state.processed_receipts;out.held_receipts=state.held_receipts;out.imported_messages=state.imported_messages;out.replayed_messages=state.replayed_messages;out.scanned_messages=state.scanned_messages;out.activity=state.activity;
-        for(const auto& s:state.sessions){const auto& t=s.transfer;out.sessions.push_back({s.serial,s.active,t.outbound,t.completed,t.peer_verified,t.network,t.link,t.reason,t.received_bytes,t.sent_bytes,t.received_files,t.sent_files,t.send,t.receive,{},{}});}
+        for(const auto& s:state.sessions){const auto& t=s.transfer;out.sessions.push_back({s.serial,s.active,t.outbound,t.completed,t.peer_verified,std::string(binkp_session_network(t)),t.link,t.reason,t.received_bytes,t.sent_bytes,t.received_files,t.sent_files,t.send,t.receive,{},{}});}
     }else out.diagnostic=ftn_initialization_error_;
     if(request.action==app::FtnRuntimeAction::queues){const auto page=store_.storage()->ftn_queue_page({true,{}},request.offset);if(page&&page.value)out.queues=*page.value;else out.code=app::FtnConfigurationCode::unavailable;}
     if(request.action==app::FtnRuntimeAction::connections){const auto c=store_.storage()->ftn_configuration({true,{}});if(!c||!c.value)out.code=app::FtnConfigurationCode::unavailable;else{const auto& links=c.value->links;const auto end=std::min<std::size_t>(links.size(),static_cast<std::size_t>(request.offset)+64);for(auto i=static_cast<std::size_t>(request.offset);i<end;++i){const auto& link=links[i];const auto n=std::find_if(c.value->networks.begin(),c.value->networks.end(),[&](const auto& network){return network.code==link.network;});out.connections.push_back({link.network,link.code,(n!=c.value->networks.end()?n->name:std::string("Unavailable network"))+" / "+link.name,link.enabled&&n!=c.value->networks.end()&&n->enabled,app::ftn_outbound(link)});}out.more_connections=end<links.size();}}
@@ -40,9 +40,15 @@ application::FtnRuntimeResponse LinuxRuntimeHost::ftn_runtime(const application:
     };
     for(auto& s:out.sessions){
         if(catalog&&catalog.value)for(const auto& l:catalog.value->links)if(l.network==s.network&&l.code==s.link){s.peer_address=l.address;s.endpoint=l.host.empty()?std::string{}:l.host+":"+std::to_string(l.port);break;}
-        names(s.network,s.link);
+        auto display=binkp_display_names(catalog&&catalog.value?&*catalog.value:nullptr,s.network,s.link);
+        s.network=std::move(display.first);
+        s.link=std::move(display.second);
     }
-    for(auto& a:out.activity)names(a.network,a.link);
+    for(auto& a:out.activity){
+        auto display=binkp_display_names(catalog&&catalog.value?&*catalog.value:nullptr,a.network,a.link);
+        a.network=std::move(display.first);
+        a.link=std::move(display.second);
+    }
     if(out.queues)for(auto& row:out.queues->rows)names(row.network,row.link);
     return out;
 }

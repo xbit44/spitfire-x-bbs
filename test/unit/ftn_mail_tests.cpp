@@ -16,6 +16,12 @@ void policies(){
     auto duplicate=c.links[0];duplicate.code="OTHER";c.links.push_back(duplicate);check(!resolve_ftn_peer(c,{a},"TEST","PEER"),"ambiguous AKA cannot be resolved by first or hint");c.links.pop_back();
     auto other=c.networks[0];other.code="SECOND";other.address="2:100/1@second";c.networks.push_back(other);duplicate.network="SECOND";duplicate.address="2:100/2@second";c.links.push_back(duplicate);
     check(resolve_ftn_peer(c,{a})->network=="TEST"&&!resolve_ftn_peer(c,{*parse_ftn_address("2:100/2")}),"domain-aware isolation; domainless collision refused");
+    const auto second_aka=*parse_ftn_address("2:100/2@second");
+    const auto outbound=resolve_ftn_peer(c,{second_aka,a},"TEST","PEER");
+    check(outbound&&outbound->network=="TEST"&&outbound->link=="PEER","outbound selection keeps its link when a hub advertises another network");
+    check(!resolve_ftn_peer(c,{second_aka,a}),"inbound claims that match two links remain ambiguous");
+    check(!resolve_ftn_peer(c,{second_aka},"TEST","PEER"),"foreign AKA alone cannot select the outbound link");
+    check(!resolve_ftn_peer(c,{*parse_ftn_address("2:100/2")},"TEST","PEER"),"one claim matching two links remains ambiguous outbound");
     check(ftn_echo_permission(c,"test","peer","files",true,true)&&!ftn_echo_permission(c,"TEST","PEER","OTHER",true,true),"explicit echo rights only");
     c.links[0].enabled=false;check(!ftn_echo_permission(c,"TEST","PEER","FILES",true,true),"revocation checked at use");c.links[0].enabled=true;
     check(ftn_route_link(c,"TEST",a)=="PEER"&&!ftn_route_link(c,"TEST",*parse_ftn_address("2:100/1@test")),"direct configured routing never loops local");

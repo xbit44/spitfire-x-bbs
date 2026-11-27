@@ -76,9 +76,18 @@ private:
     }
     void handshake(app::BinkpFrame& frame){
         const auto command=static_cast<app::BinkpCommand>(frame.id);require(++commands_<=1024,"ftn_session_handshake_command_limit");
-        if(command==app::BinkpCommand::nul){require(app::observe_binkp_information(options_,frame.bytes,true),"ftn_session_option_invalid");return;}
+        if(command==app::BinkpCommand::nul) {
+            require(app::observe_binkp_information(options_,frame.bytes,true),"ftn_session_option_invalid");
+            if(result_.advertised_system.empty()) {
+                result_.advertised_system=app::binkp_advertised_system(frame.bytes);
+                if(!result_.advertised_system.empty())notify();
+            }
+            return;
+        }
         if(command==app::BinkpCommand::adr){
             require(!saw_adr_,"ftn_session_duplicate_adr");const auto addresses=app::parse_binkp_addresses(frame.bytes);require(addresses.has_value(),"ftn_session_adr_invalid");saw_adr_=true;
+            result_.advertised_addresses=*addresses;
+            notify();
             const auto match=app::resolve_ftn_peer(ports_.configuration,*addresses,ports_.dialled_link?ports_.dialled_link->network:std::string_view{},ports_.dialled_link?ports_.dialled_link->link:std::string_view{});
             require(match.has_value()||(!result_.outbound&&!claimed_configured(ports_.configuration,*addresses)&&ports_.configuration.settings.allow_direct_local_netmail),"ftn_session_unknown_or_ambiguous_aka");
             if(match){link_=configured_link(ports_.configuration,*match);require(link_&&(result_.outbound?app::ftn_outbound(*link_):app::ftn_inbound(*link_)),"ftn_session_link_direction_refused");

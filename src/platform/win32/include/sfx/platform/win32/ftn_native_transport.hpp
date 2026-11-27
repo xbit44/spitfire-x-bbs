@@ -17,6 +17,7 @@ public:
         std::uint16_t,const application::FtnLink&,const std::wstring& owner,
         const std::function<bool()>& running);
     ~FtnNativeChannel();
+    std::string peer_ip() const;
     FtnNativeChannel(const FtnNativeChannel&)=delete;
     void handshake(const std::function<bool()>& running);
     FtnReadResult read(std::chrono::milliseconds,const std::function<bool()>& running);
