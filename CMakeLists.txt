@@ -2523,6 +2523,12 @@ if(BUILD_TESTING)
         Threads::Threads
     )
     sfx_configure_test_executable(sfx_phase3a_window6c_tests)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 11)
+        # These test executables replace both new and delete with matched malloc/free.
+        # GCC can report a mismatch at the inlined call sites.
+        target_compile_options(sfx_node_pool_tests PRIVATE -Wno-mismatched-new-delete)
+        target_compile_options(sfx_phase3a_window6c_tests PRIVATE -Wno-mismatched-new-delete)
+    endif()
     add_test(NAME sfx.unit.phase3a_window6c COMMAND sfx_phase3a_window6c_tests)
 
     add_executable(sfx_authentication_kdf_tests
