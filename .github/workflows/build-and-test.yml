@@ -30,7 +30,7 @@ jobs:
         # GCC flags an existing copy of a small pair in ftn_secrets.cpp.
         run: cmake --preset linux-gcc -DCMAKE_CXX_FLAGS=-Wno-error=range-loop-construct
       - name: Build applications and tests
-        run: cmake --build --preset linux-gcc --parallel 4
+        run: cmake --build --preset linux-gcc --parallel 4 -- -k 0
       - name: Run the full CTest suite
         run: ctest --preset linux-gcc --output-on-failure --no-tests=error --parallel 4 --timeout 300
       - name: Test caller file sessions

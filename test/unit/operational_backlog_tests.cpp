@@ -53,9 +53,12 @@ void run() {
     require(!cache.accept(first), "delayed duplicate page cannot overwrite advanced cache");
     auto crossed = *history.page(cache.cursor());
     for (auto& item : crossed.entries) {
-        auto decoded = *app::decode_operational_record(item.record, item.sequence);
-        decoded.event->context.origin_sequence -= first.entries.size();
-        item.record = app::encode_operational_record(decoded);
+        auto decoded = app::decode_operational_record(item.record, item.sequence);
+        if (!decoded || !decoded->event) {
+            throw std::runtime_error("page boundary fixture requires a decoded event");
+        }
+        decoded->event->context.origin_sequence -= first.entries.size();
+        item.record = app::encode_operational_record(*decoded);
     }
     const auto unchanged = cache.cursor().after;
     require(app::valid_operational_page(crossed) && !cache.accept(crossed) &&
