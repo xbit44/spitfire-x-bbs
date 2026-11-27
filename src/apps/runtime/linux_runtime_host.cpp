@@ -1,4 +1,5 @@
 #include "linux_runtime_host.hpp"
+#include "binkp_activity.hpp"
 #include "../product_version.h"
 #include "sfx/application/door_bulletin_preview_context.hpp"
 #include "sfx/platform/linux/door_bulletin_sources.hpp"

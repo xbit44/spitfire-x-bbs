@@ -1,6 +1,7 @@
 #include "alpha_ftn_engine.hpp"
 #include "sfx/platform/win32/portable_file_bindings.hpp"
 #include "bink_log.hpp"
+#include "binkp_activity.hpp"
 #include "sfx/application/ftn_nodelist.hpp"
 #include "sfx/platform/win32/ftn_stored_scan.hpp"
 #include "alpha_rlogin_resolver.hpp"
@@ -75,8 +76,7 @@ void AlphaFtnEngine::activity_locked(std::uint64_t session,std::string_view netw
     const auto utc=std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     if(view_.activity.size()>=32)view_.activity.erase(view_.activity.begin());
     view_.activity.push_back({static_cast<std::uint64_t>(utc),session,std::string(network),std::string(link),message});
-    std::string network_name="Unidentified network",link_name="Unconfigured peer";
-    if(wanted_){for(const auto& n:wanted_->networks)if(n.code==network)network_name=n.name;for(const auto& l:wanted_->links)if(l.network==network&&l.code==link)link_name=l.name;}
+    const auto [network_name,link_name]=binkp_display_names(wanted_?&*wanted_:nullptr,network,link);
     try {append_bink_log(receipt_.root,receipt_.owner,utc,session,network_name,link_name,message);}
     catch(...) {if(view_.activity.size()>=32)view_.activity.erase(view_.activity.begin());view_.activity.push_back({static_cast<std::uint64_t>(utc),session,std::string(network),std::string(link),"Warning: could not write Logs/bink.log. Check log folder access or free space."});}
 }
@@ -204,12 +204,12 @@ void AlphaFtnEngine::run() noexcept {
                                 std::lock_guard<std::mutex> lock(mutex_);
                                 if(encrypted){view_.tls_port=listener->port();view_.tls_listening=true;tls=std::move(listener);}
                                 else{view_.classic_port=listener->port();view_.classic_listening=true;classic=std::move(listener);}
-                            }catch(const std::exception& error){std::lock_guard<std::mutex> lock(mutex_);(encrypted?view_.tls_error:view_.classic_error)=diagnostic(error);activity_locked(0,{},{},std::string(encrypted?"TLS listener failed: ":"Classic listener failed: ")+diagnostic(error));}
+                            }catch(const std::exception& error){std::lock_guard<std::mutex> lock(mutex_);(encrypted?view_.tls_error:view_.classic_error)=diagnostic(error);activity_locked(0,binkp_startup,{},std::string(encrypted?"TLS listener failed: ":"Classic listener failed: ")+diagnostic(error));}
                         };
                         if(active->settings.mode==app::FtnMailerMode::native&&active->settings.listener_enabled)listen(false);
                         if(active->settings.mode==app::FtnMailerMode::native&&active->settings.tls_listener_enabled)listen(true);
-                        {std::lock_guard<std::mutex> lock(mutex_);view_.active_revision=active->revision;view_.diagnostic=active->settings.mode==app::FtnMailerMode::external_binkd?"ftn_external_processing_active":(view_.classic_error.empty()&&view_.tls_error.empty())?"ftn_native_active":"ftn_native_listener_failure";activity_locked(0,{},{} ,active->settings.mode==app::FtnMailerMode::external_binkd?"External BinkD selected. SFX processes mail; BinkD owns transport.":"BinkP configuration activated; inbound migration verified.");}
-                    }catch(const std::exception& error){inbound.reset();outbound.reset();std::lock_guard<std::mutex> lock(mutex_);view_.diagnostic=diagnostic(error);activity_locked(0,{},{} ,"BinkP startup stopped: "+diagnostic(error));quiescent_=true;wake_.notify_all();}
+                        {std::lock_guard<std::mutex> lock(mutex_);view_.active_revision=active->revision;view_.diagnostic=active->settings.mode==app::FtnMailerMode::external_binkd?"ftn_external_processing_active":(view_.classic_error.empty()&&view_.tls_error.empty())?"ftn_native_active":"ftn_native_listener_failure";activity_locked(0,binkp_startup,{} ,active->settings.mode==app::FtnMailerMode::external_binkd?"External BinkD selected. SFX processes mail; BinkD owns transport.":"BinkP configuration activated; inbound migration verified.");}
+                    }catch(const std::exception& error){inbound.reset();outbound.reset();std::lock_guard<std::mutex> lock(mutex_);view_.diagnostic=diagnostic(error);activity_locked(0,binkp_startup,{} ,"Startup stopped: "+diagnostic(error));quiescent_=true;wake_.notify_all();}
                 }
             }
             for(auto i=workers.begin();i!=workers.end();) {
@@ -250,8 +250,9 @@ void AlphaFtnEngine::run() noexcept {
                                 view_.processed_receipts+=result.processed?1:0;view_.held_receipts+=result.held?1:0;
                                 view_.imported_messages+=result.imported;view_.replayed_messages+=result.replayed;
                                 report_processing_locked("Inbound "+receipt.file.name,result.reason,receipt.network,receipt.link);
-                                for(const auto& note:result.diagnostics)activity_locked(0,receipt.network,receipt.link,note);
-                                if(result.processed||result.held)activity_locked(0,receipt.network,receipt.link,"Processed "+receipt.file.name+": "+std::to_string(result.imported)+" imported, "+std::to_string(result.replayed)+" already committed; "+(result.held?(result.reason=="ftn_inbound_file_missing_or_changed"?"source unavailable; automatic retries stopped.":"original retained for held messages."):"completed."));}
+                                const auto import_network=binkp_import_network(receipt.network,receipt.link);
+                                for(const auto& note:result.diagnostics)activity_locked(0,import_network,receipt.link,note);
+                                if(result.processed||result.held)activity_locked(0,import_network,receipt.link,"Processed "+receipt.file.name+": "+std::to_string(result.imported)+" imported, "+std::to_string(result.replayed)+" already committed; "+(result.held?(result.reason=="ftn_inbound_file_missing_or_changed"?"source unavailable; automatic retries stopped.":"original retained for held messages."):"completed."));}
                                 if(result.configuration_changed){const auto current=storage_.ftn_configuration({true,{}});ins::require(current&&current.value,"ftn_areafix_reload_failed");configure(*current.value);break;}
                             }
                             if(page.value->size()<16)cursor={};
@@ -331,20 +332,21 @@ void AlphaFtnEngine::run() noexcept {
                     workers.back().thread=std::thread([this,number,done,config=*active,in=*inbound,out=*outbound,scoped=directories,channel=std::move(channel),link=std::move(link),include_hold]() mutable {
                         auto running=[this]{return !stopping_.load()&&!cancel_.load();};
                         native::FtnNativeSessionResult result;bool announced{};
-                        const auto activity=[&](std::string message){std::lock_guard<std::mutex> lock(mutex_);activity_locked(number,result.network,result.link,std::move(message));};
+                        const auto activity=[&](std::string message){std::lock_guard<std::mutex> lock(mutex_);activity_locked(number,binkp_session_network(result),result.link,std::move(message));};
                         const auto observe=[&](const auto& state){
                             if(!announced&&state.handshake_complete&&!state.outbound&&!state.link.empty()){announced=true;if(sounds_)sounds_->publish(app::SoundEvent::inbound_binkp,GetTickCount64());}
                             std::lock_guard<std::mutex> lock(mutex_);for(auto& row:view_.sessions)if(row.serial==number){
                                 const auto& previous=row.transfer;
-                                const auto note=[&](std::string message){activity_locked(number,state.network,state.link,std::move(message));};
+                                const auto note=[&](std::string message){activity_locked(number,binkp_session_network(state),state.link,std::move(message));};
+                                report_binkp_peer_claims(state,previous,note);
                                 if(!state.link.empty()&&previous.link.empty()&&!state.handshake_complete)note("Address matched configured connection; authentication pending.");
-                                if(state.handshake_complete&&!previous.handshake_complete)note("BinkP handshake accepted; exchanging mail.");
+                                if(state.handshake_complete&&!previous.handshake_complete)note(state.peer_verified?"BinkP handshake accepted; exchanging mail.":"BinkP handshake accepted; exchanging mail as an unverified peer.");
                                 if(state.peer_verified&&!previous.peer_verified)note("Peer identity verified.");
                                 if(state.send.active&&(!previous.send.active||previous.send.name!=state.send.name))note("Sending "+state.send.name+" ("+std::to_string(state.send.size)+" bytes).");
                                 if(state.send.awaiting_ack&&!previous.send.awaiting_ack)note("File sent; waiting for peer acknowledgement.");
-                                if(state.sent_files>previous.sent_files)note("Peer acknowledged delivery; "+std::to_string(state.sent_files)+" file(s) sent.");
+                                if(state.sent_files>previous.sent_files)note("Peer acknowledged "+state.send.name+"; "+std::to_string(state.sent_files)+" file(s) sent.");
                                 if(state.receive.active&&(!previous.receive.active||previous.receive.name!=state.receive.name))note("Receiving "+state.receive.name+" ("+std::to_string(state.receive.size)+" bytes).");
-                                if(state.received_files>previous.received_files)note("Received "+std::to_string(state.received_files)+" file(s).");
+                                if(state.received_files>previous.received_files)note("Received "+state.receive.name+"; "+std::to_string(state.received_files)+" file(s) received.");
                                 if(state.reason=="ftn_inbound_name_collision"&&state.reason!=previous.reason)note("Inbound filename already exists; conflicting arrival skipped and retained by sender.");
                                 row.transfer=state;
                             }
@@ -362,7 +364,9 @@ void AlphaFtnEngine::run() noexcept {
                                 for(const auto& address:addresses){try{channel=native::FtnNativeChannel::connect_ipv4(address,endpoint.port,endpoint,receipt_.owner,running);break;}catch(const std::exception&){if(!running())throw;}}
                                 ins::require(bool(channel),"ftn_connection_failed");
                             }
-                            activity(link?"Connected to peer.":"Inbound connection accepted.");
+                            const auto peer_ip=channel->peer_ip();
+                            const auto description=link?std::string("Connected to peer"):std::string("Inbound connection accepted");
+                            activity(description+(peer_ip.empty()?".":" (remote IP "+peer_ip+")."));
                             if(link&&link->tls)activity("Negotiating TLS.");
                             channel->handshake(running);
                             activity("Starting BinkP handshake and authentication.");

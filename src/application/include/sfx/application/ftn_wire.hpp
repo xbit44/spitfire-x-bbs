@@ -45,6 +45,7 @@ struct BinkpOptions {
     std::string challenge_hex;
 };
 bool observe_binkp_information(BinkpOptions&,std::string_view,bool handshake);
+std::string binkp_advertised_system(std::string_view information);
 
 enum class FtnPacketProfile : std::uint8_t { type2,type2plus };
 struct FtnPacketHeader {

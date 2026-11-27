@@ -108,11 +108,25 @@ std::optional<std::vector<FtnAddress>> parse_binkp_addresses(std::string_view s)
     const auto w=words(s);if(w.empty()||w.size()>64)return {};std::set<std::string> seen;std::vector<FtnAddress> out;
     for(const auto value:w){const auto address=parse_ftn_address(value);if(!address||!seen.insert(format_ftn_address(*address)).second)return {};out.push_back(*address);}return out;
 }
+std::string binkp_advertised_system(std::string_view information) {
+    if(information.substr(0,4)!="SYS ")return {};
+    auto name=information.substr(4);
+    const auto first=name.find_first_not_of(' ');
+    if(first==name.npos)return {};
+    name=name.substr(first,128);
+    std::string out;
+    out.reserve(name.size());
+    for(const unsigned char ch:name)out+=ch>=32&&ch<=126?static_cast<char>(ch):'?';
+    while(!out.empty()&&out.back()==' ')out.pop_back();
+    return out;
+}
 bool observe_binkp_information(BinkpOptions& o,std::string_view s,bool handshake){
     if(!handshake)return true;
     const auto w=words(s);if(w.empty())return true;
     if(w[0]=="VER")for(const auto token:w){const auto version=fold(token);if(version=="binkp/1.1"||version=="(binkp/1.1)")o.version11=true;}
     if(w[0]=="OPT")for(const auto token:w){if(token=="NR")o.request_nr=true;
+        // Some mailers advertise CRAM-MD5 support without issuing a challenge.
+        if(token=="CRAM-MD5")continue;
         if(token.substr(0,5)=="CRAM-"){
             const auto split=token.find('-',5);if(split==token.npos)return false;const auto hashes=token.substr(5,split-5);bool md5=false;
             std::size_t at{};while(at<hashes.size()){const auto end=hashes.find('/',at);if(hashes.substr(at,end==hashes.npos?hashes.npos:end-at)=="MD5")md5=true;if(end==hashes.npos)break;at=end+1;}

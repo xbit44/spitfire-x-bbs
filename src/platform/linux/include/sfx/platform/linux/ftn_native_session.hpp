@@ -12,6 +12,8 @@ struct FtnNativeSessionResult {
     std::uint32_t received_files{},sent_files{},completed_batches{};
     application::FtnFileProgress send,receive;
     bool handshake_complete{}; // Protocol acceptance, distinct from verified peer identity.
+    std::string advertised_system;
+    std::vector<application::FtnAddress> advertised_addresses;
 };
 struct FtnNativeSessionPorts {
     application::IFtnMailStorage& storage;

@@ -22,7 +22,7 @@ struct BinkPConsole {
     void notice(std::wstring text){FILETIME now{};GetSystemTimeAsFileTime(&now);ULARGE_INTEGER n{};n.LowPart=now.dwLowDateTime;n.HighPart=now.dwHighDateTime;action_notice=timestamp(n.QuadPart/10000000ULL-11644473600ULL)+L"  "+text;show_activity();}
     void render_log(bool force=false){
         if(queue_view)return;std::wstring text=L"BINKP ACTIVITY (recent events, local time; this Runtime)\r\n";
-        for(const auto& a:current.activity)text+=timestamp(a.utc_seconds)+L"  "+utf8_to_wide(a.network+" / "+a.link)+L"\r\n  "+utf8_to_wide(a.message)+L"\r\n";
+        for(const auto& a:current.activity)text+=timestamp(a.utc_seconds)+L"  "+utf8_to_wide(a.network+(a.link.empty()?std::string{}:" / "+a.link))+(a.session?L"  #"+std::to_wstring(a.session):std::wstring{})+L"\r\n  "+utf8_to_wide(a.message)+L"\r\n";
         if(current.activity.empty())text+=L"No connection activity recorded yet.\r\n";
         if(!current.classic_error.empty())text+=L"Classic listener: "+utf8_to_wide(current.classic_error)+L"\r\n";
         if(!current.tls_error.empty())text+=L"TLS listener: "+utf8_to_wide(current.tls_error)+L"\r\n";
@@ -84,7 +84,7 @@ struct BinkPConsole {
         if(!SendMessageW(session,CB_GETDROPPEDSTATE,0,0)){
             std::wstring live=L"Follow active session";if(const auto* item=selected_session();item&&follow_active)live+=L" - "+utf8_to_wide(item->network+" / "+item->link);
             std::vector<std::wstring> labels{live};int selection=0;
-            for(std::size_t i=0;i<current.sessions.size();++i){const auto& item=current.sessions[i];labels.push_back(L"#"+std::to_wstring(item.serial)+L" "+utf8_to_wide(item.network+" / "+item.link)+(item.outbound?L" - Outbound":L" - Inbound")+(item.active?L" - Active":item.completed?L" - Completed":L" - Failed"));if(!follow_active&&item.serial==selected)selection=static_cast<int>(i+1);}
+            for(std::size_t i=0;i<current.sessions.size();++i){const auto& item=current.sessions[i];labels.push_back(L"#"+std::to_wstring(item.serial)+L" "+utf8_to_wide(item.network+(item.link.empty()?std::string{}:" / "+item.link))+(item.outbound?L" - Outbound":L" - Inbound")+(item.active?L" - Active":item.completed?L" - Completed":L" - Failed"));if(!follow_active&&item.serial==selected)selection=static_cast<int>(i+1);}
             if(labels!=rendered_sessions||selection!=rendered_selection){
                 SendMessageW(session,WM_SETREDRAW,FALSE,0);SendMessageW(session,CB_RESETCONTENT,0,0);
                 for(const auto& label:labels)SendMessageW(session,CB_ADDSTRING,0,reinterpret_cast<LPARAM>(label.c_str()));

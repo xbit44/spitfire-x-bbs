@@ -13,7 +13,7 @@ inline void append_linux_bink_log(const std::filesystem::path& root,std::shared_
     const auto clean=[](std::string_view text){std::string out;for(const unsigned char c:text.substr(0,512))out+=c<32||c==127?' ':static_cast<char>(c);return out;};
     const auto require=[](bool ok,const char* reason){if(!ok)throw std::runtime_error(reason);};
     const time_t stamp=static_cast<time_t>(utc);tm local{};require(localtime_r(&stamp,&local)!=nullptr,"bink_log_time_failed");char date[32]{};strftime(date,sizeof(date),"%Y-%m-%d %H:%M:%S",&local);
-    const auto line=std::string(date)+"  session="+std::to_string(session)+"  "+clean(network)+" / "+clean(link)+"  "+clean(message)+"\r\n";
+    const auto line=std::string(date)+"  session="+std::to_string(session)+"  "+clean(network)+(link.empty()?std::string{}:" / "+clean(link))+"  "+clean(message)+"\r\n";
     std::optional<native::FilePayloadLease> file;
     if(!dir.absent("bink.log")){
         std::optional<native::FilePayloadLease> current;current.emplace(dir.read("bink.log",true));require(current->byte_count()<=1048576,"bink_log_existing_oversized_retained");const auto prefix=current->identity();

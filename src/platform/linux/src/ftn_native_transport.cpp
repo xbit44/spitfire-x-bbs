@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
+#include <netdb.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -140,6 +141,14 @@ struct FtnNativeChannel::Impl {
 };
 FtnNativeChannel::FtnNativeChannel(std::unique_ptr<Impl> impl):impl_(std::move(impl)){}
 FtnNativeChannel::~FtnNativeChannel()=default;
+std::string FtnNativeChannel::peer_ip() const {
+    sockaddr_storage peer{};
+    socklen_t size=sizeof(peer);
+    if(getpeername(impl_->socket.value,reinterpret_cast<sockaddr*>(&peer),&size)!=0)return {};
+    char host[NI_MAXHOST]{};
+    if(getnameinfo(reinterpret_cast<const sockaddr*>(&peer),size,host,sizeof(host),nullptr,0,NI_NUMERICHOST)!=0)return {};
+    return host;
+}
 std::unique_ptr<FtnNativeChannel> FtnNativeChannel::connect_ipv4(const std::array<std::uint8_t,4>& address,std::uint16_t port,const application::FtnLink& link,const std::function<bool()>& running){
     require(port!=0&&port==link.port,"ftn_socket_port_policy_mismatch");Socket socket;socket.value=::socket(AF_INET,SOCK_STREAM|SOCK_CLOEXEC,IPPROTO_TCP);require(socket.value!=-1,"ftn_socket_create_failed");nonblocking(socket.value);
     sockaddr_in target{};target.sin_family=AF_INET;target.sin_port=htons(port);std::copy(address.begin(),address.end(),reinterpret_cast<std::uint8_t*>(&target.sin_addr));

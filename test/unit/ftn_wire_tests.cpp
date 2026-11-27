@@ -40,14 +40,22 @@ void descriptors(){
     check(parse_binkp_file("x 1 1",false,false).has_value(),"GOT descriptor excludes offset");
     const auto addresses=parse_binkp_addresses("2:200/1@first 2:200/1.2@first");check(addresses&&addresses->size()==2,"point-aware ADR list");
     check(!parse_binkp_addresses("2:200/1@first 2:200/1@first")&&!parse_binkp_addresses("../anything"),"duplicate or malformed ADR refused");
+    check(binkp_advertised_system("SYS  Test BBS  ")=="Test BBS","peer system name presentation");
+    check(binkp_advertised_system("SYS test\r\nname\x1b")=="test??name?","peer system name cannot inject terminal or log controls");
+    check(binkp_advertised_system("VER some program").empty()&&binkp_advertised_system("SYS   ").empty(),"only meaningful advertised system names are shown");
+    check(binkp_advertised_system("SYS "+std::string(500,'x')).size()==128,"peer system name is bounded");
     BinkpOptions options;check(observe_binkp_information(options,"VER Independent/1 BINKP/1.1",true)&&options.version11,"explicit VER negotiates1.1");
     BinkpOptions irex;check(observe_binkp_information(irex,"VER Internet Rex 2.29 Win32 (binkp/1.1)",true)&&irex.version11,"actual IREX parenthesized protocol version negotiates1.1");
     check(parse_binkp_file("peer.bin 65537 1793479816 -1",true,irex.version11).has_value(),"actual IREX negotiated NR file request is accepted");
     for(const auto value:{"VER Peer (binkp/1.0)","VER Peer (binkp/1.10)","VER Peer xbinkp/1.1","VER Peer (binkp/1.1","VER Peer binkp/1.1)","SYS (binkp/1.1)"}){BinkpOptions o;check(observe_binkp_information(o,value,true)&&!o.version11,"only complete recognized VER tokens negotiate1.1");}
     check(observe_binkp_information(options,"OPT NR CRAM-SHA1/MD5-0011223344556677 UNKNOWN",true)&&options.request_nr&&options.challenge_hex=="0011223344556677","known options selected unknown ignored");
     check(!observe_binkp_information(options,"OPT CRAM-MD5-0011223344556678",true),"challenge cannot change during handshake");
+    BinkpOptions advertised;
+    check(observe_binkp_information(advertised,"OPT CRAM-MD5 NR",true)&&advertised.request_nr&&advertised.challenge_hex.empty(),"bare ANetBBS CRAM-MD5 is a capability, not a challenge");
+    check(observe_binkp_information(options,"OPT CRAM-MD5",true)&&options.challenge_hex=="0011223344556677","bare CRAM-MD5 leaves a real challenge intact");
+    check(!observe_binkp_information(advertised,"OPT CRAM-MD5-",true),"empty challenge still refused");
     BinkpOptions late;check(observe_binkp_information(late,"VER Peer binkp/1.1",false)&&!late.version11,"late VER cannot renegotiate");
-    for(const auto bad:{"OPT CRAM-MD5-0","OPT CRAM-MD5-001122334455667z","OPT CRAM-MD5"}){BinkpOptions o;check(!observe_binkp_information(o,bad,true),"invalid challenge refused");}
+    for(const auto bad:{"OPT CRAM-MD5-0","OPT CRAM-MD5-001122334455667z"}){BinkpOptions o;check(!observe_binkp_information(o,bad,true),"invalid challenge refused");}
 }
 std::string fixture(){
     // Header fields encoded independently, Type2+, 2:200/10 -> 2:200/11.

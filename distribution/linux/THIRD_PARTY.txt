@@ -1,6 +1,6 @@
 SPITFIRE-X BBS LINUX SOFTWARE CREDITS AND SOURCE
 
-This is the 1.0.0b3 Linux public beta.
+This is the 1.0.0b4 Linux public beta.
 
 The SFX license is in sfx-license.txt beside this file. Original notice text
 is kept below this folder. SFX wrapper names are lowercase; the upstream

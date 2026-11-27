@@ -8,7 +8,7 @@
                         ____      Personal Computers     ____
                            _______________________________
                              ____                    ____
-                               _____  1.0.0b3   ____
+                               _____  1.0.0b4   ____
                                  ___________________
 
 
@@ -19,7 +19,7 @@
                                Sysop Quick Start
                                   MIT License
                                    
-                         Linux AMD64 v1.0.0b3 Public Beta
+                         Linux AMD64 v1.0.0b4 Public Beta
 
 
 
@@ -92,8 +92,8 @@
         Linux desktop in your download folder, extract it once, then enter its
         versioned folder. For this release:
 
-            tar -xzf spitfire-x-1.0.0b3-linux-x86_64.tar.gz
-            cd spitfire-x-1.0.0b3-linux-x86_64
+            tar -xzf spitfire-x-1.0.0b4-linux-x86_64.tar.gz
+            cd spitfire-x-1.0.0b4-linux-x86_64
             python3 install.py
 
              Keep two folders separate. The extracted versioned folder is
@@ -268,8 +268,8 @@
         separate staging folder, then run the new installer against your
         EXISTING board:
 
-            tar -xzf spitfire-x-1.0.0b3-linux-x86_64.tar.gz
-            cd spitfire-x-1.0.0b3-linux-x86_64
+            tar -xzf spitfire-x-1.0.0b4-linux-x86_64.tar.gz
+            cd spitfire-x-1.0.0b4-linux-x86_64
             python3 install.py --prefix "$HOME/sfx" --upgrade
 
              Replace $HOME/sfx with the actual existing folder if different.
