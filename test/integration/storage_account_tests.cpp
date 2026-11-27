@@ -260,9 +260,13 @@ require(database.health().schema_version == sfx::test::shipping_schema_version, 
     require(inspect.scalar_int64(
         "SELECT count(*) FROM sqlite_schema WHERE type='table' AND name='sfx_account_preferences'",
         "verify excluded preferences table") == 0, "account_preferences is not created");
+    // The frozen v30 bulletin migration created these five tables without STRICT.
     require(inspect.scalar_int64(
-        "SELECT count(*) FROM pragma_table_list WHERE name LIKE 'sfx_%' AND strict<>1",
-        "verify production strict tables") == 0, "all production tables are STRICT");
+        "SELECT count(*) FROM pragma_table_list "
+        "WHERE schema='main' AND type='table' AND name GLOB 'sfx_*' AND strict<>1 "
+        "AND name NOT IN ('sfx_door_bulletin_policy','sfx_door_bulletins','sfx_door_bulletin_state',"
+        "'sfx_door_bulletin_fingerprints','sfx_door_bulletin_receipts')",
+        "verify production strict tables") == 0, "shipping tables outside the v30 exceptions are STRICT");
     const auto database_path = reopened.database_path();
     require(reopened.shutdown().succeeded(), "bootstrap test storage closes");
 
