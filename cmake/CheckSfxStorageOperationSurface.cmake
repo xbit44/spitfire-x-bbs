@@ -96,10 +96,12 @@ set(required_tables
     sfx_file_policy
     sfx_security_calling_limits
     sfx_security_chat_limits
+    sfx_message_configuration_audit
+    sfx_message_presentation_policy
 )
 list(LENGTH required_tables table_count)
-if(NOT table_count EQUAL 37)
-    message(FATAL_ERROR "prepared-query table inventory is ${table_count}, expected 37")
+if(NOT table_count EQUAL 39)
+    message(FATAL_ERROR "prepared-query table inventory is ${table_count}, expected 39")
 endif()
 
 # Header filenames such as sqlite_sfx_baseline.hpp are not SQL identities.
@@ -118,4 +120,4 @@ if(NOT "${observed_tables}" STREQUAL "${required_tables}")
 endif()
 
 message(STATUS
-    "SFX storage operation surface audit passed: 58 forwards, 37 prepared-query table identities")
+    "SFX storage operation surface audit passed: 58 forwards, 39 prepared-query table identities")

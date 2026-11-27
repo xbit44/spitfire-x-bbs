@@ -25,20 +25,20 @@ struct Assets final:app::ITrustedDisplayAssetReader {
 std::string text(const app::TerminalDisplayProgram& program){std::string out;for(const auto& op:program.operations){if(op.kind==app::TerminalDisplayOperationKind::cp437_text)out+=op.bytes;else if(op.kind==app::TerminalDisplayOperationKind::logical_newline||op.kind==app::TerminalDisplayOperationKind::paging_newline)out+='\n';}return out;}
 void migrations(const std::filesystem::path& root,sfx::test::FakeStoragePathPolicy& paths){
     for(const char* point:{"before-door-bulletin-migration","before-door-bulletin-migration-commit","after-door-bulletin-migration-commit"}){
-        auto s=settings(root/point);auto plan=storage::sfx_storage_migrations();check(plan.size()==31&&plan.at(29).version==30&&plan.at(29).name=="door_bulletins","explicit immutable v30 Door Bulletin migration");plan.resize(29);
+        auto s=settings(root/point);auto plan=storage::sfx_storage_migrations();check(plan.size()==sfx::test::shipping_migration_count&&plan.at(29).version==30&&plan.at(29).name=="door_bulletins","explicit immutable v30 Door Bulletin migration");plan.resize(29);
         {storage::SqliteStorage old(s,paths,plan);check(old.start().succeeded()&&old.health().schema_version==29&&old.shutdown().succeeded(),"frozen beta5 predecessor opens/stops");}
         const auto file=s.data_directory/"SFX.DB";seed(file);
         s.bootstrap_boundary_hook=[point](std::string_view at){return at==point?app::StorageStatus{app::StorageErrorCode::io,"synthetic schema30 interruption"}:app::StorageStatus::success();};
         {storage::SqliteStorage failed(s,paths);check(!failed.start(),"interrupted additive migration reports failure");}
         {internal::SqliteConnection c(file,SQLITE_OPEN_READONLY,std::chrono::milliseconds(100),false);check(internal::validate_sfx_shipping_database(c.get(),true),"failure preserves exact accepted predecessor or committed new head");check(c.scalar_int64("PRAGMA user_version","schema30 boundary")== (std::string_view(point)=="after-door-bulletin-migration-commit"?30:29),"DDL/ledger/version publish atomically");check_frozen_beta5_ledger(c);}
-        s.bootstrap_boundary_hook={};storage::SqliteStorage current(s,paths);check(current.start().succeeded()&&current.health().schema_version==31,"retry upgrades once");check(current.shutdown().succeeded(),"upgraded fixture stops");check(scalar(file,"SELECT count(*) FROM sfx_accounts")==3&&scalar(file,"SELECT count(*) FROM sfx_schema_migrations")==31,"all actors and exact31 ledger rows retained");
+        s.bootstrap_boundary_hook={};storage::SqliteStorage current(s,paths);check(current.start().succeeded()&&current.health().schema_version==sfx::test::shipping_schema_version,"retry upgrades once");check(current.shutdown().succeeded(),"upgraded fixture stops");check(scalar(file,"SELECT count(*) FROM sfx_accounts")==3&&scalar(file,"SELECT count(*) FROM sfx_schema_migrations")==sfx::test::shipping_migration_count,"all actors and the exact shipping ledger retained");
     }
 }
 }
 int main(int argc,char** argv){try{
     check(argc==2,"new isolated fixture root required");const auto root=std::filesystem::absolute(argv[1]);check(!std::filesystem::exists(root),"retain earlier evidence");sfx::test::FakeStoragePathPolicy paths;
     migrations(root/"migration",paths);
-    std::int64_t now=1792248000;auto s=settings(root/"primary");s.utc_now=[&]{return now;};storage::SqliteStorage db(s,paths);check(db.start().succeeded()&&db.health().schema_version==31&&db.shutdown().succeeded(),"fresh schema31 and stop before synthetic actors");const auto file=s.data_directory/"SFX.DB";seed(file);check(db.start().succeeded(),"synthetic board starts");
+    std::int64_t now=1792248000;auto s=settings(root/"primary");s.utc_now=[&]{return now;};storage::SqliteStorage db(s,paths);check(db.start().succeeded()&&db.health().schema_version==sfx::test::shipping_schema_version&&db.shutdown().succeeded(),"fresh shipping schema and stop before synthetic actors");const auto file=s.data_directory/"SFX.DB";seed(file);check(db.start().succeeded(),"synthetic board starts");
     const app::MessageConfigurationActor owner{true,{}};const app::MessageActor alice{id(2),2,1,1};const app::MessageConfigurationActor caller{false,alice};
     check(!db.door_bulletin_configuration(caller),"ordinary caller cannot read configuration/path fields");check(db.door_bulletin_configuration(owner).value->entries.empty(),"fresh feature has no invented content");
     auto local=app::fresh_install_starter_doors().front();local.security_level=999;local.sysop_only=true;local.execution.level=999;

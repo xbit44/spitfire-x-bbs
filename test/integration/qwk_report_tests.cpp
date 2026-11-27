@@ -1,6 +1,7 @@
 // NG34: new synthetic production storage/archive/codec/sealed-source fixtures.
 // No historical owner packet or live hub is used or claimed reproduced.
 #define main retained_qwk_storage_main
+#include "sfx/test/shipping_schema.hpp"
 #include "qwk_storage_tests.cpp"
 #undef main
 #include "alpha_qwk_reply_spool.hpp"
@@ -97,7 +98,7 @@ int main(int argc,char** argv)try{
     check(argc==2||(argc==3&&(std::string(argv[2])=="--network-only"||std::string(argv[2])=="--byte-boundary")),"new NG34 fixture root and optional focused run");const bool network_only=argc==3&&std::string(argv[2])=="--network-only";const auto root=std::filesystem::absolute(argv[1]);check(!std::filesystem::exists(root),"preserve prior NG34 evidence");
     const auto sid=ins::operator_sid();auto sd=ins::mutable_descriptor(sid);std::filesystem::create_directories(root.parent_path());ins::create_directory(root,sd.get());ins::create_directory(root/L"Data",sd.get());
     storage::SqliteStorageSettings settings;settings.data_directory=root/L"Data";settings.utc_now=[]{return std::int64_t{1793970000};};sfx::test::FakeStoragePathPolicy paths;storage::SqliteStorage db(settings,paths);
-    check(db.start().succeeded(),"production schema starts");check(db.health().schema_version==29,"current beta2 schema29");check(db.shutdown().succeeded(),"stop before trusted synthetic actors");const auto file=root/L"Data"/L"SFX.DB";seed(file);check(db.start().succeeded(),"seeded production storage starts");
+    check(db.start().succeeded(),"production schema starts");check(db.health().schema_version==sfx::test::shipping_schema_version,"current shipping schema");check(db.shutdown().succeeded(),"stop before trusted synthetic actors");const auto file=root/L"Data"/L"SFX.DB";seed(file);check(db.start().succeeded(),"seeded production storage starts");
     app::MessageActor alice{id(2),2,1,1},bob{id(3),3,1,1};
     fallback_selection_checks(db,bob);
     auto prefs=app::StorageResult<app::QwkSavedPreferences>{};

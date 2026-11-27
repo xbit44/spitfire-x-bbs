@@ -1,5 +1,6 @@
 // New isolated databases only. Exercise real migration, rollback and editor commits.
 #define main retained_message_storage_main
+#include "sfx/test/shipping_schema.hpp"
 #include "message_storage_tests.cpp"
 #undef main
 #include <map>
@@ -17,7 +18,7 @@ std::map<std::string,std::string> subject_snapshot(const std::filesystem::path& 
 int main(int argc,char** argv){try{
     check(argc==2,"fresh isolated path required");const auto root=std::filesystem::absolute(argv[1]);check(!std::filesystem::exists(root),"preserve previous fixtures");sfx::test::FakeStoragePathPolicy policy;
     for(const auto* fault:{"none","before-optional-subject-migration","after-optional-subject-rebuild","before-optional-subject-migration-commit","after-optional-subject-migration-commit"}){
-        auto s=options(root/fault);auto prior=db::sfx_storage_migrations();check(prior.size()==27,"current lineage27 retains fixed23 and additive24");auto subject_only=prior;subject_only.resize(23);prior.resize(22);const auto file=s.data_directory/"SFX.DB";
+        auto s=options(root/fault);auto prior=db::sfx_storage_migrations();check(prior.size()==sfx::test::shipping_migration_count,"current shipping lineage retains fixed23 and additive24");auto subject_only=prior;subject_only.resize(23);prior.resize(22);const auto file=s.data_directory/"SFX.DB";
         {db::SqliteStorage old(s,policy,prior);check(old.start().succeeded()&&old.shutdown().succeeded(),"real22 predecessor");seed(file);check(old.start().succeeded(),"populated22 starts");for(unsigned n=30;n<34;++n){auto post=request(old,{id(2),2,1,1},{app::MessageKind::public_echo,{2},{},{}},n);check(old.commit_message(post).succeeded(),"old messages committed");}check(old.shutdown().succeeded(),"predecessor stopped");}
         edit(file,"UPDATE sqlite_sequence SET seq=5000 WHERE name='sfx_local_messages'");const auto before=subject_snapshot(file);
         const bool inject=std::string_view(fault)!="none";if(inject)s.bootstrap_boundary_hook=[fault](std::string_view at){return at==fault?app::StorageStatus{app::StorageErrorCode::io,"synthetic23 boundary failure"}:app::StorageStatus::success();};

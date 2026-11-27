@@ -1,6 +1,7 @@
 #include "sfx/adapters/storage/sqlite_storage.hpp"
 #include "sfx/application/account_storage.hpp"
 #include "sfx/application/phase3a_storage.hpp"
+#include "sfx/test/shipping_schema.hpp"
 #include "sfx/test/phase3a_storage_fakes.hpp"
 #include "sfx/test/storage_fakes.hpp"
 #include "sqlite_internal.hpp"
@@ -116,7 +117,7 @@ ReadyStorage create_ready_storage(
     auto database = std::make_unique<storage::SqliteStorage>(
         std::move(settings), policy, storage::sfx_storage_migrations());
     require(database->start().succeeded(), "Phase 3A storage starts");
-require(database->health().schema_version == 27,
+require(database->health().schema_version == sfx::test::shipping_schema_version,
         "Phase 3A operations use the shipping SFX schema including caller journals");
 
     app::StageInitialSysopRequest stage;

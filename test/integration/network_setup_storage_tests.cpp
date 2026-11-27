@@ -13,7 +13,7 @@ void migration25(const std::filesystem::path& root,sfx::test::FakeStoragePathPol
         config.bootstrap_boundary_hook=[point](std::string_view at){return at==point?app::StorageStatus{app::StorageErrorCode::io,"injected schema25 interruption"}:app::StorageStatus::success();};
         {storage::SqliteStorage failed(config,paths);check(!failed.start(),"interrupted schema25 result is truthful");}
         check(scalar(config.data_directory/"SFX.DB","PRAGMA user_version")== (std::string_view(point)=="after-ftn-wire-body-migration-commit"?25:24),"schema25 commit/rollback atomic");
-        config.bootstrap_boundary_hook={};storage::SqliteStorage retry(config,paths);check(retry.start().succeeded()&&retry.health().schema_version==27,"upgrade resumes once");check(retry.shutdown().succeeded(),"upgrade retry stopped");
+        config.bootstrap_boundary_hook={};storage::SqliteStorage retry(config,paths);check(retry.start().succeeded()&&retry.health().schema_version==sfx::test::shipping_schema_version,"upgrade resumes once");check(retry.shutdown().succeeded(),"upgrade retry stopped");
         check(scalar(config.data_directory/"SFX.DB","SELECT count(*) FROM sfx_accounts")==before,"upgrade preserves original accounts");
     }
 }
@@ -26,7 +26,8 @@ void migration27(const std::filesystem::path& root,sfx::test::FakeStoragePathPol
         {storage::SqliteStorage failed(config,paths);check(!failed.start(),"interrupted caller-location migration reports failure");}
         check(scalar(file,"PRAGMA user_version")==26&&scalar(file,"SELECT count(*) FROM sfx_schema_migrations")==26,"schema27 publication and ledger roll back together");
         {internal::SqliteConnection db(file,SQLITE_OPEN_READONLY,std::chrono::milliseconds(100),false);check(internal::validate_sfx_shipping_database(db.get(),true),"failed schema27 retains exact fixed predecessor manifest");check(db.scalar_int64("SELECT count(*) FROM sqlite_schema WHERE name IN('sfx_caller_message_location','sfx_ftn_toss_pending')","location rollback")==0,"table and pending-work index roll back together");}
-        config.bootstrap_boundary_hook={};storage::SqliteStorage retry(config,paths);check(retry.start().succeeded()&&retry.health().schema_version==27,"schema27 retry succeeds exactly once");check(retry.shutdown().succeeded(),"schema27 retry closes");
+        config.bootstrap_boundary_hook={};auto target=storage::sfx_storage_migrations();target.resize(27);
+        storage::SqliteStorage retry(config,paths,target);check(retry.start().succeeded()&&retry.health().schema_version==27,"schema27 retry succeeds exactly once");check(retry.shutdown().succeeded(),"schema27 retry closes");
         check(scalar(file,"SELECT count(*) FROM sfx_accounts")==before&&scalar(file,"SELECT count(*) FROM sfx_schema_migrations")==27,"schema27 preserves accounts and adds one ledger entry");
         check(retry.start().succeeded()&&retry.shutdown().succeeded()&&scalar(file,"SELECT count(*) FROM sfx_schema_migrations")==27,"reopen does not repeat schema27 migration");
     }
@@ -35,7 +36,7 @@ void migration27(const std::filesystem::path& root,sfx::test::FakeStoragePathPol
 int main(int argc,char** argv){try{
     check(argc==2,"new fixture root required");const auto root=std::filesystem::absolute(argv[1]);check(!std::filesystem::exists(root),"preserve previous fixture evidence");
     sfx::test::FakeStoragePathPolicy paths;auto config=settings(root/"primary");
-    {storage::SqliteStorage fresh(config,paths);check(fresh.start().succeeded()&&fresh.health().schema_version==27,"current schema27 starts");check(fresh.shutdown().succeeded(),"empty current fixture stopped");}
+    {storage::SqliteStorage fresh(config,paths);check(fresh.start().succeeded()&&fresh.health().schema_version==sfx::test::shipping_schema_version,"current shipping schema starts");check(fresh.shutdown().succeeded(),"empty current fixture stopped");}
     const auto file=config.data_directory/"SFX.DB";seed(file);storage::SqliteStorage db(config,paths);check(db.start().succeeded(),"owned synthetic writer ready");const app::MessageConfigurationActor owner{true,{}};
     auto c=*db.ftn_configuration(owner).value;app::FtnNetwork n;n.code="FIDO";n.name="FidoNet";n.address="42:100/49";n.enabled=true;n.origin_line="Synthetic SFX";
     check(app::add_ftn_setup_network(c,n,{}).succeeded(),"stage named network and group");

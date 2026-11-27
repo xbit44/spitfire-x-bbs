@@ -1,5 +1,6 @@
 #include "sfx/adapters/storage/sqlite_storage.hpp"
 #include "sfx/application/phase3a.hpp"
+#include "sfx/test/shipping_schema.hpp"
 #include "sfx/test/storage_fakes.hpp"
 #include "sqlite_internal.hpp"
 #include "sqlite_registration_fingerprint.hpp"
@@ -398,7 +399,7 @@ ReadyStorage create_ready_storage(
     auto database = std::make_unique<storage::SqliteStorage>(
         std::move(settings), policy, storage::sfx_storage_migrations());
     require(database->start().succeeded(), "Window 5 storage starts");
-require(database->health().schema_version == 27,
+require(database->health().schema_version == sfx::test::shipping_schema_version,
         "Window 5 operations run against the active clean SFX schema");
 
     app::StageInitialSysopRequest stage;
@@ -657,7 +658,7 @@ void test_fingerprint_golden_vectors() {
 
 void test_clean_sfx_receipt_schema(const std::filesystem::path& root) {
     const auto migrations = storage::sfx_storage_migrations();
-    require(migrations.size() == 27 && migrations.back().version == 27 && migrations[2].version == 3 &&
+    require(migrations.size() == sfx::test::shipping_migration_count && migrations.back().version == sfx::test::shipping_schema_version && migrations[2].version == 3 &&
         migrations[2].name == "sfx-menu-preferences" &&
         sha256_hex(migrations[2].sql) == migrations[2].content_sha256 && migrations[1].version == 2 &&
         migrations[1].name == "sfx-caller-journal-foundation" &&
@@ -674,7 +675,7 @@ void test_clean_sfx_receipt_schema(const std::filesystem::path& root) {
     std::filesystem::create_directories(directory);
     test::FakeStoragePathPolicy policy;
     storage::SqliteStorage database(settings_for(directory), policy, migrations);
-require(database.start().succeeded() && database.health().schema_version == 27,
+require(database.start().succeeded() && database.health().schema_version == sfx::test::shipping_schema_version,
         "clean SFX retains exact baseline and journal, then adds menu preferences");
     require(scalar(database.database_path(),
         "SELECT count(*) FROM sfx_registration_commit_receipts") == 0,

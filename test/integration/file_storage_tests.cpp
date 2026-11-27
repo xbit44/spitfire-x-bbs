@@ -1,4 +1,5 @@
 #include "sfx/adapters/storage/sqlite_storage.hpp"
+#include "sfx/test/shipping_schema.hpp"
 #include "sfx/test/storage_fakes.hpp"
 #include "sqlite_internal.hpp"
 #include "sqlite_statement.hpp"
@@ -44,7 +45,7 @@ int main(int argc,char** argv){try{
     first_run_defaults(root/"first-run-defaults",paths);
     auto s=settings(root/"primary");storage::SqliteStorage db(s,paths);
     const auto started=db.start();if(!started)std::cerr<<"startup "<<started.operation<<" code="<<static_cast<unsigned>(started.code)<<'\n';
-    check(started.succeeded() && db.health().schema_version==27,"fresh current schema27 includes Section14 file storage");check(db.shutdown().succeeded(),"stop for synthetic actors");
+    check(started.succeeded() && db.health().schema_version==sfx::test::shipping_schema_version,"fresh current shipping schema includes Section14 file storage");check(db.shutdown().succeeded(),"stop for synthetic actors");
     const auto file=s.data_directory/"SFX.DB";seed(file);check(db.start().succeeded(),"populated fixture starts");
     const app::FileActor sysop{id(1),1,1,1},alice{id(2),2,1,1},bob{id(3),3,1,1};const app::FileConfigurationActor owner{true,{}};
     auto cfg=db.file_configuration(owner);check(cfg && cfg.value->groups.size()==1 && cfg.value->areas.size()==3,"exact three starter areas");

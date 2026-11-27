@@ -33,8 +33,8 @@ void migration16(const std::filesystem::path& root,sfx::test::FakeStoragePathPol
         {internal::SqliteConnection c(s.data_directory/"SFX.DB",SQLITE_OPEN_READONLY,std::chrono::milliseconds(100),false);
             check(internal::validate_sfx_shipping_database(c.get(),true),"interrupted upgrade leaves exact v15 or v16");
             check(c.scalar_int64("PRAGMA user_version","atomic Door upgrade")== (std::string_view(point)=="after-door-migration-commit"?16:15),"Door commit boundary atomic");}
-        s.bootstrap_boundary_hook={};storage::SqliteStorage retry(s,paths);check(retry.start().succeeded()&&retry.health().schema_version==27,"Door migration retries exactly once through current schema");check(retry.shutdown().succeeded(),"upgraded fixture stopped");
-        check(scalar(s.data_directory/"SFX.DB","SELECT count(*) FROM sfx_accounts")==3&&scalar(s.data_directory/"SFX.DB","SELECT count(*) FROM sfx_schema_migrations")==27,"accounts and exact migration ledger preserved");
+        s.bootstrap_boundary_hook={};storage::SqliteStorage retry(s,paths);check(retry.start().succeeded()&&retry.health().schema_version==sfx::test::shipping_schema_version,"Door migration retries exactly once through current schema");check(retry.shutdown().succeeded(),"upgraded fixture stopped");
+        check(scalar(s.data_directory/"SFX.DB","SELECT count(*) FROM sfx_accounts")==3&&scalar(s.data_directory/"SFX.DB","SELECT count(*) FROM sfx_schema_migrations")==sfx::test::shipping_migration_count,"accounts and exact migration ledger preserved");
     }
 }
 }
@@ -49,7 +49,7 @@ int main(int argc,char** argv){try{
     migration16(root/"migration16",paths);
     migration17(root/"migration17",paths);
     migration18(root/"migration18",paths);
-    auto s=settings(root/"primary");storage::SqliteStorage db(s,paths);check(db.start().succeeded()&&db.health().schema_version==27,"fresh exact schema27");check(db.shutdown().succeeded(),"stop before synthetic actors");const auto file=s.data_directory/"SFX.DB";seed(file);check(db.start().succeeded(),"start seeded Door fixture");
+    auto s=settings(root/"primary");storage::SqliteStorage db(s,paths);check(db.start().succeeded()&&db.health().schema_version==sfx::test::shipping_schema_version,"fresh exact shipping schema");check(db.shutdown().succeeded(),"stop before synthetic actors");const auto file=s.data_directory/"SFX.DB";seed(file);check(db.start().succeeded(),"start seeded Door fixture");
     const app::MessageConfigurationActor owner{true,{}};const app::MessageActor alice{id(2),2,1,1},sysop{id(1),1,1,1};
     auto c=db.door_configuration(owner);check(c&&c.value&&c.value->doors.empty()&&c.value->entries.empty()&&c.value->menus.size()==1&&c.value->menus.front().id==0,"fresh root only; no configured target/account/credential");
     check(!db.door_configuration({false,alice}),"ordinary caller cannot read protected Door configuration");

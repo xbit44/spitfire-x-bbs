@@ -1,4 +1,5 @@
 #include "sfx/adapters/storage/sqlite_storage.hpp"
+#include "sfx/test/shipping_schema.hpp"
 #include "sfx/test/storage_fakes.hpp"
 #include "sqlite_internal.hpp"
 #include "sqlite_sfx_baseline.hpp"
@@ -28,7 +29,7 @@ void fresh(const std::filesystem::path& root) {
     db::SqliteStorageSettings settings; settings.data_directory = root; settings.utc_now = [] { return 1788990000; };
     db::SqliteStorage storage(settings, paths);
     check(storage.start().succeeded(), "fresh journal storage startup");
-check(storage.health().schema_version == 27, "exact current schema with classic information");
+check(storage.health().schema_version == sfx::test::shipping_schema_version, "exact current schema with classic information");
     app::StageInitialSysopRequest stage; stage.display_name = "Journal Sysop"; stage.credential = credential(); stage.audit = audit(1);
     const auto staged = storage.stage_initial_sysop(stage); check(staged && staged.account_id, "fixture account stages");
     const auto policy = storage.security_policy(); check(policy && policy.value, "fixture policy readable");
@@ -116,7 +117,7 @@ void migration(const std::filesystem::path& root) {
     settings.bootstrap_boundary_hook = {};
     db::SqliteStorage upgraded(settings, paths);
     check(upgraded.start().succeeded(), "old shipping database upgrades safely on retry");
-check(upgraded.health().schema_version == 27, "retry completes current shipping version");
+check(upgraded.health().schema_version == sfx::test::shipping_schema_version, "retry completes current shipping version");
     check(upgraded.pending_caller_journals(false, 16).value->empty() && upgraded.pending_caller_journals(true, 16).value->empty(),
         "migration never manufactures historical detailed blocks");
     app::StartSessionRequest current{id(900), id(901), 1, 1, 1788990000};

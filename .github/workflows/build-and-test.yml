@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   linux:
-    name: Linux x86-64 build and smoke tests
+    name: Linux x86-64 build and full test suite
     if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-22.04
     timeout-minutes: 30
@@ -29,19 +29,41 @@ jobs:
       - name: Configure
         # GCC flags an existing copy of a small pair in ftn_secrets.cpp.
         run: cmake --preset linux-gcc -DCMAKE_CXX_FLAGS=-Wno-error=range-loop-construct
-      - name: Build applications and smoke tests
-        run: |
-          cmake --build --preset linux-gcc --parallel 4 --target \
-            SFXWeb SFXRuntime SFXHostLookup SFXBinkD SFXFileTransfer SFXQWKTransfer \
-            sfx_file_presentation_tests sfx_file_transfer_completion_tests \
-            sfx_operational_configuration_tests sfx_scheduler_tests sfx_file_session_tests
-      - name: Run smoke tests
+      - name: Build applications and tests
+        run: cmake --build --preset linux-gcc --parallel 4 -- -k 0
+      - name: Run the full CTest suite
+        run: ctest --preset linux-gcc --output-on-failure --no-tests=error --parallel 4 --timeout 300
+      - name: Test caller file sessions
         shell: bash
         run: |
-          ctest --preset linux-gcc --output-on-failure --no-tests=error \
-            -R '^sfx\.unit\.(file_presentation|file_transfer_completion|operational_configuration|scheduler)$'
           scratch="$(mktemp -d "$RUNNER_TEMP/sfx-file-session.XXXXXX")"
           build/linux-gcc/sfx_file_session_tests "$scratch/board"
+
+  linux-gcc16:
+    name: Linux x86-64 build (GCC 16)
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    container: quay.io/fedora/fedora:44
+    timeout-minutes: 30
+    steps:
+      - name: Install Fedora's GCC 16 toolchain
+        run: |
+          dnf -y install gcc gcc-c++ cmake ninja-build make perl-core git-core tar xz
+          gcc --version
+          g++ --version
+          test "$(gcc -dumpversion | cut -d. -f1)" = 16
+          test "$(g++ -dumpversion | cut -d. -f1)" = 16
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Configure
+        run: >-
+          cmake --preset linux-gcc -DBUILD_TESTING=OFF
+          -DCMAKE_CXX_FLAGS=-Wno-error=range-loop-construct
+      - name: Build applications
+        run: >-
+          cmake --build --preset linux-gcc --parallel 4 --target
+          SFXWeb SFXRuntime SFXHostLookup SFXBinkD SFXFileTransfer SFXQWKTransfer
 
   windows:
     name: Windows x86 build and smoke tests

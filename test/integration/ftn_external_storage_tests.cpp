@@ -21,7 +21,8 @@ void upgrade(const std::filesystem::path& root,sfx::test::FakeStoragePathPolicy&
     {storage::SqliteStorage failed(s,paths);check(!failed.start(),"interrupted migration fails");}
     check(scalar(file,"PRAGMA user_version")==27,"interrupted additive migration rolled back");
     s.bootstrap_boundary_hook={};
-    {storage::SqliteStorage current(s,paths);check(current.start().succeeded()&&current.health().schema_version==28,"predecessor upgrades normally");check(app::encode_ftn_configuration(*current.ftn_configuration({true,{}}).value)==prior_configuration,"upgrade preserves exact Native settings and protected credential bytes");check(current.shutdown().succeeded(),"upgraded fixture stopped");}
+    {auto target=storage::sfx_storage_migrations();target.resize(28);
+        storage::SqliteStorage current(s,paths,target);check(current.start().succeeded()&&current.health().schema_version==28,"predecessor upgrades normally");check(app::encode_ftn_configuration(*current.ftn_configuration({true,{}}).value)==prior_configuration,"upgrade preserves exact Native settings and protected credential bytes");check(current.shutdown().succeeded(),"upgraded fixture stopped");}
     check(scalar(file,"SELECT count(*) FROM sfx_ftn_ingress WHERE proof=5 AND external_session_authenticated=0")==1,"old external proof is not promoted");
     check(scalar(file,"SELECT count(*) FROM sfx_ftn_ingress_sessions WHERE proof=5 AND external_session_authenticated=0")==1,"old session observation preserved without authentication");
     check(scalar(file,"SELECT count(*) FROM sfx_ftn_ingress WHERE proof=1 AND state=4 AND network='NATIVE' AND wire_name='prior-native.pkt' AND declared_size=7 AND received_bytes=7 AND external_session_authenticated=0")==1,"old Native custody remains Native and exact");

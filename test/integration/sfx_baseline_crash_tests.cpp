@@ -1,4 +1,5 @@
 #include "sfx/adapters/storage/sqlite_storage.hpp"
+#include "sfx/test/shipping_schema.hpp"
 #include "sfx/test/storage_fakes.hpp"
 #include "sqlite_internal.hpp"
 #include "sqlite_sfx_baseline.hpp"
@@ -95,15 +96,15 @@ void verify_exact_completed_state(const std::filesystem::path& directory) {
         "frozen schema-one validator still rejects an upgraded shipping schema");
     require(verification.scalar_int64(
                 "SELECT count(*) FROM sfx_schema_migrations",
-                "count crash-retry migration ledger") == 27,
-        "retry produces exactly all 27 accepted shipping migration ledger rows");
+                "count crash-retry migration ledger") == sfx::test::shipping_migration_count,
+        "retry produces exactly all accepted shipping migration ledger rows");
     require(verification.scalar_int64(
                 "PRAGMA application_id", "read crash-retry application ID") ==
             internal::sfx_baseline_application_id &&
             verification.scalar_int64(
                 "PRAGMA user_version", "read crash-retry schema version") ==
-            27,
-        "retry publishes SFXB and shipping schema version27");
+            sfx::test::shipping_schema_version,
+        "retry publishes SFXB and the shipping schema version");
 }
 
 void verify_only_sfx_database_remains(const std::filesystem::path& directory) {

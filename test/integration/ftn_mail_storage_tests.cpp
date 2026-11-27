@@ -24,7 +24,7 @@ app::CommitSourceMessageRequest seeded_message(storage::SqliteStorage& db,unsign
     check(db.commit_source_message(request).succeeded(),"legitimate native source/receipt/recipient/arrival committed before upgrade");return request;
 }
 void upgrade(const std::filesystem::path& root,const char* fault){
-    sfx::test::FakeStoragePathPolicy paths;auto s=settings(root);auto plan=storage::sfx_storage_migrations();check(plan.size()==27,"current lineage27 retains the exact21-to22 migration slice");auto target=plan;target.resize(22);plan.resize(21);
+    sfx::test::FakeStoragePathPolicy paths;auto s=settings(root);auto plan=storage::sfx_storage_migrations();check(plan.size()==sfx::test::shipping_migration_count,"current shipping lineage retains the exact21-to22 migration slice");auto target=plan;target.resize(22);plan.resize(21);
     {storage::SqliteStorage old(s,paths,plan);const auto started=old.start();if(!started)std::cerr<<started.operation<<'\n';check(started.succeeded()&&old.health().schema_version==21,"exact21 startup");check(old.shutdown().succeeded(),"old fixture stopped");}
     const auto file=s.data_directory/"SFX.DB";seed(file);
     std::vector<app::CommitSourceMessageRequest> messages;

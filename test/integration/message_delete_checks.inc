@@ -10,9 +10,9 @@ void individual_migration_checks(const std::filesystem::path& root,sfx::test::Fa
             check(internal::validate_sfx_shipping_database(c.get(),true),"migration fault exact recognized lineage");
             check(c.scalar_int64("PRAGMA user_version","atomic deletion migration")== (std::string_view(point)=="after-message-delete-migration-commit"?11:10),"individual migration atomic");}
         s.bootstrap_boundary_hook={};db::SqliteStorage retry(s,policy);
-        check(retry.start().succeeded() && retry.health().schema_version==30 && retry.shutdown().succeeded(),"individual migration retry once to current shipping lineage");
+        check(retry.start().succeeded() && retry.health().schema_version==sfx::test::shipping_schema_version && retry.shutdown().succeeded(),"individual migration retry once to current shipping lineage");
         check(retry.validate_backup(backup).succeeded() && retry.restore_backup(backup).succeeded() && retry.start().succeeded(),"v10 production restore and remigration");
-        check(scalar(s.data_directory/"SFX.DB","SELECT count(*) FROM sfx_accounts")==3 && scalar(s.data_directory/"SFX.DB","SELECT count(*) FROM sfx_schema_migrations")==30,"all accounts and thirty ledger rows retained");
+        check(scalar(s.data_directory/"SFX.DB","SELECT count(*) FROM sfx_accounts")==3 && scalar(s.data_directory/"SFX.DB","SELECT count(*) FROM sfx_schema_migrations")==sfx::test::shipping_migration_count,"all accounts and the complete shipping ledger retained");
         check(retry.shutdown().succeeded(),"migration recovery stopped");
     }
 }

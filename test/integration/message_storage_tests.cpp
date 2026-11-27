@@ -1,4 +1,5 @@
 #include "sfx/adapters/storage/sqlite_storage.hpp"
+#include "sfx/test/shipping_schema.hpp"
 #include "sfx/test/storage_fakes.hpp"
 #include "sqlite_internal.hpp"
 #include "sqlite_sfx_baseline.hpp"

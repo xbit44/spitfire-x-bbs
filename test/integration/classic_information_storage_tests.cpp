@@ -1,5 +1,6 @@
 #include "sfx/adapters/storage/sqlite_storage.hpp"
 #include "sfx/application/local_classic_information.hpp"
+#include "sfx/test/shipping_schema.hpp"
 #include "sfx/test/storage_fakes.hpp"
 #include "sqlite_internal.hpp"
 #include "sqlite_sfx_baseline.hpp"
@@ -85,7 +86,7 @@ void text_transition(const std::filesystem::path& root,sfx::test::FakeStoragePat
         }
         settings.bootstrap_boundary_hook={};auto text=std::make_shared<TextFixture>();settings.other_board_text=text;
         db::SqliteStorage current(settings,policy);
-        check(current.start().succeeded() && current.health().schema_version==27,"v7 retirement retries through current schema27");
+        check(current.start().succeeded() && current.health().schema_version==sfx::test::shipping_schema_version,"v7 retirement retries through current shipping schema");
         check(current.other_boards(0).value->entries.empty(),"no import of old test catalog");
         check(current.opening_date().value->configured_date=="1984-05-12" && current.opening_date().value->initialization_utc==1700000000,"configured and original dates preserved");
         check(current.menu_preferences(1).value->preferences.color==5 && !current.menu_preferences(1).value->preferences.hotkey,"account choices preserved");
@@ -115,7 +116,7 @@ void text_transition(const std::filesystem::path& root,sfx::test::FakeStoragePat
         check(!current.change_classic_information(add,caller) && text->rows.empty() && text->logs.size()==2,"current disabled account cannot publish text or a log even with matching revision");
         check(current.shutdown().succeeded(),"disabled account fixture stops before recovery");
         check(current.validate_backup(backup).succeeded() && current.restore_backup(backup).succeeded(),"exact v6 recovery accepted");
-        check(current.start().succeeded() && current.health().schema_version==27 && current.other_boards(0).value->entries.empty(),"recovered v6 re-retires without importing");
+        check(current.start().succeeded() && current.health().schema_version==sfx::test::shipping_schema_version && current.other_boards(0).value->entries.empty(),"recovered v6 re-retires without importing");
         check(current.opening_date().value->configured_date=="1984-05-12" && current.shutdown().succeeded(),"recovery preserves unrelated information");
     }
 }

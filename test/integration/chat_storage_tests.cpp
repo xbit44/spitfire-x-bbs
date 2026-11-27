@@ -12,7 +12,7 @@ int main(int argc,char** argv){try{
         s.bootstrap_boundary_hook=[point](std::string_view at){return at==point?app::StorageStatus{app::StorageErrorCode::io,"isolated Chat migration failure"}:app::StorageStatus::success();};
         {storage::SqliteStorage failed(s,paths);check(!failed.start(),"injected migration fails closed");}
         check(scalar(s.data_directory/"SFX.DB","PRAGMA user_version")== (std::string_view(point)=="after-chat-migration-commit"?19:18),"atomic migration version");
-        s.bootstrap_boundary_hook={};storage::SqliteStorage retry(s,paths);check(retry.start().succeeded()&&retry.health().schema_version==27,"migration retries");check(retry.shutdown().succeeded(),"retry stopped");
+        s.bootstrap_boundary_hook={};storage::SqliteStorage retry(s,paths);check(retry.start().succeeded()&&retry.health().schema_version==sfx::test::shipping_schema_version,"migration retries");check(retry.shutdown().succeeded(),"retry stopped");
         check(scalar(s.data_directory/"SFX.DB","SELECT count(*) FROM sfx_accounts")==3&&scalar(s.data_directory/"SFX.DB","SELECT count(*) FROM sfx_account_sessions")==3,"legacy accounts and sessions retained");
     }
     for(const char* point:{"before-private-chat-migration","before-private-chat-migration-commit","after-private-chat-migration-commit"}){
@@ -21,10 +21,10 @@ int main(int argc,char** argv){try{
         fixture.bootstrap_boundary_hook=[point](std::string_view at){return at==point?app::StorageStatus{app::StorageErrorCode::io,"isolated private Chat migration failure"}:app::StorageStatus::success();};
         {storage::SqliteStorage failed(fixture,paths);check(!failed.start(),"private Chat migration fails closed");}
         check(scalar(fixture.data_directory/"SFX.DB","PRAGMA user_version")==(std::string_view(point)=="after-private-chat-migration-commit"?20:19),"private Chat migration atomic");
-        fixture.bootstrap_boundary_hook={};storage::SqliteStorage retry(fixture,paths);check(retry.start().succeeded()&&retry.health().schema_version==27,"private Chat migration retry");check(retry.shutdown().succeeded(),"private Chat retry closed");
+        fixture.bootstrap_boundary_hook={};storage::SqliteStorage retry(fixture,paths);check(retry.start().succeeded()&&retry.health().schema_version==sfx::test::shipping_schema_version,"private Chat migration retry");check(retry.shutdown().succeeded(),"private Chat retry closed");
         check(scalar(fixture.data_directory/"SFX.DB","SELECT count(*) FROM sfx_accounts")==3,"private Chat upgrade keeps all accounts");
     }
-    auto s=settings(root/"primary");storage::SqliteStorage db(s,paths);check(db.start().succeeded()&&db.health().schema_version==27,"fresh current schema27");check(db.shutdown().succeeded(),"stop before synthetic actors");const auto file=s.data_directory/"SFX.DB";seed(file);check(db.start().succeeded(),"start fixture");
+    auto s=settings(root/"primary");storage::SqliteStorage db(s,paths);check(db.start().succeeded()&&db.health().schema_version==sfx::test::shipping_schema_version,"fresh current shipping schema");check(db.shutdown().succeeded(),"stop before synthetic actors");const auto file=s.data_directory/"SFX.DB";seed(file);check(db.start().succeeded(),"start fixture");
     const app::MessageConfigurationActor owner{true,{}};const app::MessageActor alice{id(2),2,1,1},sysop{id(1),1,1,1};
     auto c=db.chat_configuration(owner);check(c&&c.value&&c.value->rooms.size()==1&&c.value->rooms[0].access.level==10&&c.value->exclude_sysop_statistics,"default Lobby10 and statistics On");
     auto ordinary=db.chat_preferences(alice);check(ordinary&&ordinary.value&&!ordinary.value->dnd&&!ordinary.value->ghost&&ordinary.value->notices,"new preference defaults");
