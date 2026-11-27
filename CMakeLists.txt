@@ -2211,6 +2211,8 @@ if(BUILD_TESTING)
     target_link_libraries(sfx_message_storage_tests PRIVATE sfx::storage_sqlite)
     sfx_configure_test_executable(sfx_message_storage_tests)
     add_test(NAME sfx.integration.message_storage COMMAND sfx_message_storage_tests "${CMAKE_CURRENT_BINARY_DIR}/test-output/section8a")
+    # This suite runs many real SQLite migrations, backups and fault-recovery cases.
+    set_tests_properties(sfx.integration.message_storage PROPERTIES TIMEOUT 600)
     add_executable(sfx_optional_subject_tests test/integration/optional_subject_tests.cpp test/support/src/sqlite_write_fault_vfs.cpp)
     target_include_directories(sfx_optional_subject_tests PRIVATE src/adapters/storage/src test/support/include third_party/sqlite/3.53.4)
     target_link_libraries(sfx_optional_subject_tests PRIVATE sfx::storage_sqlite)
