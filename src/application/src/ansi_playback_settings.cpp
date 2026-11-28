@@ -11,44 +11,27 @@
 #include <thread>
 #include <utility>
 
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-#endif
-
 namespace sfx::application {
 namespace {
 
 using Path = std::filesystem::path;
 
 struct PathLess {
+    AnsiPlaybackSettings::PathRules rules;
+
+    Path normalize(Path path) const {
+        if (rules.normalize) path = rules.normalize(std::move(path));
+        return path.lexically_normal().make_preferred();
+    }
+
     bool operator()(const Path& left, const Path& right) const noexcept {
-#ifdef _WIN32
-        const auto order = CompareStringOrdinal(left.c_str(), -1, right.c_str(), -1, TRUE);
-        if (order != 0) return order == CSTR_LESS_THAN;
-#endif
-        return left.native() < right.native();
+        return rules.less ? rules.less(left, right) : left.native() < right.native();
     }
 };
 
 using Rates = std::map<Path, std::uint32_t, PathLess>;
 std::shared_ptr<const Rates> active_rates;
 std::atomic<bool> worker_active{false};
-
-Path normalize(Path path) {
-#ifdef _WIN32
-    const auto& native = path.native();
-    // Win32 handle paths may include an extended-length DOS drive prefix.
-    if (native.size() > 6 && native.compare(0, 4, L"\\\\?\\") == 0 && native[5] == L':')
-        path = native.substr(4);
-#endif
-    return path.lexically_normal().make_preferred();
-}
 
 std::string_view trim(std::string_view text) noexcept {
     constexpr std::string_view whitespace = " \t\r";
@@ -64,11 +47,11 @@ bool is_ansi_file(const Path& path) {
     return suffix == ".ans";
 }
 
-std::optional<Rates> parse(std::string_view text) {
+std::optional<Rates> parse(std::string_view text, PathLess path_less) {
     constexpr std::string_view bom = "\xef\xbb\xbf";
     if (text.substr(0, bom.size()) == bom) text.remove_prefix(bom.size());
     if (text.find('\0') != text.npos) return {};
-    Rates rates;
+    Rates rates(path_less);
     bool in_section = false;
     while (!text.empty()) {
         const auto end = text.find('\n');
@@ -85,7 +68,7 @@ std::optional<Rates> parse(std::string_view text) {
         if (std::any_of(filename.begin(), filename.end(), [](unsigned char byte) {
                 return byte < 32 || byte == 127;
             })) return {};
-        auto path = normalize(std::filesystem::u8path(filename));
+        auto path = path_less.normalize(std::filesystem::u8path(filename));
         if (!path.is_absolute() || !is_ansi_file(path)) return {};
 
         const auto value = trim(line.substr(separator + 1));
@@ -103,7 +86,7 @@ std::optional<Rates> parse(std::string_view text) {
 }  // namespace
 
 struct AnsiPlaybackSettings::Worker {
-    explicit Worker(ReadConfiguration read) : read_(std::move(read)) {
+    Worker(ReadConfiguration read, PathRules rules) : read_(std::move(read)), path_less_{rules} {
         refresh(true);
         thread_ = std::thread([this] {
             std::unique_lock<std::mutex> lock(wait_);
@@ -139,7 +122,7 @@ private:
                 return;
             }
             pending_.reset();
-            auto rates = parse(*text);
+            auto rates = parse(*text, path_less_);
             if (!rates) return;
             auto snapshot = std::make_shared<const Rates>(std::move(*rates));
             accepted_ = std::move(text);
@@ -150,6 +133,7 @@ private:
     }
 
     ReadConfiguration read_;
+    PathLess path_less_;
     std::optional<std::string> accepted_, pending_;
     std::mutex wait_;
     std::condition_variable wake_;
@@ -157,10 +141,10 @@ private:
     std::thread thread_;
 };
 
-AnsiPlaybackSettings::AnsiPlaybackSettings(ReadConfiguration read) noexcept {
+AnsiPlaybackSettings::AnsiPlaybackSettings(ReadConfiguration read, PathRules rules) noexcept {
     if (worker_active.exchange(true)) return;
     try {
-        worker_ = std::make_unique<Worker>(std::move(read));
+        worker_ = std::make_unique<Worker>(std::move(read), rules);
     } catch (...) {
         std::atomic_store(&active_rates, std::shared_ptr<const Rates>{});
         worker_active.store(false);
@@ -178,7 +162,7 @@ std::uint32_t ansi_playback_bps(const std::filesystem::path& asset) noexcept {
     try {
         const auto snapshot = std::atomic_load(&active_rates);
         if (snapshot && !snapshot->empty()) {
-            const auto found = snapshot->find(normalize(asset));
+            const auto found = snapshot->find(snapshot->key_comp().normalize(asset));
             if (found != snapshot->end()) return found->second;
         }
     } catch (...) {}

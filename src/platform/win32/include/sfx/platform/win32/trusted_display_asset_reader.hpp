@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sfx/application/ansi_playback_settings.hpp"
 #include "sfx/application/display.hpp"
 
 #include <atomic>
@@ -9,6 +10,8 @@
 #include <string_view>
 
 namespace sfx::platform::win32 {
+
+application::AnsiPlaybackSettings::PathRules ansi_playback_path_rules() noexcept;
 
 enum class TrustedDisplayReadStage : std::uint8_t {
     root_revalidated,

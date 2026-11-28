@@ -15,6 +15,7 @@
 #include "sfx/platform/win32/service_secret_bridge.hpp"
 #include "sfx/platform/win32/service_file_owner.hpp"
 #include "sfx/platform/win32/portable_installation.hpp"
+#include "sfx/platform/win32/trusted_display_asset_reader.hpp"
 
 #include <windows.h>
 #include <shellapi.h>
@@ -181,7 +182,9 @@ int sfx::apps::runtime::run_runtime_process(void* inherited_owner_handle) {
     alpha_hostname_test_uncertain(std::filesystem::exists(
         win32::alpha_installation_root() / L"hostname-uncertain.test"));
 #endif
-    app::AnsiPlaybackSettings playback_settings([&] { return read_ansi_playback_file(root, installation_owner); });
+    app::AnsiPlaybackSettings playback_settings(
+        [&] { return read_ansi_playback_file(root, installation_owner); },
+        win32::ansi_playback_path_rules());
     AlphaRuntimeHost host(root,{},persistent?installation_owner:std::wstring{});
     app::AlphaControlResponse start = host.start();
     if(persistent&&start.code!=app::LocalControlResponseCode::ok&&start.code!=app::LocalControlResponseCode::setup_required)

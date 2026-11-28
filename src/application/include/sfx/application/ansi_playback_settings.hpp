@@ -19,8 +19,12 @@ inline constexpr std::uint32_t kAnsiPlaybackMaximumBps = 115200;
 class AnsiPlaybackSettings final {
 public:
     using ReadConfiguration = std::function<std::optional<std::string>()>;
+    struct PathRules {
+        std::filesystem::path (*normalize)(std::filesystem::path);
+        bool (*less)(const std::filesystem::path&, const std::filesystem::path&) noexcept;
+    };
 
-    explicit AnsiPlaybackSettings(ReadConfiguration) noexcept;
+    explicit AnsiPlaybackSettings(ReadConfiguration, PathRules = {nullptr, nullptr}) noexcept;
     ~AnsiPlaybackSettings();
     AnsiPlaybackSettings(const AnsiPlaybackSettings&) = delete;
     AnsiPlaybackSettings& operator=(const AnsiPlaybackSettings&) = delete;

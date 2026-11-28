@@ -1,5 +1,9 @@
 #include "sfx/application/ansi_playback_settings.hpp"
 
+#ifdef _WIN32
+#include "sfx/platform/win32/trusted_display_asset_reader.hpp"
+#endif
+
 #include <chrono>
 #include <condition_variable>
 #include <iostream>
@@ -53,8 +57,10 @@ void wait_for_rate(const fs::path& path, const std::uint32_t rate) {
 void verify_settings() {
 #ifdef _WIN32
     const fs::path root = L"C:/SFX test";
+    const auto rules = sfx::platform::win32::ansi_playback_path_rules();
 #else
     const fs::path root = "/SFX test";
+    const app::AnsiPlaybackSettings::PathRules rules{nullptr, nullptr};
 #endif
     const auto first = root / "Display" / "slowansi.ans";
     const auto second = root / "Alternate" / "slowansi.ans";
@@ -73,7 +79,7 @@ void verify_settings() {
     config.set(std::string("\xef\xbb\xbf; ANSI settings\r\n\r\n") + section +
         with_rate(first, 19200) + with_rate(second, 0) + with_rate(equals_in_name, 300));
     {
-        app::AnsiPlaybackSettings settings([&] { return config.read(); });
+        app::AnsiPlaybackSettings settings([&] { return config.read(); }, rules);
         check(app::ansi_playback_bps(first) == 19200, "Startup reads BOM, comments, CRLF and spaces");
         check(app::ansi_playback_bps(second) == 0 && app::ansi_playback_bps(unlisted) == 0,
             "Identical leaf names use distinct full paths");
@@ -82,6 +88,8 @@ void verify_settings() {
         check(app::ansi_playback_bps(paths_with_dots) == 19200, "Lookup uses normalized path");
 #ifdef _WIN32
         check(app::ansi_playback_bps(different_case) == 19200, "Windows path comparison ignores case");
+        const fs::path handle_path = L"\\\\?\\C:\\SFX test\\Display\\slowansi.ans";
+        check(app::ansi_playback_bps(handle_path) == 19200, "Windows handle path matches a DOS drive path");
 #else
         check(app::ansi_playback_bps(different_case) == 0, "Linux path comparison preserves case");
 #endif
