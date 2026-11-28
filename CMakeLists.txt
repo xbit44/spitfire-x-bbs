@@ -89,6 +89,7 @@ target_include_directories(sfx_core PUBLIC src/core/include)
 sfx_configure_portable_target(sfx_core)
 
 add_library(sfx_application STATIC
+    src/application/src/ansi_playback_settings.cpp
     src/application/src/ftn.cpp
     src/application/src/ftn_setup.cpp
     src/application/src/ftn_nodelist.cpp
@@ -1193,8 +1194,8 @@ if(WIN32)
     target_link_libraries(SFXDOSHost PRIVATE ws2_32 advapi32 iphlpapi bcrypt)
     # External GPL executable, never linked into SFX. Its fixed reproducible
     # source/build materials are shipped separately with the owner media.
-    set(SFX_MESSAGE_HELPER "${CMAKE_CURRENT_SOURCE_DIR}/build/section8b-helper-empty-batch/r4/sexyz.exe")
-    set(SFX_MESSAGE_HELPER_STAMP "${CMAKE_CURRENT_SOURCE_DIR}/build/section8b-helper-empty-batch/r4-built.stamp")
+    set(SFX_MESSAGE_HELPER "${CMAKE_CURRENT_SOURCE_DIR}/build/section8b-helper-empty-batch/b5/sexyz.exe")
+    set(SFX_MESSAGE_HELPER_STAMP "${CMAKE_CURRENT_SOURCE_DIR}/build/section8b-helper-empty-batch/b5-built.stamp")
     file(GLOB_RECURSE SFX_MESSAGE_HELPER_INPUTS CONFIGURE_DEPENDS
         "${CMAKE_CURRENT_SOURCE_DIR}/research/architecture/section8b-helper-empty-batch/*")
     # Keep the MSBuild output directory outside the script-owned unique run.
@@ -1202,35 +1203,33 @@ if(WIN32)
         COMMAND pwsh.exe -NoProfile -File
             "${CMAKE_CURRENT_SOURCE_DIR}/cmake/EnsureMessageHelper.ps1"
             -Repository "${CMAKE_CURRENT_SOURCE_DIR}" -Stamp "${SFX_MESSAGE_HELPER_STAMP}"
-        DEPENDS ${SFX_MESSAGE_HELPER_INPUTS}
-            "${CMAKE_CURRENT_SOURCE_DIR}/research/architecture/evidence/section8b-helper-empty-batch-20261009/r1/source-materials.json"
-            "${CMAKE_CURRENT_SOURCE_DIR}/research/architecture/evidence/section8b-helper-empty-batch-20261009/r1/DR_EXACT_HELPER_REVIEW.json"
+        DEPENDS ${SFX_MESSAGE_HELPER_INPUTS} "${SFX_MESSAGE_HELPER}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/build/section8b-helper-empty-batch/b5/manifest.json"
+            "${CMAKE_CURRENT_SOURCE_DIR}/build/section8b-helper-empty-batch/b5/qualification.json"
             "${CMAKE_CURRENT_SOURCE_DIR}/cmake/EnsureMessageHelper.ps1"
         VERBATIM)
     add_custom_target(SFXMessageHelper DEPENDS "${SFX_MESSAGE_HELPER_STAMP}")
-    set(SFX_PACKET_HELPER "${CMAKE_CURRENT_SOURCE_DIR}/build/rc10-helper-packet/r2/SFXQWKTransfer.exe")
+    set(SFX_PACKET_HELPER "${CMAKE_CURRENT_SOURCE_DIR}/build/rc10-helper-packet/b5/SFXQWKTransfer.exe")
     set(SFX_PACKET_HELPER_STAMP "${CMAKE_CURRENT_BINARY_DIR}/packet-helper-bound.stamp")
     file(GLOB_RECURSE SFX_PACKET_HELPER_INPUTS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/research/architecture/rc10-packet-helper/*")
     add_custom_command(OUTPUT "${SFX_PACKET_HELPER_STAMP}"
         COMMAND pwsh.exe -NoProfile -File "${CMAKE_CURRENT_SOURCE_DIR}/cmake/EnsurePacketHelper.ps1"
             -Repository "${CMAKE_CURRENT_SOURCE_DIR}" -Stamp "${SFX_PACKET_HELPER_STAMP}"
         DEPENDS ${SFX_PACKET_HELPER_INPUTS} "${SFX_PACKET_HELPER}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/build/rc10-helper-packet/r2/manifest.json"
-            "${CMAKE_CURRENT_SOURCE_DIR}/build/rc10-helper-packet-tests/r4/qualification.json"
+            "${CMAKE_CURRENT_SOURCE_DIR}/build/rc10-helper-packet/b5/manifest.json"
+            "${CMAKE_CURRENT_SOURCE_DIR}/build/rc10-helper-packet/b5/qualification.json"
             "${CMAKE_CURRENT_SOURCE_DIR}/cmake/EnsurePacketHelper.ps1"
         VERBATIM)
     add_custom_target(SFXPacketHelper DEPENDS "${SFX_PACKET_HELPER_STAMP}")
-    set(SFX_FILE_HELPER "${CMAKE_CURRENT_SOURCE_DIR}/build/section10-helper-file/r4/SFXFileTransfer.exe")
+    set(SFX_FILE_HELPER "${CMAKE_CURRENT_SOURCE_DIR}/build/section10-helper-file/b5/SFXFileTransfer.exe")
     set(SFX_FILE_HELPER_STAMP "${CMAKE_CURRENT_BINARY_DIR}/file-helper-bound.stamp")
     file(GLOB_RECURSE SFX_FILE_HELPER_INPUTS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/research/architecture/section10-file-helper/*")
     add_custom_command(OUTPUT "${SFX_FILE_HELPER_STAMP}"
         COMMAND pwsh.exe -NoProfile -File "${CMAKE_CURRENT_SOURCE_DIR}/cmake/EnsureFileHelper.ps1"
             -Repository "${CMAKE_CURRENT_SOURCE_DIR}" -Stamp "${SFX_FILE_HELPER_STAMP}"
         DEPENDS ${SFX_FILE_HELPER_INPUTS} "${SFX_FILE_HELPER}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/build/section10-helper-file/r4/manifest.json"
-            "${CMAKE_CURRENT_SOURCE_DIR}/build/section10-g-startup-r2/result.json"
-            "${CMAKE_CURRENT_SOURCE_DIR}/build/section10-helper-tests/r5/result.json"
-            "${CMAKE_CURRENT_SOURCE_DIR}/build/section10-helper-zregression/r3/result.json"
+            "${CMAKE_CURRENT_SOURCE_DIR}/build/section10-helper-file/b5/manifest.json"
+            "${CMAKE_CURRENT_SOURCE_DIR}/build/section10-helper-file/b5/qualification.json"
             "${CMAKE_CURRENT_SOURCE_DIR}/cmake/EnsureFileHelper.ps1"
         VERBATIM)
     add_custom_target(SFXFileHelper DEPENDS "${SFX_FILE_HELPER_STAMP}")
@@ -1604,6 +1603,11 @@ if(BUILD_TESTING)
     target_link_libraries(sfx_menu_display_tests PRIVATE sfx::application)
     sfx_configure_test_executable(sfx_menu_display_tests)
     add_test(NAME sfx.unit.menu_display COMMAND sfx_menu_display_tests)
+
+    add_executable(sfx_ansi_playback_settings_tests test/unit/ansi_playback_settings_tests.cpp)
+    target_link_libraries(sfx_ansi_playback_settings_tests PRIVATE sfx::application Threads::Threads)
+    sfx_configure_test_executable(sfx_ansi_playback_settings_tests)
+    add_test(NAME sfx.unit.ansi_playback_settings COMMAND sfx_ansi_playback_settings_tests)
     add_executable(sfx_menu_session_tests test/unit/menu_session_tests.cpp)
     add_executable(sfx_beta6_polish_prompt_tests test/unit/beta6_polish_prompt_tests.cpp)
     target_link_libraries(sfx_beta6_polish_prompt_tests PRIVATE sfx::application)

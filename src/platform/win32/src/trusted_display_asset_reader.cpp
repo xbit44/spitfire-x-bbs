@@ -1,4 +1,5 @@
 #include "sfx/platform/win32/trusted_display_asset_reader.hpp"
+#include "sfx/application/ansi_playback_settings.hpp"
 
 #include <windows.h>
 
@@ -463,7 +464,8 @@ Win32TrustedDisplayAssetReader::read_asset(
             std::to_string(identity->high) + ":" +
             std::to_string(identity->low);
         return {TrustedDisplayAssetReadCode::available,
-            std::string(logical_identity), stable, std::move(bytes), modified};
+            std::string(logical_identity), stable, std::move(bytes), modified,
+            application::ansi_playback_bps(candidate)};
     } catch (...) {
         return {TrustedDisplayAssetReadCode::unavailable, {}, {}, {}};
     }

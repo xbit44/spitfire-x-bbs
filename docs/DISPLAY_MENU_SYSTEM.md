@@ -47,6 +47,30 @@ display-asset contract is not proof of implemented message-art support.
 
 The OGSF `.CLR` / `.BBS` native convention is not carried forward.
 
+## ANSI playback speed
+
+To slow a display for callers, create `Config/ansi-speed.ini` in a Windows
+installation or `config/ansi-speed.ini` in a Linux installation. Put the full
+path of each selected ANSI file on a line with its simulated serial rate.
+Use the appropriate path for your system.
+
+```ini
+[PlaybackBps]
+D:\SFX\Display\WELCOME1.ANS = 19200
+/home/sysop/sfx/display/welcome2.ans = 9600
+```
+
+Use rates from 300 through 115200 bits per second. Remove a path or use
+`0` for full speed. A file in another folder has its own setting, even if
+the filename matches. Save as UTF-8. The Runtime reloads edits and applies
+them to displays that start afterward. On Linux, keep this file owned by
+the BBS account and writable only by that account.
+
+At 19200 bps a 15,563-byte screen takes roughly 8 seconds plus any caller
+pauses. The rate applies to the chosen ANSI artwork over Telnet and SSH.
+Paging and authored pauses still apply. BotGate's live countdown and forced
+idle-disconnect notices use immediate output.
+
 ## Selection model
 
 Use an unsuffixed fallback plus an optional exact-security override.

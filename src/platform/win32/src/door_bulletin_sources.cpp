@@ -1,4 +1,5 @@
 #include "sfx/platform/win32/door_bulletin_sources.hpp"
+#include "sfx/application/ansi_playback_settings.hpp"
 #include "sfx/platform/win32/file_payload_store.hpp"
 #include "sfx/platform/win32/portable_file_bindings.hpp"
 #include "sfx/platform/win32/trusted_display_asset_reader.hpp"
@@ -19,7 +20,8 @@ app::TrustedDisplayAssetReadResult read_door_bulletin_source(const std::filesyst
     std::string bytes;bytes.reserve(static_cast<std::size_t>(size));
     for(std::uint64_t offset=0;offset<size;){const auto piece=lease.read(offset,static_cast<std::size_t>(std::min<std::uint64_t>(65536,size-offset)));installation::require(!piece.empty(),"door_bulletin_source_short_read");bytes.append(piece.begin(),piece.end());offset+=piece.size();}
     installation::require(lease.byte_count()==size,"door_bulletin_source_changed_during_read");const auto identity=lease.native_object_identity();
-    return {app::TrustedDisplayAssetReadCode::available,target.filename().u8string(),identity.volume+":"+identity.file_id,std::move(bytes),{}};
+    return {app::TrustedDisplayAssetReadCode::available,target.filename().u8string(),
+        identity.volume+":"+identity.file_id,std::move(bytes),{},app::ansi_playback_bps(target)};
 }
 app::DoorBulletinSourcePorts door_bulletin_sources(const std::filesystem::path& root,const std::wstring& owner,
     std::function<void(app::DoorBulletinId,std::string_view)> diagnostic){

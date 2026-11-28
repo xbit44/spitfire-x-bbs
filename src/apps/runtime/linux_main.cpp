@@ -1,4 +1,5 @@
 #include "linux_runtime_host.hpp"
+#include "ansi_playback_file.hpp"
 #include "sfx/platform/linux/local_control.hpp"
 #include "sfx/platform/linux/bbs_time_zone_provider.hpp"
 #include <charconv>
@@ -27,6 +28,7 @@ int run(const std::filesystem::path& root,const std::filesystem::path& tzdata){
     Clock clock;rt::LinuxRuntimeHost runtime(root,clock,[]{return false;});
     const auto opened=runtime.open();const bool copied_recovery=opened.code==Code::recovery_required&&opened.diagnostic_code=="linux_file_map_prepare_required";
     if(opened.code!=Code::ok&&opened.code!=Code::setup_required&&!copied_recovery)throw std::runtime_error(opened.diagnostic_code);
+    app::AnsiPlaybackSettings playback_settings([&] { return rt::read_ansi_playback_file(root); });
     const auto root_pin=host::open_owned_directory(root);
     if(mkdirat(root_pin.get(),"management",0700)!=0&&errno!=EEXIST)throw std::runtime_error("management_directory_create_failed");
     host::LinuxLocalControlServer control(root/"management");if(!control.open())throw std::runtime_error("management_control_unavailable");

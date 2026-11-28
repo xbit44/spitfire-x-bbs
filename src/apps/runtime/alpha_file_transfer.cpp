@@ -18,7 +18,7 @@ namespace app=application;
 namespace inst=platform::win32::installation;
 using inst::Handle;using inst::Path;using inst::require;
 using file_transfer_detail::Direction;
-constexpr char file_helper_sha[]="81257FC9C96AAAE5BC03FA6EEC7DFAD2BF82A5E9938F0DB52B6ADC2417807C3B";
+constexpr char file_helper_sha[]="8B87D172E85FE23AA792A984E69DC305292A74D125F7414B7607218B487479A4";
 struct Socket {SOCKET value{INVALID_SOCKET};~Socket(){if(value!=INVALID_SOCKET)closesocket(value);}};
 struct Attributes {std::vector<unsigned char> bytes;LPPROC_THREAD_ATTRIBUTE_LIST list{};~Attributes(){if(list)DeleteProcThreadAttributeList(list);}};
 using Child=OwnedTransferChild;

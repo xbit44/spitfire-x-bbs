@@ -1,6 +1,6 @@
 SPITFIRE-X BBS LINUX SOFTWARE CREDITS AND SOURCE
 
-This is the 1.0.0b4 Linux public beta.
+This is the 1.0.0b5 Linux beta.
 
 The SFX license is in sfx-license.txt beside this file. Original notice text
 is kept below this folder. SFX wrapper names are lowercase; the upstream
@@ -12,7 +12,7 @@ based on SEXYZ by Rob Swindell and contributors. They do not link with SFX
 libraries. Installed paths from the board root are bin/tools/sfxfiletransfer
 and bin/tools/sfxqwktransfer. The matching complete source companion is:
 
-  SFX-1.0.0b1-rc2-Linux-Transfer-Helper-Source-20261124-r1.zip
+  SFX-1.0.0b5-Linux-Transfer-Helper-Source.zip
 
 It contains the current helper source, original licenses and credits, Linux
 change notes, the exact build definition and a tested standalone build guide.

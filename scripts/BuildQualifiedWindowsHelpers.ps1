@@ -30,9 +30,9 @@ Import-Module $devShell
 Enter-VsDevShell -VsInstallPath $VisualStudio -SkipAutomaticLocation -DevCmdArguments "-arch=x86 -host_arch=x64 -vcvars_ver=$VCToolsVersion -winsdk=$WindowsSdkVersion"
 $env:VSLANG='1033'
 $helperProfiles=@(
-    @{name='Message';source='research/architecture/section8b-helper-empty-batch';target='build/section8b-helper-empty-batch/r4/sexyz.exe';hash='E884051DC99FA4D56DF3770CD2680EC40A22C32048440354CCE8D4E9E0D36FE8';guard='EnsureMessageHelper.ps1'},
-    @{name='Packet';source='research/architecture/rc10-packet-helper';target='build/rc10-helper-packet/r2/SFXQWKTransfer.exe';hash='981A34ADBBEE712E04FE39E4A087C938763D78A25C288749A64FAB05E8D049EB';guard='EnsurePacketHelper.ps1'},
-    @{name='File';source='research/architecture/section10-file-helper';target='build/section10-helper-file/r4/SFXFileTransfer.exe';hash='81257FC9C96AAAE5BC03FA6EEC7DFAD2BF82A5E9938F0DB52B6ADC2417807C3B';guard='EnsureFileHelper.ps1'}
+    @{name='Message';source='research/architecture/section8b-helper-empty-batch';target='build/section8b-helper-empty-batch/b5/sexyz.exe';hash='F6C7E6079AA68F3C10A902A8CC90257C8F0BA158FCEEC76EDA0C9E2CBB7DFB91';guard='EnsureMessageHelper.ps1'},
+    @{name='Packet';source='research/architecture/rc10-packet-helper';target='build/rc10-helper-packet/b5/SFXQWKTransfer.exe';hash='D813790C72BA1EDDA5F2E920719798E05A0DF4D722C2E557A32A1678C800F998';guard='EnsurePacketHelper.ps1'},
+    @{name='File';source='research/architecture/section10-file-helper';target='build/section10-helper-file/b5/SFXFileTransfer.exe';hash='8B87D172E85FE23AA792A984E69DC305292A74D125F7414B7607218B487479A4';guard='EnsureFileHelper.ps1'}
 )
 $names=@('sexyz','xmodem','zmodem','ringbuf','nopen','date_str','telnet','crc16','crc32','datewrap','dirwrap','filewrap','genwrap','ini_file','netwrap','os_info','sockwrap','str_list','threadwrap','xpdatetime','xpevent','xpprintf')
 foreach($helperProfile in $helperProfiles){

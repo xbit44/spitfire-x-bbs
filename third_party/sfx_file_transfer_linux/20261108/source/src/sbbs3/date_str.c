@@ -56,57 +56,54 @@ char* date_template(scfg_t* cfg, char* buf, size_t size)
 	return buf;
 }
 
-#define DECVAL(ch, mul) (DEC_CHAR_TO_INT(ch) * (mul))
+/* Keep only the last two digits without overflowing on long components. */
+static bool read_date_component(const char** input, int* component)
+{
+	const char* p = *input;
+	if (!IS_DIGIT(*p))
+		return false;
+	int value = 0;
+	do {
+		value = (value % 10) * 10 + DEC_CHAR_TO_INT(*p++);
+	} while (IS_DIGIT(*p));
+	*input = p;
+	*component = value;
+	return true;
+}
 
 /****************************************************************************/
-/* Converts a date string in numeric format (e.g. MM/DD/YY) to time_t		*/
+/* Converts a date string in numeric format (e.g. MM/DD/YY) to time_t         */
 /****************************************************************************/
 time32_t dstrtounix(enum date_fmt fmt, const char *instr)
 {
-	const char* p;
-	const char* day;
-	char        str[16];
-	struct tm   tm;
+	int first, second, third;
+	struct tm tm;
 
 	if (instr == NULL || !instr[0] || !strncmp(instr, "00/00/00", 8))
 		return 0;
-
-	if (IS_DIGIT(instr[0]) && IS_DIGIT(instr[1])
+	if (strlen(instr) >= 8
+	    && IS_DIGIT(instr[0]) && IS_DIGIT(instr[1])
 	    && IS_DIGIT(instr[3]) && IS_DIGIT(instr[4])
-	    && IS_DIGIT(instr[6]) && IS_DIGIT(instr[7]))
-		p = instr;  /* correctly formatted */
-	else {
-		p = instr;    /* incorrectly formatted */
-		while (*p && IS_DIGIT(*p)) p++;
-		if (*p == 0)
+	    && IS_DIGIT(instr[6]) && IS_DIGIT(instr[7])) {
+		first = DEC_CHAR_TO_INT(instr[0]) * 10 + DEC_CHAR_TO_INT(instr[1]);
+		second = DEC_CHAR_TO_INT(instr[3]) * 10 + DEC_CHAR_TO_INT(instr[4]);
+		third = DEC_CHAR_TO_INT(instr[6]) * 10 + DEC_CHAR_TO_INT(instr[7]);
+	} else {
+		const char* p = instr;
+		if (!read_date_component(&p, &first) || !*p)
 			return 0;
-		p++;
-		day = p;
-		while (*p && IS_DIGIT(*p)) p++;
-		if (*p == 0)
+		++p;
+		if (!read_date_component(&p, &second) || !*p)
 			return 0;
-		p++;
-		sprintf(str, "%02u/%02u/%02u"
-		        , atoi(instr) % 100, atoi(day) % 100, atoi(p) % 100);
-		p = str;
+		++p;
+		if (!read_date_component(&p, &third))
+			return 0;
 	}
 
 	memset(&tm, 0, sizeof(tm));
-	if (fmt == YYMMDD) {
-		tm.tm_year = DECVAL(p[0], 10) + DECVAL(p[1], 1);
-		tm.tm_mon = DECVAL(p[3], 10) + DECVAL(p[4], 1);
-		tm.tm_mday = DECVAL(p[6], 10) + DECVAL(p[7], 1);
-	} else {
-		tm.tm_year = ((p[6] & 0xf) * 10) + (p[7] & 0xf);
-		if (fmt == DDMMYY) {
-			tm.tm_mon = ((p[3] & 0xf) * 10) + (p[4] & 0xf);
-			tm.tm_mday = ((p[0] & 0xf) * 10) + (p[1] & 0xf);
-		}
-		else {
-			tm.tm_mon = ((p[0] & 0xf) * 10) + (p[1] & 0xf);
-			tm.tm_mday = ((p[3] & 0xf) * 10) + (p[4] & 0xf);
-		}
-	}
+	tm.tm_year = fmt == YYMMDD ? first : third;
+	tm.tm_mon = fmt == MMDDYY ? first : second;
+	tm.tm_mday = fmt == DDMMYY ? first : fmt == YYMMDD ? third : second;
 	if (tm.tm_year < Y2K_2DIGIT_WINDOW)
 		tm.tm_year += 100;
 	if (tm.tm_mon)

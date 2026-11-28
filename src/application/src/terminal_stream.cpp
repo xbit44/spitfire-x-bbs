@@ -3,10 +3,12 @@
 
 #include <algorithm>
 #include <charconv>
+#include <chrono>
 #include <limits>
 #include <map>
 #include <new>
 #include <string>
+#include <thread>
 #include <type_traits>
 
 namespace sfx::application {
@@ -536,8 +538,40 @@ TerminalOutcome StreamCallerTerminal::present_display(
         : 0U;
     const auto prompt_sgr=text_style_==TerminalTextStyle::ogsf_ansi?menu_text_sgr(7):std::string{};
     DisplayRendition rendition;
+    using Clock = std::chrono::steady_clock;
+    using namespace std::chrono_literals;
+    std::uint32_t playback_bps = 0;
+    Clock::time_point next_output;
+    const auto write_display = [&](std::string_view bytes, bool split_text = false) {
+        if (playback_bps == 0) return write_all(bytes);
+        // A serial byte occupies ten bits with 8N1 framing. Use small text
+        // batches and leave ANSI sequences and CRLF pairs in one write.
+        const auto batch = std::max<std::size_t>(1, playback_bps / 400);
+        while (!bytes.empty()) {
+            const auto piece = split_text ? bytes.substr(0, batch) : bytes;
+            auto now = Clock::now();
+            if (now - next_output > 50ms) next_output = now;
+            // Keep the cumulative deadline across small ANSI operations.
+            // Check the session regularly even after a long sequence at 300 bps.
+            while (next_output - now >= 15ms) {
+                const auto alive = stream_.poll_output();
+                if (alive != InteractiveStreamOutcome::completed) return output_outcome(alive);
+                std::this_thread::sleep_until(std::min(next_output, now + 40ms));
+                now = Clock::now();
+            }
+            const auto outcome = write_all(piece);
+            if (outcome != TerminalOutcome::completed) return outcome;
+            next_output += std::chrono::nanoseconds(10000000000ULL * piece.size() / playback_bps);
+            bytes.remove_prefix(piece.size());
+        }
+        return TerminalOutcome::completed;
+    };
     try {
         for (const auto& operation : request.program->operations) {
+            if (operation.playback_bps != playback_bps) {
+                playback_bps = operation.playback_bps;
+                if (playback_bps != 0) next_output = Clock::now();
+            }
             TerminalOutcome outcome = TerminalOutcome::completed;
             switch (operation.kind) {
                 case TerminalDisplayOperationKind::cp437_text:
@@ -546,22 +580,24 @@ TerminalOutcome StreamCallerTerminal::present_display(
                         const auto styled=system_menu_text(operation.bytes,text_style_==TerminalTextStyle::ogsf_ansi);
                         if(styled.size()>kTerminalMaximumDisplayOutputBytes)return TerminalOutcome::output_failure;
                         outcome=write_all(styled);
-                    }else outcome = write_all(operation.bytes);
+                    }else outcome = write_display(operation.bytes, true);
                     break;
                 case TerminalDisplayOperationKind::logical_newline:
                     output_started = true;
-                    outcome = write_all("\r\n");
+                    outcome = write_display("\r\n");
                     break;
                 case TerminalDisplayOperationKind::paging_newline:
                     {
                         output_started = true;
                         bool stopped = false;
-                        outcome = write_all("\r\n");
+                        outcome = write_display("\r\n");
                         if (outcome == TerminalOutcome::completed) {
+                            const auto prior_inputs = paging_input_events;
                             outcome = handle_emitted_paging_row(row_limit,
                                 emitted_rows, paging_enabled, nonstop,
                                 abort_enabled, paging_input_events, stopped,
                                 prompt_sgr,rendition.sequence());
+                            if (paging_input_events != prior_inputs) playback_bps = 0;
                         }
                         if (outcome == TerminalOutcome::completed && stopped) {
                             return TerminalOutcome::completed;
@@ -570,21 +606,22 @@ TerminalOutcome StreamCallerTerminal::present_display(
                     break;
                 case TerminalDisplayOperationKind::ansi_sequence:
                     output_started = true;
-                    outcome = write_all(operation.bytes);
+                    outcome = write_display(operation.bytes);
                     if(!prompt_sgr.empty()) rendition.apply(operation.bytes);
                     break;
                 case TerminalDisplayOperationKind::clear_screen:
                     output_started = true;
-                    outcome = write_all("\x1b[2J\x1b[H");
+                    outcome = write_display("\x1b[2J\x1b[H");
                     break;
                 case TerminalDisplayOperationKind::caller_bell:
                     output_started = true;
-                    outcome = write_all("\a");
+                    outcome = write_display("\a");
                     break;
                 case TerminalDisplayOperationKind::pause:
                     output_started = true;
                     outcome = pause_internal(
                         {request.identity}, abort_enabled);
+                    playback_bps = 0;
                     break;
                 case TerminalDisplayOperationKind::paging_disabled:
                     paging_enabled = false;
@@ -599,6 +636,7 @@ TerminalOutcome StreamCallerTerminal::present_display(
                             PagingPromptKind::forced, abort_enabled,
                             paging_input_events,prompt_sgr,rendition.sequence());
                         outcome = prompt.outcome;
+                        playback_bps = 0;
                     }
                     break;
                 case TerminalDisplayOperationKind::abort_disabled:

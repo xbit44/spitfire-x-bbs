@@ -755,7 +755,8 @@ private:
         }
         if (kind == TerminalDisplayOperationKind::cp437_text &&
             !output_.operations.empty() &&
-            output_.operations.back().kind == kind) {
+            output_.operations.back().kind == kind &&
+            output_.operations.back().playback_bps == playback_bps_) {
             if (bytes.size() >
                 kMaximumRenderedDisplayBytes -
                     output_.operations.back().bytes.size()) {
@@ -767,7 +768,7 @@ private:
                 kTerminalMaximumDisplayOperations) {
                 return false;
             }
-            output_.operations.push_back({kind, std::move(bytes)});
+            output_.operations.push_back({kind, std::move(bytes), playback_bps_});
         }
         output_.output_byte_count += addition;
         if(kind==TerminalDisplayOperationKind::cp437_text) text_column_modulo_=(text_column_modulo_+addition)%8U;
@@ -951,6 +952,8 @@ private:
         if (!content.has_value()) {
             file_stack_.pop_back(); logical_stack_.pop_back(); return false;
         }
+        const auto enclosing_bps = playback_bps_;
+        playback_bps_ = ansi_source ? asset.playback_bps : 0;
         const DisplayParseResult parsed = parse_display(
             *content, request_.identity==TrustedDisplayIdentity::door_bulletin_generated?DisplayTrust::untrusted:DisplayTrust::trusted_sysop_asset, registry_);
         if (!parsed.valid()) valid = false;
@@ -992,6 +995,7 @@ private:
                 }
             }
         }
+        playback_bps_ = enclosing_bps;
         file_stack_.pop_back();
         logical_stack_.pop_back();
         return valid;
@@ -1004,6 +1008,7 @@ private:
     std::size_t aggregate_source_bytes_{0};
     std::size_t text_column_modulo_{0};
     std::size_t include_count_{0};
+    std::uint32_t playback_bps_{};
     std::vector<std::string> logical_stack_;
     std::vector<std::string> file_stack_;
 };

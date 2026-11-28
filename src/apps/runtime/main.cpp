@@ -1,4 +1,5 @@
 #include "alpha_runtime_host.hpp"
+#include "ansi_playback_file.hpp"
 #include "runtime_control_dispatch.hpp"
 #include "alpha_hostname_lookup.hpp"
 #include "alpha_rlogin.hpp"
@@ -180,6 +181,7 @@ int sfx::apps::runtime::run_runtime_process(void* inherited_owner_handle) {
     alpha_hostname_test_uncertain(std::filesystem::exists(
         win32::alpha_installation_root() / L"hostname-uncertain.test"));
 #endif
+    app::AnsiPlaybackSettings playback_settings([&] { return read_ansi_playback_file(root, installation_owner); });
     AlphaRuntimeHost host(root,{},persistent?installation_owner:std::wstring{});
     app::AlphaControlResponse start = host.start();
     if(persistent&&start.code!=app::LocalControlResponseCode::ok&&start.code!=app::LocalControlResponseCode::setup_required)

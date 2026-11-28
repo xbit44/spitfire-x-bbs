@@ -2,7 +2,7 @@
   "files": [
     {
       "path": "docs/sysop/assets/search-index.js",
-      "sha256": "335AA9C65508C70309A3003048BE160D599A1E9C9D3A0B576A14F6FD0FA07EDD"
+      "sha256": "D02118D68EDD339C7DB0EB151E70BF3356C3926005A42D762122CBC50AC50B7C"
     },
     {
       "path": "docs/sysop/assets/search.js",
@@ -22,7 +22,7 @@
     },
     {
       "path": "docs/sysop/customization-reference.html",
-      "sha256": "A9392D09470840C8E3E6B6958896BF4AD596BDFE3BF72BAB267305958B2DA567"
+      "sha256": "AD582330910AC28025CB7D285A02A1929F2D50A32E762C046AB7F814B9777D36"
     },
     {
       "path": "docs/sysop/daily-operation.html",

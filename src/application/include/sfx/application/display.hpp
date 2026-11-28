@@ -181,6 +181,8 @@ struct TrustedDisplayAssetReadResult {
     std::string stable_file_identity;
     std::string bytes;
     std::optional<std::int64_t> modified_utc_100ns{};
+    // Set by the host from the path of the asset it has already opened.
+    std::uint32_t playback_bps{};
 };
 
 class ITrustedDisplayAssetReader {

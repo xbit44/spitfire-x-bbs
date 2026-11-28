@@ -83,9 +83,9 @@ std::array<std::vector<std::uint8_t>, current_program_count> payload() {
     require(manifest==expected,"setup_payload_hash_mismatch");
     require(sha256(resource(240))==qualified_door_driver_sha256,"setup_dos_driver_not_exact");
     require(sha256(result[dos_launcher_program_index])=="7512CC632275C310C29E3C8FF5554270C4C7885CF637A1528CCC8A47A101FBA2","setup_dos_launcher_not_exact");
-    require(sha256(result[5])=="E884051DC99FA4D56DF3770CD2680EC40A22C32048440354CCE8D4E9E0D36FE8","setup_message_helper_not_approved");
-    require(sha256(result[6])=="981A34ADBBEE712E04FE39E4A087C938763D78A25C288749A64FAB05E8D049EB","setup_packet_helper_not_exact");
-    require(sha256(result[file_transfer_program_index])=="81257FC9C96AAAE5BC03FA6EEC7DFAD2BF82A5E9938F0DB52B6ADC2417807C3B","setup_general_file_helper_not_exact");
+    require(sha256(result[5])=="F6C7E6079AA68F3C10A902A8CC90257C8F0BA158FCEEC76EDA0C9E2CBB7DFB91","setup_message_helper_not_approved");
+    require(sha256(result[6])=="D813790C72BA1EDDA5F2E920719798E05A0DF4D722C2E557A32A1678C800F998","setup_packet_helper_not_exact");
+    require(sha256(result[file_transfer_program_index])=="8B87D172E85FE23AA792A984E69DC305292A74D125F7414B7607218B487479A4","setup_general_file_helper_not_exact");
     for (std::size_t index = 0; index != result.size(); ++index) {
         const auto& program = result[index];
         require(program.size() > sizeof(IMAGE_DOS_HEADER), "setup_program_header_missing");

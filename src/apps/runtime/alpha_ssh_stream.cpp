@@ -496,6 +496,11 @@ application::InteractiveStreamReadResult AlphaSshStream::read_polled(std::size_t
     return {Outcome::shutdown_requested, {}};
 }
 
+application::InteractiveStreamOutcome AlphaSshStream::poll_output() {
+    if (impl_->stopping.load()) return Outcome::shutdown_requested;
+    return impl_->channel ? Outcome::completed : Outcome::disconnected;
+}
+
 application::InteractiveStreamWriteResult AlphaSshStream::write_some(std::string_view bytes) {
     return write_polled(bytes,false);
 }

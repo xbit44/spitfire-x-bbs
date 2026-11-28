@@ -1131,8 +1131,10 @@ public:
                 !write_all(stream,"\r\n\r\n"))return;
             auto program=selected.program->terminal_program;
             // Disconnect notices cannot extend AFK or enter an active Door.
-            for(const auto& operation:program.operations)
+            for(auto& operation:program.operations) {
+                operation.playback_bps=0;
                 if(operation.kind==TerminalDisplayOperationKind::pause) program.output_byte_count-=2U;
+            }
             program.operations.erase(std::remove_if(program.operations.begin(),program.operations.end(),
                 [](const auto& operation) {return operation.kind==TerminalDisplayOperationKind::pause ||
                     operation.kind==TerminalDisplayOperationKind::paging_enabled;}),program.operations.end());

@@ -82,6 +82,8 @@ enum class TerminalDisplayOperationKind : std::uint8_t {
 struct TerminalDisplayOperation {
     TerminalDisplayOperationKind kind{TerminalDisplayOperationKind::cp437_text};
     std::string bytes;
+    // Source-specific rate for authored artwork. Zero uses the normal speed.
+    std::uint32_t playback_bps{};
 };
 
 struct TerminalDisplayProgram {
