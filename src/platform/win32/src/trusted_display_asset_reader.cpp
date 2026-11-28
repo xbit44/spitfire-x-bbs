@@ -10,6 +10,24 @@
 #include <vector>
 
 namespace sfx::platform::win32 {
+
+application::AnsiPlaybackSettings::PathRules ansi_playback_path_rules() noexcept {
+    using Path = std::filesystem::path;
+    return {
+        [](Path path) -> Path {
+            const auto& native = path.native();
+            // Handle paths may include an extended-length DOS drive prefix.
+            if (native.size() > 6 && native.compare(0, 4, L"\\\\?\\") == 0 && native[5] == L':')
+                return native.substr(4);
+            return path;
+        },
+        [](const Path& left, const Path& right) noexcept {
+            const auto order = CompareStringOrdinal(left.c_str(), -1, right.c_str(), -1, TRUE);
+            return order != 0 ? order == CSTR_LESS_THAN : left.native() < right.native();
+        }
+    };
+}
+
 namespace {
 
 class ScopedHandle final {
@@ -463,7 +481,8 @@ Win32TrustedDisplayAssetReader::read_asset(
             std::to_string(identity->high) + ":" +
             std::to_string(identity->low);
         return {TrustedDisplayAssetReadCode::available,
-            std::string(logical_identity), stable, std::move(bytes), modified};
+            std::string(logical_identity), stable, std::move(bytes), modified,
+            application::ansi_playback_bps(candidate)};
     } catch (...) {
         return {TrustedDisplayAssetReadCode::unavailable, {}, {}, {}};
     }

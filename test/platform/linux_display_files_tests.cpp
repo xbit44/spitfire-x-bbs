@@ -1,4 +1,5 @@
 #include "sfx/platform/linux/trusted_display_asset_reader.hpp"
+#include "sfx/application/ansi_playback_settings.hpp"
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fstream>
@@ -35,5 +36,23 @@ int main(int argc,char** argv){try{
     check(reader->read_asset("../main.asc",32768).code==Code::invalid,"directory escape refused");
     check(reader->read_asset("missing.asc",32768).code==Code::not_found,"missing optional artwork distinct from unsafe asset");
     check(reader->read_asset("main.asc",32768).code==Code::available,"regular artwork usable after refusals");
+    const auto one = root / "one";
+    const auto two = root / "two";
+    for (const auto& folder : {one, two}) {
+        check(fs::create_directory(folder) && chmod(folder.c_str(), 0700) == 0, "separate owned display root");
+        std::ofstream(folder / "SlowAnsi.ANS", std::ios::binary) << expected;
+    }
+    sfx::application::AnsiPlaybackSettings rates([&] {
+        return std::string("[PlaybackBps]\n") + (one / "SlowAnsi.ANS").string() + "=19200\n";
+    });
+    auto first = host::LinuxTrustedDisplayAssetReader::open(one);
+    auto second = host::LinuxTrustedDisplayAssetReader::open(two);
+    check(first && second, "both display roots usable");
+    const auto paced = first->read_asset("slowansi.ans", 32768);
+    const auto normal = second->read_asset("slowansi.ans", 32768);
+    check(paced.code == Code::available && paced.playback_bps == 19200 && paced.bytes == expected,
+          "lookup uses the actual resolved filename in the first folder");
+    check(normal.code == Code::available && normal.playback_bps == 0 && normal.bytes == expected,
+          "same filename in the second folder stays at full speed");
     std::cout<<"PASS "<<checks<<" Linux display file checks\n";return 0;
 }catch(const std::exception& error){std::cerr<<"FAIL "<<checks<<": "<<error.what()<<'\n';return 1;}}

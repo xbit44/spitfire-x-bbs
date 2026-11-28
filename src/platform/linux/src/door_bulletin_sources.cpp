@@ -1,4 +1,5 @@
 #include "sfx/platform/linux/door_bulletin_sources.hpp"
+#include "sfx/application/ansi_playback_settings.hpp"
 #include "sfx/platform/linux/trusted_display_asset_reader.hpp"
 #include <algorithm>
 #include <sys/stat.h>
@@ -19,7 +20,8 @@ app::TrustedDisplayAssetReadResult read_door_bulletin_source(const std::filesyst
     if(first!=second)throw std::runtime_error("door_bulletin_source_changed_between_captures");
     auto current=open_owned_directory(work,false);for(const auto& part:path.parent_path())current=open_owned_resource_directory(current.get(),part.string());
     if(fstat(current.get(),&after)!=0||before.st_dev!=after.st_dev||before.st_ino!=after.st_ino)throw std::runtime_error("door_bulletin_source_parent_changed_during_capture");
-    return {app::TrustedDisplayAssetReadCode::available,leaf,"owned-door-source:"+std::to_string(source.definition.door)+":"+relative,{first.begin(),first.end()},{}};
+    return {app::TrustedDisplayAssetReadCode::available,leaf,"owned-door-source:"+std::to_string(source.definition.door)+":"+relative,
+        {first.begin(),first.end()},{},app::ansi_playback_bps(work / path)};
 }
 app::DoorBulletinSourcePorts door_bulletin_sources(const std::filesystem::path& root,std::shared_ptr<IFilePayloadBindings> bindings,std::function<void(app::DoorBulletinId,std::string_view)> diagnostic){
     app::DoorBulletinSourcePorts ports;ports.display_reader=[root]()->std::unique_ptr<app::ITrustedDisplayAssetReader>{return LinuxTrustedDisplayAssetReader::open(root/"display");};ports.generated_reader=[root,bindings](const app::DoorBulletinSource& source)->app::DoorBulletinFileCapture{try{return read_door_bulletin_source(root,source,bindings);}catch(const std::exception& e){return {{app::TrustedDisplayAssetReadCode::unavailable,{},{},{},{}},e.what()};}};ports.diagnostic=std::move(diagnostic);return ports;

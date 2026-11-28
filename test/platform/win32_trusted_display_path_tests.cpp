@@ -1,4 +1,5 @@
 #include "sfx/platform/win32/trusted_display_asset_reader.hpp"
+#include "sfx/application/ansi_playback_settings.hpp"
 
 #include <windows.h>
 #include <winioctl.h>
@@ -612,6 +613,25 @@ int main(int argc, char** argv) {
         replacement_races(base, root);
         std::cout << "window6b-win32 invalid-root-forms\n";
         invalid_root_forms(root);
+
+        const auto second_root = base / L"AnotherDisplay";
+        require(CreateDirectoryW(second_root.c_str(), nullptr) != FALSE, "second trusted display root");
+        write_file(root / L"SlowAnsi.ANS", "Owner artwork");
+        write_file(second_root / L"SlowAnsi.ANS", "Owner artwork");
+        app::AnsiPlaybackSettings rates([&] {
+            return std::string("[PlaybackBps]\n") + (root / L"slowansi.ans").u8string() + "=19200\n";
+        });
+        auto first = platform::Win32TrustedDisplayAssetReader::open(root.wstring());
+        auto second = platform::Win32TrustedDisplayAssetReader::open(second_root.wstring());
+        require(first && second, "both trusted display roots open");
+        const auto paced = first->read_asset("SLOWANSI.ANS", 32768);
+        const auto normal = second->read_asset("SLOWANSI.ANS", 32768);
+        require(paced.code == app::TrustedDisplayAssetReadCode::available &&
+                paced.playback_bps == 19200 && paced.bytes == "Owner artwork",
+                "configured full path uses Win32 case-insensitive filename match");
+        require(normal.code == app::TrustedDisplayAssetReadCode::available &&
+                normal.playback_bps == 0 && normal.bytes == paced.bytes,
+                "same filename in another root stays at full speed");
 
         std::cout
             << "all SFX Window 6B Win32 trusted-display path tests passed "

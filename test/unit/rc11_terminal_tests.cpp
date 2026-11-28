@@ -2,6 +2,7 @@
 #include "linux_startup_message.hpp"
 #include "sfx/application/newsletter_editor.hpp"
 #include "sfx/application/sysop_session.hpp"
+#include <chrono>
 #include <deque>
 #include <iostream>
 #include <stdexcept>
@@ -13,6 +14,8 @@ unsigned checks{};
 void check(bool ok,const char* text){++checks;if(!ok)throw std::runtime_error(text);}
 struct Wire final:app::IInteractiveSessionByteStream {
     std::deque<int> events;std::string output;unsigned polls{};
+    std::size_t writes{};
+    std::vector<std::string> controls;
     void bytes(std::string_view text){for(unsigned char c:text)events.push_back(c);}
     void idle(){for(unsigned n=0;n<8;++n)events.push_back(-1);}
     app::InteractiveStreamReadResult read_some(std::size_t)override{
@@ -22,6 +25,8 @@ struct Wire final:app::IInteractiveSessionByteStream {
         return {app::InteractiveStreamOutcome::completed,{static_cast<std::uint8_t>(next)}};
     }
     app::InteractiveStreamWriteResult write_some(std::string_view text)override{
+        ++writes;
+        if (text.find('\x1b') != text.npos || text.find('\r') != text.npos) controls.emplace_back(text);
         output+=text;return {app::InteractiveStreamOutcome::completed,text.size()};
     }
 };
@@ -63,8 +68,43 @@ void newsletter(bool ansi,unsigned columns,unsigned scenario){
     if(scenario==2)check(wire.output.find("saved.")==std::string::npos,"Cancel result never claims saved");
     live=false;check(modal.read_some(1).outcome==app::InteractiveStreamOutcome::cancelled,"real revocation still cancels stream");
 }
+void display_playback() {
+    using namespace std::chrono_literals;
+    using Kind = app::TerminalDisplayOperationKind;
+    const std::string body(480, 'X');
+    const std::string escape = "\x1b[31m";
+    app::TerminalDisplayProgram program;
+    program.operations = {{Kind::ansi_sequence,escape,19200}, {Kind::cp437_text,body,19200},
+                          {Kind::paging_newline,{},19200}};
+    program.output_byte_count = escape.size() + body.size() + 2;
+    Wire paced;
+    app::StreamCallerTerminal terminal(paced);
+    const auto started = std::chrono::steady_clock::now();
+    check(terminal.present_display({"pace", &program}) == app::TerminalOutcome::completed,
+          "paced ANSI display completes");
+    check(std::chrono::steady_clock::now() - started >= 190ms,
+          "19200 bps produces caller-visible elapsed time");
+    check(paced.output == escape + body + "\r\n" && paced.writes > 3 &&
+          paced.controls == std::vector<std::string>{escape,"\r\n"},
+          "pacing preserves bytes and never splits ANSI or CRLF");
+
+    Wire cancelled;
+    rt::MenuModalStream modal(cancelled,[&] { return cancelled.output.size() < 40; },[] {});
+    app::StreamCallerTerminal guarded(modal);
+    check(guarded.present_display({"pace", &program}) == app::TerminalOutcome::cancelled &&
+          cancelled.output.size() < program.output_byte_count,
+          "session guard cancels a paced display before its remaining artwork is sent");
+
+    for (auto& operation : program.operations) operation.playback_bps = 0;
+    Wire normal;
+    app::StreamCallerTerminal unpaced(normal);
+    check(unpaced.present_display({"pace", &program}) == app::TerminalOutcome::completed &&
+          normal.writes == 3 && normal.output == paced.output,
+          "full-speed display keeps the original bytes and writes");
+}
 }
 int main(){try{
+    display_playback();
     for(unsigned width:{40U,80U})for(bool ansi:{false,true})for(unsigned scenario=0;scenario<(ansi?6U:3U);++scenario)newsletter(ansi,width,scenario);
     for(unsigned width:{40U,60U,80U}){
         const std::string warning="Sysop Utilities closed; refresh your access and selected records before continuing.";

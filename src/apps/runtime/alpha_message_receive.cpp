@@ -17,7 +17,7 @@ namespace {
 namespace app=sfx::application;
 namespace inst=sfx::platform::win32::installation;
 using inst::Handle;using inst::Path;using inst::require;
-constexpr char helper_sha[]="E884051DC99FA4D56DF3770CD2680EC40A22C32048440354CCE8D4E9E0D36FE8";
+constexpr char helper_sha[]="F6C7E6079AA68F3C10A902A8CC90257C8F0BA158FCEEC76EDA0C9E2CBB7DFB91";
 struct Socket {
     SOCKET value{INVALID_SOCKET};
     ~Socket(){if(value!=INVALID_SOCKET)closesocket(value);}

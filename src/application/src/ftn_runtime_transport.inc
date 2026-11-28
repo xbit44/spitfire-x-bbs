@@ -28,7 +28,8 @@ std::optional<FtnRuntimeRequest> decode_ftn_runtime_request(const std::vector<st
 std::vector<std::uint8_t> encode_ftn_runtime_response(const FtnRuntimeResponse& v){
     if(static_cast<unsigned>(v.code)>4||static_cast<unsigned>(v.mode)>2||v.saved_revision<0||v.active_revision<0||v.sessions.size()>16||v.connections.size()>64||v.activity.size()>32||(v.queues&&v.queues->rows.size()>64))return {};
     Writer w;const auto text=[&](std::string_view s,std::size_t max){return ftn_runtime_text(s,max)&&w.text(s,max);};
-    w.u8(3);w.u8(static_cast<std::uint8_t>(v.code));w.u8(static_cast<std::uint8_t>(v.mode));w.u64(v.saved_revision);w.u64(v.active_revision);
+    const bool completions=std::any_of(v.sessions.begin(),v.sessions.end(),[](const auto& s){return !s.last_sent.name.empty()||!s.last_received.name.empty();});
+    w.u8(completions?4:3);w.u8(static_cast<std::uint8_t>(v.code));w.u8(static_cast<std::uint8_t>(v.mode));w.u64(v.saved_revision);w.u64(v.active_revision);
     for(const auto flag:{v.capable,v.paused,v.serial_recovery_required,v.classic_listening,v.tls_listening,v.processing,v.more_connections})w.u8(flag);
     w.u16(v.classic_port);w.u16(v.tls_port);for(const auto* s:{&v.diagnostic,&v.classic_error,&v.tls_error,&v.processing_error})if(!text(*s,96))return {};
     for(const auto count:{v.processed_receipts,v.held_receipts,v.imported_messages,v.replayed_messages,v.scanned_messages})w.u64(count);
@@ -36,13 +37,17 @@ std::vector<std::uint8_t> encode_ftn_runtime_response(const FtnRuntimeResponse& 
     w.u8(static_cast<std::uint8_t>(v.connections.size()));for(const auto& c:v.connections){if(!valid_ftn_code(c.network)||!valid_ftn_code(c.link)||!text(c.network,48)||!text(c.link,48)||!text(c.name,195))return {};w.u8(c.enabled);w.u8(c.outbound);}
     w.u8(v.queues.has_value());if(v.queues){const auto& q=*v.queues;for(const auto n:q.ingress)w.u64(n);for(const auto n:q.outbound)w.u64(n);w.u64(q.unscanned);w.u8(q.more);w.u8(static_cast<std::uint8_t>(q.rows.size()));for(const auto& row:q.rows){if(!row.id.valid()||row.state>(row.outbound?5:4))return {};w.raw(row.id.bytes.data(),16);w.u8(row.outbound);w.u8(row.state);w.u64(row.bytes);if(!text(row.network,96)||!text(row.link,96)||!text(row.file,128)||!text(row.reason,64))return {};}}
     w.u8(static_cast<std::uint8_t>(v.activity.size()));for(const auto& a:v.activity){if(!a.utc_seconds||a.utc_seconds>253402300799ULL||!text(a.network,96)||!text(a.link,96)||!text(a.message,192))return {};w.u64(a.utc_seconds);w.u64(a.session);}
+    if(completions)for(const auto& s:v.sessions)for(const auto* p:{&s.last_sent,&s.last_received}){
+        if(p->size>1073741824ULL||p->position!=p->size||p->active||p->awaiting_ack||(p->name.empty()&&p->size)||!text(p->name,128))return {};
+        w.u64(p->size);
+    }
     auto bytes=w.take();return bytes.size()<=kLocalControlMaximumPayloadBytes?bytes:std::vector<std::uint8_t>{};
 }
 std::optional<FtnRuntimeResponse> decode_ftn_runtime_response(const std::vector<std::uint8_t>& bytes){
     if(bytes.size()>kLocalControlMaximumPayloadBytes)return {};
     Reader r(bytes);FtnRuntimeResponse v;std::uint8_t version{},code{},mode{},count{};
     const auto flag=[&](bool& to){std::uint8_t n{};if(!r.u8(n)||n>1)return false;to=n!=0;return true;};
-    if(!r.u8(version)||version!=3||!r.u8(code)||!r.u8(mode)||!nonnegative64(r,v.saved_revision)||!nonnegative64(r,v.active_revision))return {};
+    if(!r.u8(version)||(version!=3&&version!=4)||!r.u8(code)||!r.u8(mode)||!nonnegative64(r,v.saved_revision)||!nonnegative64(r,v.active_revision))return {};
     v.code=static_cast<FtnConfigurationCode>(code);v.mode=static_cast<FtnMailerMode>(mode);
     for(auto* b:{&v.capable,&v.paused,&v.serial_recovery_required,&v.classic_listening,&v.tls_listening,&v.processing,&v.more_connections})if(!flag(*b))return {};
     if(!r.u16(v.classic_port)||!r.u16(v.tls_port))return {};
@@ -55,6 +60,10 @@ std::optional<FtnRuntimeResponse> decode_ftn_runtime_response(const std::vector<
     bool queued{};if(!flag(queued))return {};if(queued){v.queues.emplace();auto& q=*v.queues;for(auto& n:q.ingress)if(!r.u64(n))return {};for(auto& n:q.outbound)if(!r.u64(n))return {};if(!r.u64(q.unscanned)||!flag(q.more)||!r.u8(count)||count>64)return {};for(unsigned i=0;i<count;++i){FtnQueueRow row;if(!r.raw(row.id.bytes.data(),16)||!flag(row.outbound)||!r.u8(row.state)||!r.u64(row.bytes)||!r.text(row.network,96)||!r.text(row.link,96)||!r.text(row.file,128)||!r.text(row.reason,64))return {};q.rows.push_back(std::move(row));}}
     if(!r.u8(count)||count>32)return {};
     for(unsigned i=0;i<count;++i){FtnActivity a;if(!r.text(a.network,96)||!r.text(a.link,96)||!r.text(a.message,192)||!r.u64(a.utc_seconds)||!r.u64(a.session))return {};v.activity.push_back(std::move(a));}
+    if(version==4)for(auto& s:v.sessions)for(auto* p:{&s.last_sent,&s.last_received}){
+        if(!r.text(p->name,128)||!r.u64(p->size))return {};
+        p->position=p->size;
+    }
     if(!r.complete()||encode_ftn_runtime_response(v).empty())return {};
     return v;
 }

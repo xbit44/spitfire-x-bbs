@@ -26,6 +26,7 @@ public:
         decoder_.adopt_pending_delimiter_lf(terminal_.take_pending_delimiter_lf());
         return stream_.read_escape_tail(maximum);
     }
+    application::InteractiveStreamOutcome poll_output() override { return stream_.poll_output(); }
     application::InteractiveStreamWriteResult write_some(std::string_view bytes)override{return stream_.write_some(bytes);}
 };
 // Shared shipping caller helpers, extracted without changing the Windows
@@ -60,8 +61,13 @@ public:
         if(!result.bytes.empty()) keyboard_();
         return result;
     }
+    application::InteractiveStreamOutcome poll_output() override {
+        if (!tick_() || (guard_ && !guard_())) return application::InteractiveStreamOutcome::cancelled;
+        return stream_.poll_output();
+    }
     application::InteractiveStreamWriteResult write_some(std::string_view bytes) override {
-        if(!tick_() || (guard_&&!guard_())) return {application::InteractiveStreamOutcome::cancelled,0};
+        const auto ready = poll_output();
+        if (ready != application::InteractiveStreamOutcome::completed) return {ready, 0};
         return stream_.write_some(bytes);
     }
 private:

@@ -1,4 +1,5 @@
 #include "linux_runtime_host.hpp"
+#include "ansi_playback_file.hpp"
 #include "sfx/application/botgate_rules.hpp"
 #include "sfx/platform/linux/installation_layout.hpp"
 #include "linux_startup_message.hpp"
@@ -112,6 +113,7 @@ int run(const std::filesystem::path& root,const std::filesystem::path& tzdata,un
     if(geteuid()==0||requested_port>65535||sodium_init()<0||!host::LinuxBbsTimeZoneRuleProvider::initialize(tzdata))throw std::runtime_error("web_start_context_invalid");
     Clock clock;rt::LinuxRuntimeHost runtime(root,clock,[&]{return rt::verified_linux_starter_doors(root);});const auto opened=runtime.open();
     if(opened.code!=Code::ok&&opened.code!=Code::setup_required&&!(opened.code==Code::recovery_required&&runtime.management_owned()))throw std::runtime_error(opened.diagnostic_code);
+    app::AnsiPlaybackSettings playback_settings([&] { return rt::read_ansi_playback_file(root); });
     const auto root_pin=host::open_owned_directory(root);if(mkdirat(root_pin.get(),"management",0700)!=0&&errno!=EEXIST)throw std::runtime_error("web_management_directory_unavailable");
     const auto assets=host::open_owned_resource_directory(root_pin.get(),"web");const auto management=host::open_owned_directory(root/"management");
     rt::web::BrowserSessions sessions(clock,[&](const std::string& token){const auto text=token+'\n';host::publish_private_file(management.get(),"launch-secret.v1",{text.begin(),text.end()},true);});

@@ -143,7 +143,7 @@
     {
       "path": "distribution/windows/THIRD_PARTY.txt",
       "destination": "Docs/ThirdParty/THIRD_PARTY.txt",
-      "sha256": "D8B54CE03F6E21141574AFD310140108BBDF44D5DC4B6081477990CB336C210E"
+      "sha256": "84D480317DD05A8C8FF0B0F26C0BE969003788C9D6EBE3CA06B173A5A2497A71"
     },
     {
       "path": "distribution/ThirdParty/notices/Moebius-CP437-NOTICE.txt",

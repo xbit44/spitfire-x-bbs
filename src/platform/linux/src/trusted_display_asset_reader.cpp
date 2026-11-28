@@ -1,4 +1,5 @@
 #include "sfx/platform/linux/trusted_display_asset_reader.hpp"
+#include "sfx/application/ansi_playback_settings.hpp"
 #include <cerrno>
 #include <dirent.h>
 #include <fcntl.h>
@@ -65,7 +66,8 @@ application::TrustedDisplayAssetReadResult LinuxTrustedDisplayAssetReader::read_
         std::optional<std::int64_t> modified;
         if(before.st_mtim.tv_sec>=0&&before.st_mtim.tv_sec<INT64_MAX/10000000)
             modified=static_cast<std::int64_t>(before.st_mtim.tv_sec)*10000000+before.st_mtim.tv_nsec/100;
-        return {Code::available,std::string(logical),std::to_string(before.st_dev)+':'+std::to_string(before.st_ino),std::move(bytes),modified};
+        return {Code::available,std::string(logical),std::to_string(before.st_dev)+':'+std::to_string(before.st_ino),
+            std::move(bytes),modified,application::ansi_playback_bps(root_ / *name)};
     }catch(...){return {Code::unavailable,{},{},{},{}};}
 }
 } // namespace sfx::platform::linux_host

@@ -1257,6 +1257,18 @@ int main() {
             snapshot.activity.push_back({1793440000,9,"FidoNet","Synthetic Hub","Connecting to 127.0.0.1:24777."});
             snapshot.sessions.front().peer_address="2:100/2";snapshot.sessions.front().endpoint="127.0.0.1:26490";
             const auto bytes=app::encode_ftn_runtime_response(snapshot);const auto restored=app::decode_ftn_runtime_response(bytes);require(restored&&restored->serial_recovery_required&&restored->saved_revision==4&&restored->active_revision==3&&restored->sessions.front().peer_address=="2:100/2"&&restored->sessions.front().endpoint=="127.0.0.1:26490"&&restored->sessions.front().send.position==2048&&restored->queues->outbound[2]==1,"actual revision hold file progress and queue states retained separately");
+            {
+                auto recent=snapshot;
+                auto& recent_session=recent.sessions.front();
+                recent_session.last_sent={"acknowledged.pkt",39,39,false,false};
+                recent_session.last_received={"received.pkt",75,75,false,false};
+                const auto roundtrip=app::decode_ftn_runtime_response(app::encode_ftn_runtime_response(recent));
+                require(roundtrip&&roundtrip->sessions.front().last_sent.name=="acknowledged.pkt"&&
+                    roundtrip->sessions.front().last_sent.position==39&&roundtrip->sessions.front().last_received.size==75&&
+                    roundtrip->sessions.front().send.position==2048,"completed files round-trip independently of live progress");
+                recent_session.last_sent.position=1;
+                require(app::encode_ftn_runtime_response(recent).empty(),"incomplete file cannot be encoded as a completion");
+            }
             require(restored->activity.size()==1&&restored->activity[0].message==snapshot.activity[0].message&&restored->activity[0].utc_seconds==1793440000,"timestamped activity round trip");
             {auto bad=snapshot;bad.activity[0].message="forged\r\nline";require(app::encode_ftn_runtime_response(bad).empty(),"activity rejects control injection");bad=snapshot;bad.activity.resize(33,bad.activity[0]);require(app::encode_ftn_runtime_response(bad).empty(),"activity history bounded");}
             for(std::size_t n=0;n<bytes.size();++n)require(!app::decode_ftn_runtime_response({bytes.begin(),bytes.begin()+n}),"FTN snapshot rejects every truncation");

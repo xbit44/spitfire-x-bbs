@@ -1,6 +1,6 @@
 {
   "format": 1,
-  "version": "1.0.0b4",
+  "version": "1.0.0b5",
   "platform": "linux-amd64",
   "layout_schema": "linux-lowercase-v1",
   "files": [

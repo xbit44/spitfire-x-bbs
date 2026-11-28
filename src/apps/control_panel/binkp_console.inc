@@ -3,7 +3,13 @@ struct BinkPConsole {
     HWND window{},session{},status{},send{},receive{},log{},poll{},scan{},queues{},configure{},activity_button{},details{};
     HFONT current_font{};int framed_columns{},scroll_y{};bool laying_out{};
     app::FtnRuntimeResponse current;std::uint64_t selected{},sample_tick{},sample_sent{},sample_received{},send_rate{},receive_rate{};bool rate_known{},queue_view{},follow_active{true};std::uint32_t queue_offset{};
-    std::uint64_t send_pulse_until{},receive_pulse_until{},send_pulse_session{},receive_pulse_session{};
+    static constexpr UINT completion_timer=15;
+    static constexpr UINT completion_hold_ms=1000;
+    struct TransferCompletion {
+        app::FtnFileProgress file;
+        std::uint64_t session{},until{};
+    };
+    TransferCompletion sent_completion,received_completion;
     const app::FtnSessionStatus* selected_session()const{const auto found=std::find_if(current.sessions.begin(),current.sessions.end(),[&](const auto& s){return s.serial==selected;});return found==current.sessions.end()?nullptr:&*found;}
     void select_session(){const auto index=SendMessageW(session,CB_GETCURSEL,0,0);follow_active=index==0;
         if(index>0&&static_cast<std::size_t>(index-1)<current.sessions.size())selected=current.sessions[static_cast<std::size_t>(index-1)].serial;
@@ -60,14 +66,29 @@ struct BinkPConsole {
         }
         notice(L"Connection list limit reached; no poll requested.");
     }
+    void observe_completion(const app::FtnRuntimeResponse& value,bool sending){
+        const auto files=[sending](const app::FtnSessionStatus& s){return sending?s.sent_files:s.received_files;};
+        const app::FtnSessionStatus* completed=nullptr;
+        for(const auto& item:value.sessions){
+            const auto& file=sending?item.last_sent:item.last_received;
+            if(!files(item)||file.name.empty())continue;
+            const auto old=std::find_if(current.sessions.begin(),current.sessions.end(),[&](const auto& s){return s.serial==item.serial;});
+            if((old==current.sessions.end()||files(item)>files(*old))&&(!completed||item.serial>completed->serial))completed=&item;
+        }
+        if(!completed)return;
+        auto& hold=sending?sent_completion:received_completion;
+        hold={sending?completed->last_sent:completed->last_received,completed->serial,GetTickCount64()+completion_hold_ms};
+        const auto control=sending?send:receive;
+        SetTimer(control,completion_timer,completion_hold_ms,nullptr);
+        InvalidateRect(control,nullptr,FALSE);
+    }
     void apply(app::FtnRuntimeResponse value){
-        // A complete short transfer can fall between two one-second snapshots.
-        // Briefly mark its direction without showing invented progress or
-        // increasing idle Runtime polling. The finite native timer only paints.
-        const auto pulse_tick=GetTickCount64();
-        for(const auto& item:value.sessions){const auto old=std::find_if(current.sessions.begin(),current.sessions.end(),[&](const auto& v){return v.serial==item.serial;});
-            if(item.sent_files&&(old==current.sessions.end()||item.sent_files>old->sent_files)){send_pulse_session=item.serial;send_pulse_until=pulse_tick+1500;SetTimer(send,15,1500,nullptr);InvalidateRect(send,nullptr,FALSE);}
-            if(item.received_files&&(old==current.sessions.end()||item.received_files>old->received_files)){receive_pulse_session=item.serial;receive_pulse_until=pulse_tick+1500;SetTimer(receive,15,1500,nullptr);InvalidateRect(receive,nullptr,FALSE);}
+        if(value.code==app::FtnConfigurationCode::ok){
+            observe_completion(value,true);
+            observe_completion(value,false);
+        }else{
+            sent_completion={};
+            received_completion={};
         }
         current=std::move(value);const bool ready=current.code==app::FtnConfigurationCode::ok;
         const bool run=ready&&current.capable&&!current.paused&&!current.serial_recovery_required&&current.mode!=app::FtnMailerMode::disabled&&current.active_revision==current.saved_revision&&current.active_revision>0;
@@ -101,17 +122,29 @@ struct BinkPConsole {
         const std::array<const wchar_t*,5> inbound{{L"Partial",L"Received",L"Processing",L"Held",L"Processed"}};const std::array<const wchar_t*,6> outbound{{L"Queued",L"Claimed",L"Awaiting ACK",L"Delivered",L"Held",L"Handed to BinkD"}};
         for(const auto& row:q.rows){text+=(row.outbound?L"OUT ":L"IN  ")+utf8_to_wide(row.network+" / "+row.link+" / "+row.file)+L"  "+(row.outbound?outbound[row.state]:inbound[row.state])+L"  "+std::to_wstring(row.bytes)+L" bytes\r\n";if(!row.reason.empty())text+=L"    "+utf8_to_wide(row.reason)+L"\r\n";}if(q.rows.empty())text+=L"No pending or held records on this page.\r\n";SetWindowTextW(log,text.c_str());queue_offset=q.more?queue_offset+64:0;SetWindowTextW(queues,q.more?L"Next Queue Page":L"Refresh Queues");
     }
+    const app::FtnFileProgress* transfer_file(bool sending,const app::FtnSessionStatus* item,bool& complete)const{
+        complete=false;
+        const auto* live=item?(sending?&item->send:&item->receive):nullptr;
+        if(item&&item->active&&live&&(live->active||live->awaiting_ack)&&!live->name.empty())return live;
+        const auto& hold=sending?sent_completion:received_completion;
+        if(GetTickCount64()>=hold.until||(!follow_active&&(!item||item->serial!=hold.session)))return nullptr;
+        complete=true;
+        return &hold.file;
+    }
     void pending_frame(){
         const auto* item=selected_session();
-        const auto text=[&](bool sending){const auto* p=item?(sending?&item->send:&item->receive):nullptr;
+        const auto text=[&](bool sending){bool complete{};const auto* p=transfer_file(sending,item,complete);
             std::wstring value=sending?L"SEND":L"RECEIVE";
             if(!p||p->name.empty())return value+L" - "+(item&&item->active?L"Waiting for file":L"Idle")+L"\nNo file transfer";
             value+=L" - "+utf8_to_wide(p->name)+L" ("+std::to_wstring(p->size)+L" bytes)";
             const auto percent=p->size?std::min<std::uint64_t>(100,p->position*100/p->size):(p->active?0:100);
             value+=L"\n"+std::to_wstring(p->position)+L" / "+std::to_wstring(p->size)+L" bytes   "+std::to_wstring(percent)+L"%   ";
-            if(!item->active)value+=item->completed?L"Session completed":L"Session ended";
+            if(complete){
+                const auto serial=(sending?sent_completion:received_completion).session;
+                value+=sending?L"Acknowledged":L"Received";
+                if(!item||item->serial!=serial)value+=L" (#"+std::to_wstring(serial)+L")";
+            }
             else if(p->awaiting_ack)value+=L"Awaiting acknowledgement";
-            else if(!p->active)value+=L"File finished";
             else value+=rate_known?rate_text(sending?send_rate:receive_rate):L"Measuring speed...";
             return value;
         };
@@ -130,12 +163,16 @@ struct BinkPConsole {
         const auto newline=value.find(L'\n');RECT label{pad,pad,r.right-pad,pad+line};DrawTextW(dc,value.c_str(),static_cast<int>(newline==value.npos?value.size():newline),&label,DT_LEFT|DT_SINGLELINE|DT_END_ELLIPSIS|DT_NOPREFIX);
         if(newline!=value.npos){label.top+=line;label.bottom+=line;DrawTextW(dc,value.c_str()+newline+1,-1,&label,DT_LEFT|DT_SINGLELINE|DT_END_ELLIPSIS|DT_NOPREFIX);}
         RECT bar{pad,pad+line*2+2,r.right-pad,pad+line*3+2};const auto track=CreateSolidBrush(p.surface);FillRect(dc,&bar,track);DeleteObject(track);
-        const auto* item=selected_session();const auto* file=item?(h==send?&item->send:&item->receive):nullptr;
-        if(item&&item->active&&file&&(file->active||file->awaiting_ack)&&!file->name.empty()){RECT fill=bar;const double fraction=file->size?std::min(1.0,static_cast<double>(file->position)/file->size):(file->active?0.0:1.0);fill.right=fill.left+static_cast<int>((fill.right-fill.left)*fraction);const auto gold=CreateSolidBrush(p.gold);FillRect(dc,&fill,gold);DeleteObject(gold);}
-        const bool recent=item&&item->serial==(h==send?send_pulse_session:receive_pulse_session)&&GetTickCount64()<(h==send?send_pulse_until:receive_pulse_until);
-        const auto edge=CreateSolidBrush(recent?p.gold:p.cyan);FrameRect(dc,&bar,edge);DeleteObject(edge);SetTextColor(dc,p.cyan);label={bar.left,bar.bottom+1,bar.right,r.bottom};DrawTextW(dc,L"0",-1,&label,DT_LEFT|DT_SINGLELINE);DrawTextW(dc,L"50",-1,&label,DT_CENTER|DT_SINGLELINE);DrawTextW(dc,L"100%",-1,&label,DT_RIGHT|DT_SINGLELINE);SelectObject(dc,old);
+        bool complete{};const auto* file=transfer_file(h==send,selected_session(),complete);
+        if(file){RECT fill=bar;const double fraction=complete?1.0:file->size?std::min(1.0,static_cast<double>(file->position)/file->size):0.0;fill.right=fill.left+static_cast<int>((fill.right-fill.left)*fraction);const auto gold=CreateSolidBrush(p.gold);FillRect(dc,&fill,gold);DeleteObject(gold);}
+        const auto edge=CreateSolidBrush(complete?p.gold:p.cyan);FrameRect(dc,&bar,edge);DeleteObject(edge);SetTextColor(dc,p.cyan);label={bar.left,bar.bottom+1,bar.right,r.bottom};DrawTextW(dc,L"0",-1,&label,DT_LEFT|DT_SINGLELINE);DrawTextW(dc,L"50",-1,&label,DT_CENTER|DT_SINGLELINE);DrawTextW(dc,L"100%",-1,&label,DT_RIGHT|DT_SINGLELINE);SelectObject(dc,old);
     }
-    static LRESULT CALLBACK transfer_proc(HWND h,UINT m,WPARAM w,LPARAM l,UINT_PTR id,DWORD_PTR data){auto& self=*reinterpret_cast<BinkPConsole*>(data);if(m==WM_TIMER&&w==15){KillTimer(h,15);InvalidateRect(h,nullptr,FALSE);return 0;}if(m==WM_PAINT){PAINTSTRUCT ps{};const auto dc=BeginPaint(h,&ps);self.paint_transfer(h,dc);EndPaint(h,&ps);return 0;}if(m==WM_PRINTCLIENT){self.paint_transfer(h,reinterpret_cast<HDC>(w));return 0;}if(m==WM_ERASEBKGND)return 1;if(m==WM_NCDESTROY){KillTimer(h,15);RemoveWindowSubclass(h,transfer_proc,id);}return DefSubclassProc(h,m,w,l);}
+    static LRESULT CALLBACK transfer_proc(HWND h,UINT m,WPARAM w,LPARAM l,UINT_PTR id,DWORD_PTR data){auto& self=*reinterpret_cast<BinkPConsole*>(data);if(m==WM_TIMER&&w==completion_timer){
+        const auto& hold=h==self.send?self.sent_completion:self.received_completion;
+        const auto now=GetTickCount64();
+        if(now<hold.until){SetTimer(h,completion_timer,static_cast<UINT>(hold.until-now),nullptr);return 0;}
+        KillTimer(h,completion_timer);self.pending_frame();InvalidateRect(h,nullptr,FALSE);return 0;
+    }if(m==WM_PAINT){PAINTSTRUCT ps{};const auto dc=BeginPaint(h,&ps);self.paint_transfer(h,dc);EndPaint(h,&ps);return 0;}if(m==WM_PRINTCLIENT){self.paint_transfer(h,reinterpret_cast<HDC>(w));return 0;}if(m==WM_ERASEBKGND)return 1;if(m==WM_NCDESTROY){KillTimer(h,completion_timer);RemoveWindowSubclass(h,transfer_proc,id);}return DefSubclassProc(h,m,w,l);}
     void paint_session(HDC dc,RECT r,int index,bool highlighted){const auto& p=g_appearance.palette();const auto brush=CreateSolidBrush(highlighted?p.selection:p.panel);FillRect(dc,&r,brush);DeleteObject(brush);SetTextColor(dc,highlighted?p.selected_text:p.text);SetBkMode(dc,TRANSPARENT);const auto old=SelectObject(dc,current_font?current_font:GetStockObject(SYSTEM_FIXED_FONT));
         const auto length=SendMessageW(session,CB_GETLBTEXTLEN,index,0);if(length>=0){std::wstring label(static_cast<std::size_t>(length)+1,L'\0');SendMessageW(session,CB_GETLBTEXT,index,reinterpret_cast<LPARAM>(label.data()));r.left+=6;r.right-=6;DrawTextW(dc,label.c_str(),-1,&r,DT_VCENTER|DT_SINGLELINE|DT_END_ELLIPSIS|DT_NOPREFIX);}SelectObject(dc,old);
     }

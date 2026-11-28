@@ -12,13 +12,16 @@ unsigned checks = 0;
 void require(bool ok, const char* message) { ++checks; if (!ok) throw std::runtime_error(message); }
 struct Reader final : app::ITrustedDisplayAssetReader {
     std::map<std::string,std::string> files;
+    std::map<std::string,std::uint32_t> playback_rates;
     std::vector<std::string> requests;
     app::TrustedDisplayAssetReadResult read_asset(std::string_view name, std::size_t maximum) override {
         requests.emplace_back(name);
         auto it = files.find(std::string(name));
         if (it == files.end()) return {app::TrustedDisplayAssetReadCode::not_found,{},{},{}};
         if (it->second.size() > maximum) return {app::TrustedDisplayAssetReadCode::invalid,{},{},{}};
-        return {app::TrustedDisplayAssetReadCode::available,it->first,it->first,it->second};
+        const auto rate = playback_rates.find(it->first);
+        return {app::TrustedDisplayAssetReadCode::available,it->first,it->first,it->second,{},
+                rate == playback_rates.end() ? 0 : rate->second};
     }
 };
 std::string text(const app::TrustedDisplaySelectionResult& result) {
@@ -104,6 +107,20 @@ int main(int argc, char** argv) {
         require(!selector.select(request).available(),"context cannot inject terminal controls");
         request.graphics=app::GraphicsMode::ansi;
         request.context.name="Caller";
+        {
+            Reader paced;
+            paced.files = {{"MAIN.ANS","A@INCLUDE:PART.ANS@B@INCLUDE:PLAIN.ASC@C"},
+                           {"PART.ANS","P"}, {"PLAIN.ASC","X"}};
+            paced.playback_rates = {{"MAIN.ANS",19200}, {"PART.ANS",9600}, {"PLAIN.ASC",9600}};
+            const auto artwork = app::TrustedDisplaySelector(paced).select(request);
+            require(text(artwork)=="APBXC","separate rates preserve the authored text");
+            std::vector<std::uint32_t> rates;
+            for (const auto& operation : artwork.program->terminal_program.operations) {
+                rates.push_back(operation.playback_bps);
+            }
+            require(rates==std::vector<std::uint32_t>{19200,9600,19200,0,19200},
+                    "file-specific ANSI rates survive nested artwork and ignore plain text");
+        }
         for(auto mode:{app::GraphicsMode::ansi,app::GraphicsMode::ascii}) {
             request.graphics=mode;
             const auto leaf=mode==app::GraphicsMode::ansi?"MAIN.ANS":"MAIN.ASC";

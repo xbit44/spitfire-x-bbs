@@ -11,6 +11,7 @@ struct FtnSessionStatus {
     std::uint32_t received_files{},sent_files{};
     FtnFileProgress send,receive;
     std::string peer_address,endpoint; // Configured peer address and dial endpoint, never credentials.
+    FtnFileProgress last_sent{},last_received{}; // Latest successful completion in each direction.
 };
 struct FtnConnectionStatus {std::string network,link,name;bool enabled{},outbound{};};
 // A bounded history survives fast sessions between Panel refreshes. Names in

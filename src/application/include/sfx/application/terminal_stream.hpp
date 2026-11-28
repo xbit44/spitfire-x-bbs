@@ -69,6 +69,10 @@ public:
     virtual InteractiveStreamReadResult read_escape_tail(std::size_t maximum_bytes) {
         return read_some(maximum_bytes);
     }
+    // Check the session while waiting to send artwork, without reading input.
+    virtual InteractiveStreamOutcome poll_output() {
+        return InteractiveStreamOutcome::completed;
+    }
     virtual InteractiveStreamWriteResult write_some(std::string_view bytes) = 0;
 };
 

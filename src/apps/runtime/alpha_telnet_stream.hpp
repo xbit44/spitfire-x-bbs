@@ -132,6 +132,11 @@ public:
         }
     }
 
+    application::InteractiveStreamOutcome poll_output() override {
+        return stopping_.load() ? application::InteractiveStreamOutcome::shutdown_requested
+                                : application::InteractiveStreamOutcome::completed;
+    }
+
     application::InteractiveStreamWriteResult write_some(
         const std::string_view bytes) override {
         if (bytes.empty()) return {application::InteractiveStreamOutcome::failed, 0};

@@ -155,7 +155,7 @@ private:
         notify();
     }
     void received(){
-        require(receiving_&&!awaiting_file_,"ftn_session_receive_order");receiving_->finish();result_.receive={incoming_.name,incoming_.size,incoming_.size,false,false};++result_.received_files;send(app::BinkpCommand::got,app::format_binkp_file(incoming_,false));receiving_.reset();notify();
+        require(receiving_&&!awaiting_file_,"ftn_session_receive_order");receiving_->finish();result_.receive={incoming_.name,incoming_.size,incoming_.size,false,false};result_.last_received=result_.receive;++result_.received_files;send(app::BinkpCommand::got,app::format_binkp_file(incoming_,false));receiving_.reset();notify();
     }
     void restart(std::string_view descriptor){
         const auto get=app::parse_binkp_file(descriptor,true,options_.version11);require(get&&!get->request_offset&&sending_&&app::same_binkp_file(*get,outgoing_.file),"ftn_session_get_not_current_file");require(!local_eob_,"ftn_session_get_after_eob");send_offset_=get->offset;auto resumed=outgoing_.file;resumed.offset=send_offset_;send(app::BinkpCommand::file,app::format_binkp_file(resumed,true));awaiting_get_=false;awaiting_ack_=send_offset_==resumed.size;
@@ -165,7 +165,13 @@ private:
         if(!sending_||!app::same_binkp_file(*file,outgoing_.file)){require(got&&acknowledged_.count(key),"ftn_session_ack_not_current_file");return;}
         // A peer may report an already-held duplicate in response to the NR
         // offer. That is a real remote GOT, unlike a local missing spool file.
-        require(!got||awaiting_ack_||awaiting_get_,"ftn_session_early_got");require(ports_.storage.finish_ftn_job(owner,outgoing_.id,session_,got?app::FtnOutboundState::delivered:app::FtnOutboundState::queued,got?std::string_view{}:std::string_view{"peer_skipped"}).succeeded(),"ftn_session_ack_commit_failed");settled_.insert(ftn_native_artifact_name(outgoing_.id));if(got){acknowledged_.insert(key);++result_.sent_files;}sending_.reset();awaiting_ack_=awaiting_get_=false;notify();batch();
+        require(!got||awaiting_ack_||awaiting_get_,"ftn_session_early_got");require(ports_.storage.finish_ftn_job(owner,outgoing_.id,session_,got?app::FtnOutboundState::delivered:app::FtnOutboundState::queued,got?std::string_view{}:std::string_view{"peer_skipped"}).succeeded(),"ftn_session_ack_commit_failed");settled_.insert(ftn_native_artifact_name(outgoing_.id));
+        if(got){
+            acknowledged_.insert(key);
+            result_.last_sent={outgoing_.file.name,outgoing_.file.size,outgoing_.file.size,false,false};
+            ++result_.sent_files;
+        }
+        sending_.reset();awaiting_ack_=awaiting_get_=false;notify();batch();
     }
     void offer(){
         if(!app::ftn_queue_offer_allowed(result_.proof,result_.outbound)||!link_){next_job_=jobs_.size();return;}

@@ -20,7 +20,7 @@ namespace app=sfx::application;
 namespace inst=sfx::platform::win32::installation;
 using inst::Handle;using inst::Path;using inst::require;
 using qwk_packet_detail::Direction;
-constexpr char helper_sha[]="981A34ADBBEE712E04FE39E4A087C938763D78A25C288749A64FAB05E8D049EB";
+constexpr char helper_sha[]="D813790C72BA1EDDA5F2E920719798E05A0DF4D722C2E557A32A1678C800F998";
 struct Socket {SOCKET value{INVALID_SOCKET};~Socket(){if(value!=INVALID_SOCKET)closesocket(value);}};
 // Match the ordinary-file pump's bounded idle wait; no global timer changes.
 struct PacketIdleWait {

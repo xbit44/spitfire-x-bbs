@@ -259,6 +259,8 @@ bool valid_terminal_display_program(
     }
     std::size_t output_bytes = 0;
     for (const auto& operation : program.operations) {
+        if (operation.playback_bps != 0 &&
+            (operation.playback_bps < 300 || operation.playback_bps > 115200)) return false;
         std::size_t addition = 0;
         switch (operation.kind) {
             case TerminalDisplayOperationKind::cp437_text:

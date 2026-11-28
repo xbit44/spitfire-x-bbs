@@ -71,6 +71,7 @@ public:
     // File pump owns both directions: never wait for caller input while a
     // helper response/output may need forwarding on that same pump thread.
     application::InteractiveStreamReadResult read_ready(std::size_t maximum_bytes);
+    application::InteractiveStreamOutcome poll_output() override;
     application::InteractiveStreamWriteResult write_some(std::string_view bytes) override;
     application::InteractiveStreamWriteResult write_ready(std::string_view bytes);
 
